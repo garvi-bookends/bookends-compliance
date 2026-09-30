@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bookends-compliance",
+  // Cloudflare account "Yashghodke.dome@gmail.com's Account"; workers.dev subdomain: capichesecretmenu
+  "account_id": "d6ca0c92c61defcc94c03ed6bd69a5dd",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-20",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bookends-compliance",
+      // Created with `wrangler d1 create bookends-compliance` (APAC).
+      "database_id": "e76f4c69-650c-4d00-bdb7-c4c1c0710a19",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Audit photos, proof of fixes and licence scans.
+  "kv_namespaces": [
+    { "binding": "FILES", "id": "66c40c0fbba34765b6d59da85019fb22" }
+  ],
+  // Slows down anyone guessing the team access code: 5 sign-in attempts per minute per IP.
+  "ratelimits": [
+    { "name": "LOGIN_LIMIT", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } }
+  ],
+  "vars": {
+    // Business-day boundary. 330 = IST (UTC+5:30).
+    "TZ_OFFSET_MINUTES": "330",
+    // Set to "1" only after Cloudflare Access protects the app (see README).
+    "TRUST_ACCESS": "0"
+  },
+  "observability": { "enabled": true }
+}

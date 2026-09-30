@@ -1,0 +1,8210 @@
+{
+ "import_date": "2026-09-26",
+ "sites": [
+  {
+   "key": "capiche-vesu",
+   "name": "Capiche Vesu",
+   "brand": "Capiche",
+   "area": "Vesu",
+   "city": "Surat",
+   "kind": "restaurant"
+  },
+  {
+   "key": "capiche-piplod",
+   "name": "Capiche Piplod",
+   "brand": "Capiche",
+   "area": "Piplod",
+   "city": "Surat",
+   "kind": "restaurant"
+  },
+  {
+   "key": "capiche-university",
+   "name": "Capiche University",
+   "brand": "Capiche",
+   "area": "University",
+   "city": "Ahmedabad",
+   "kind": "restaurant"
+  },
+  {
+   "key": "capiche-ambli",
+   "name": "Capiche Ambli",
+   "brand": "Capiche",
+   "area": "Ambli",
+   "city": "Ahmedabad",
+   "kind": "restaurant"
+  },
+  {
+   "key": "aiko-pal",
+   "name": "AIKO Pal",
+   "brand": "AIKO",
+   "area": "Pal",
+   "city": "Surat",
+   "kind": "restaurant"
+  },
+  {
+   "key": "aiko-ambli",
+   "name": "AIKO Ambli",
+   "brand": "AIKO",
+   "area": "Ambli",
+   "city": "Ahmedabad",
+   "kind": "restaurant"
+  },
+  {
+   "key": "beshak-dumas",
+   "name": "Beshak Dumas",
+   "brand": "Beshak",
+   "area": "Dumas",
+   "city": "Surat",
+   "kind": "restaurant"
+  },
+  {
+   "key": "ahd-hot-kitchen",
+   "name": "Central Hot Kitchen",
+   "brand": "Central kitchen",
+   "area": "Karnavati PG",
+   "city": "Ahmedabad",
+   "kind": "kitchen"
+  },
+  {
+   "key": "ahd-bakery",
+   "name": "Central Bakery Kitchen",
+   "brand": "Central kitchen",
+   "area": "Karnavati PG",
+   "city": "Ahmedabad",
+   "kind": "kitchen"
+  },
+  {
+   "key": "surat-hot-kitchen",
+   "name": "Central Hot Kitchen",
+   "brand": "Central kitchen",
+   "area": null,
+   "city": "Surat",
+   "kind": "kitchen"
+  },
+  {
+   "key": "surat-bakery",
+   "name": "Central Bakery Kitchen",
+   "brand": "Central kitchen",
+   "area": null,
+   "city": "Surat",
+   "kind": "kitchen"
+  }
+ ],
+ "audits": [
+  {
+   "site": "capiche-vesu",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-13",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malviya",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 39.0,
+    "available": 94.0,
+    "pct": 41.5
+   },
+   "summary": "Overall standing — 39/94 (41.5%), which falls in the Non-Compliance band. All 39 checkpoints were rated: 16 Compliant, 1 Partial and 22 Non-Compliant. Section A (Service Area) scores 34.4% and Section B (Kitchen Area) 45.2%.\nCriticals are the priority — 5 of the 8 ★ criticals are Non-Compliant (S1, K1, K15, K19, K23); only K4, K5, K6 — segregation and cold-chain control — hold. These 5 carry 20 marks between them, so closing them alone lifts the score to 59/94 (62.8%) and back into Needs Improvement.\nFailures cluster in two areas — housekeeping and cleaning (S3, S4, S9, K10, K13, K22, K24) and documentation (S1, S2, S15, K15, K16, K23) account for 13 of the 22 Non-Compliant checkpoints. The documentation set is paperwork that can be closed quickly; the cleaning set needs a scheduled deep-clean with sign-off.",
+   "source_ref": "Capiche_Vesu_1st Audit_Report  FINAL.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "S1",
+     "result": "fail",
+     "note": "Licence has reportedly been renewed, but no printed copy was displayed on site.. Licence copy on file is for the period ending 17-Mar-2026 — already expired ~5 months before the audit. No renewed copy was produced.",
+     "photos": [
+      "evidence/import/179624d180ad7f1e.jpeg",
+      "evidence/import/e387e9b8cdd73951.jpeg"
+     ]
+    },
+    {
+     "code": "S2",
+     "result": "fail",
+     "note": "Bill does print a licence number, but it does not match the outlet's own licence certificate (10720031000169 vs 10725031000254).",
+     "photos": [
+      "evidence/import/82de3243c6529c30.jpeg"
+     ]
+    },
+    {
+     "code": "S8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S13",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/2160325073f2783d.jpeg",
+      "evidence/import/883ced27a0c25609.jpeg",
+      "evidence/import/3e9437c02b06647c.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/be17c15a6a494593.jpeg",
+      "evidence/import/70ba4882f612c285.png",
+      "evidence/import/d673fcc1a32a1fdc.png",
+      "evidence/import/cfa0c3895b26b980.png",
+      "evidence/import/93b6a0b51749f1e7.png"
+     ]
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S3",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/bd8046062c2211b1.png",
+      "evidence/import/ecfc6a075789177f.png",
+      "evidence/import/12737cfb1b12f888.jpeg"
+     ]
+    },
+    {
+     "code": "S12",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/c14a03b3e342f509.jpeg"
+     ]
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/4eb310168609b6a4.png"
+     ]
+    },
+    {
+     "code": "S14",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/b493835c50dc7be6.jpeg"
+     ]
+    },
+    {
+     "code": "K9",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/d63cfdd6c5da5888.jpeg",
+      "evidence/import/1f06246431cc6366.jpeg"
+     ]
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record paper. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/c14a03b3e342f509.jpeg"
+     ]
+    },
+    {
+     "code": "S6",
+     "result": "fail",
+     "note": "No Cap",
+     "photos": []
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S4",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/05cf0067741ee512.png"
+     ]
+    },
+    {
+     "code": "S5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/82fd3fbfa8f65400.jpeg",
+      "evidence/import/8266ba6013ac31ac.jpeg"
+     ]
+    },
+    {
+     "code": "S15",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/82de3243c6529c30.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "fail",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed.",
+     "photos": []
+    },
+    {
+     "code": "K24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0dc325d60c66f9d2.jpeg"
+     ]
+    },
+    {
+     "code": "S9",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/9bdbd1ec38ebdca7.png"
+     ]
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Fitness certificates located for 3 staff, but all dated 08-Apr-2025 (~16 months old) — currency for the full roster still needs confirming.",
+     "photos": [
+      "evidence/import/51c5a273f4e1f783.jpeg"
+     ]
+    },
+    {
+     "code": "K22",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K13",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/ecfc6a075789177f.png"
+     ]
+    }
+   ]
+  },
+  {
+   "site": "aiko-ambli",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-15",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 57.0,
+    "available": 94.0,
+    "pct": 60.6
+   },
+   "summary": "Overall standing — 57/94 (60.6%), Needs Improvement; all 39 checkpoints were scored. 4 of the 8 ★ criticals are Non-Compliant (K1, K15, K19, K23), but S1 passes — the licence is displayed and valid — and K4, K5 and K6 hold, so segregation and the chiller and freezer controls are sound.\nThe kitchen is the weaker half — 37/62 (59.7%) against the service area's 20/32 (62.5%). The guest-facing side largely holds — guest surfaces, crockery and display counters all pass — while the kitchen loses marks on stock control: expired or undated items (K1 ★, six photographs) and unlabelled decanted containers (K2), plus chemical storage (K9) and staff grooming (K17).\nRoute to Satisfactory — the three documentation items (K15, K16, K23) carry 10 marks; closing them reaches 67/94 (71.3%), and clearing the pest pair (S14, K19) as well reaches 73/94 (77.7%). Two further items clear the 80% Satisfactory band.",
+   "source_ref": "AIKO_AMBLI_1st Audit REPORT.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "S1",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/937b3b06400d72c7.jpeg",
+      "evidence/import/b3a16fff369c31eb.jpeg"
+     ]
+    },
+    {
+     "code": "S8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/5d8b80bd4a5a64b0.jpeg"
+     ]
+    },
+    {
+     "code": "S13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/9329025022e551ac.jpeg",
+      "evidence/import/8d999c108f89d3c6.jpeg",
+      "evidence/import/1225664607636e2e.jpeg",
+      "evidence/import/3982a4908eb984b7.jpeg",
+      "evidence/import/efc75c4c42c8ea3a.jpeg",
+      "evidence/import/7438b04de99a19e1.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/a0c9933b9c89eb1d.jpeg",
+      "evidence/import/da13e4ba3b3bbaf2.jpeg"
+     ]
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S12",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/3588134154f9e1fa.jpeg"
+     ]
+    },
+    {
+     "code": "K9",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/17c6e3ce37b46cca.jpeg",
+      "evidence/import/7b03ef7d75a68e2e.jpeg"
+     ]
+    },
+    {
+     "code": "S14",
+     "result": "fail",
+     "note": "No record",
+     "photos": []
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/3588134154f9e1fa.jpeg"
+     ]
+    },
+    {
+     "code": "S4",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/03b74abd2de92ac6.jpeg"
+     ]
+    },
+    {
+     "code": "S5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S6",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/4e987c68d1f5924b.jpeg"
+     ]
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Not available. Fitness certificates not available.",
+     "photos": []
+    },
+    {
+     "code": "S15",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/937b3b06400d72c7.jpeg"
+     ]
+    },
+    {
+     "code": "K17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/4e987c68d1f5924b.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "fail",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed.",
+     "photos": [
+      "evidence/import/d169cd2e8eca8a28.png"
+     ]
+    },
+    {
+     "code": "K24",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "aiko-pal",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-15",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malviya",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 59.0,
+    "available": 94.0,
+    "pct": 62.8
+   },
+   "summary": "Overall standing — 59/94 (62.8%), Needs Improvement; all 39 checkpoints were scored, but 4 of the 8 ★ criticals are Non-Compliant (S1, K1, K15, K19) and K23 is only Partial.\nWhere it fails — every temperature and segregation control passes; the losses sit in hygiene discipline and housekeeping — grooming fails front and back of house (S6, K17), pest control fails on both counts (S14 barrier, K19 record) with a pest photographed on site, and waste handling falls short at S12 and K21.\nRoute to Satisfactory — the five display and documentation items (S1, S2, S15, K15, K16) are worth 14 marks, taking the outlet to 73/94 (77.7%); clearing the 80% Satisfactory band needs at least two of the grooming and housekeeping findings (S6, K17, S12) closed as well.",
+   "source_ref": "AIKO_REPORT 1st Audit.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "S1",
+     "result": "fail",
+     "note": "Licence has reportedly been renewed, but no printed copy was displayed on site.. Licence copy on file is for the period ending 07-Mar-2026 — already expired ~5 months before the audit. No renewed copy was produced.",
+     "photos": [
+      "evidence/import/d0641c6efddabe19.jpeg"
+     ]
+    },
+    {
+     "code": "S2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/937b3b06400d72c7.jpeg",
+      "evidence/import/b3a16fff369c31eb.jpeg"
+     ]
+    },
+    {
+     "code": "S8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/fc06d3c110df1b5c.jpeg",
+      "evidence/import/d52c4bd460dccf87.jpeg",
+      "evidence/import/abf3e7b0275d891c.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S12",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/cd2ad4fc747769fc.jpeg",
+      "evidence/import/706d97a301cde633.jpeg"
+     ]
+    },
+    {
+     "code": "K9",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/fc17627350cd8cef.jpeg"
+     ]
+    },
+    {
+     "code": "S14",
+     "result": "fail",
+     "note": "No record",
+     "photos": []
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/b8352dd1b819483e.jpeg"
+     ]
+    },
+    {
+     "code": "S4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S6",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/9a49e8ec2807ef81.jpeg",
+      "evidence/import/dc96a5cd5f5f2e39.jpeg"
+     ]
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Not available. Fitness certificates not available.",
+     "photos": []
+    },
+    {
+     "code": "S15",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/937b3b06400d72c7.jpeg"
+     ]
+    },
+    {
+     "code": "K17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/37ed51172d3e9b2f.jpeg",
+      "evidence/import/19a2cffde5b933ca.jpeg",
+      "evidence/import/d9f68a70fd48d503.jpeg",
+      "evidence/import/17a6ab18f9e78885.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "partial",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed.",
+     "photos": []
+    },
+    {
+     "code": "K24",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "capiche-ambli",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-15",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 52.0,
+    "available": 94.0,
+    "pct": 55.3
+   },
+   "summary": "Overall standing — 52/94 (55.3%), Needs Improvement; all 39 checkpoints were scored. 4 of the 8 ★ criticals are Non-Compliant (K1, K15, K19, K23), but S1 passes — the licence is displayed and valid — and K4, K5 and K6 hold, so segregation and the chiller and freezer controls are sound.\nThe service area has slipped to the 50% floor — 16/32 (50.0%) exactly, against the kitchen's 36/62 (58.1%). Seven of the fifteen service checkpoints now fail, and every one is visible to a guest: guest-area surfaces (S3), staff uniform and grooming (S6), chipped or unclean crockery (S9), restrooms (S13), the entrance pest barrier (S14), and both menu items (S2, S15). A single further downgrade takes this section into the Non-Compliance band.\nRoute to Satisfactory — the four documentation items (K15, K16, K23, K24) carry 12 marks, lifting the outlet to 64/94 (68.1%); clearing the pest pair (S14, K19) as well reaches 70/94 (74.5%). Passing the 80% band needs at least 8 checkpoints closed, including all four failing criticals.",
+   "source_ref": "Capiche Ambli_REPORT_1st Audit.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "S1",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0d50741cc29083a7.jpeg",
+      "evidence/import/90f2ce2cf0790335.jpeg"
+     ]
+    },
+    {
+     "code": "S8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/936678958cdccb3a.png"
+     ]
+    },
+    {
+     "code": "S13",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/9ea697cdb7fdeac8.jpeg"
+     ]
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/8aeadeec413e8c1a.jpeg",
+      "evidence/import/5696d887c353fd07.jpeg",
+      "evidence/import/06e7b6f6e28b4a22.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/d63267711302911c.jpeg",
+      "evidence/import/3cdb8270f2f13c48.jpeg",
+      "evidence/import/8ac793d0800348c6.jpeg"
+     ]
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S3",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/b31887e510706daa.jpeg"
+     ]
+    },
+    {
+     "code": "S12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S14",
+     "result": "fail",
+     "note": "No record",
+     "photos": []
+    },
+    {
+     "code": "K9",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/bb04070f5eafe4c7.jpeg",
+      "evidence/import/1e62394226354bd7.jpeg"
+     ]
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S6",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/52f025f3e9979959.jpeg"
+     ]
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Not available. Fitness certificates not available.",
+     "photos": []
+    },
+    {
+     "code": "K17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/3bbf2f111510808b.png",
+      "evidence/import/8f064fadafa3f3dc.jpeg"
+     ]
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S15",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/5862fdbe315ffd10.jpeg",
+      "evidence/import/0d50741cc29083a7.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "fail",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed. & TDS-1457.",
+     "photos": []
+    },
+    {
+     "code": "K24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/81ffbe1f7bc0e0cb.jpeg"
+     ]
+    },
+    {
+     "code": "S4",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/29e66633b268d817.jpeg",
+      "evidence/import/8944fd722c63085b.jpeg",
+      "evidence/import/949b7eec5fbc91fb.jpeg"
+     ]
+    },
+    {
+     "code": "S5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S9",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/a98bee024d674fe4.jpeg"
+     ]
+    }
+   ]
+  },
+  {
+   "site": "capiche-piplod",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-15",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malviya",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 61.0,
+    "available": 94.0,
+    "pct": 64.9
+   },
+   "summary": "Overall standing — 61/94 (64.9%), Needs Improvement; all 39 checkpoints were scored, but 4 of the 8 ★ criticals are Non-Compliant (S1, K1, K15, K19) and K23 is only Partial.\nNot only paperwork — K1 (expired/undated stock) and K2 (unlabelled decanted containers, FIFO) are live food-handling failures, and pest control fails on both counts — S14 barrier and K19 record — with a pest photographed on site.\nRoute to Satisfactory — the five administrative items S1, S2, S15, K15 and K16 are worth 14 marks between them; closing those alone lifts the outlet to 75/94 (79.8%), just short of the 80% Satisfactory band.",
+   "source_ref": "PIPLOD_REPORT_1st Audit.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "S1",
+     "result": "fail",
+     "note": "Licence has reportedly been renewed, but no printed copy was displayed on site.. Licence copy on file is for the period ending 07-Mar-2026 — already expired ~5 months before the audit. No renewed copy was produced.",
+     "photos": [
+      "evidence/import/3f0268ce00f87e2f.jpeg"
+     ]
+    },
+    {
+     "code": "S2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0d50741cc29083a7.jpeg",
+      "evidence/import/90f2ce2cf0790335.jpeg"
+     ]
+    },
+    {
+     "code": "S8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/65f2eb983f0b6876.jpeg",
+      "evidence/import/fd04f7f4f54db8d7.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/c27dbe3275746440.jpeg",
+      "evidence/import/cd620b11b6b1a45d.jpeg"
+     ]
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S14",
+     "result": "fail",
+     "note": "No record",
+     "photos": []
+    },
+    {
+     "code": "K9",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/8ab41d7b6a1d6540.jpeg",
+      "evidence/import/e4691f1a9eda6ca7.jpeg"
+     ]
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Not available. Fitness certificates not available.",
+     "photos": []
+    },
+    {
+     "code": "K17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S15",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0d50741cc29083a7.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "partial",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed.",
+     "photos": []
+    },
+    {
+     "code": "K24",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/5f2d468b022beb19.jpeg"
+     ]
+    },
+    {
+     "code": "S4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S9",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/986148c88d199c04.jpeg",
+      "evidence/import/eb942c07a7132d0d.jpeg"
+     ]
+    }
+   ]
+  },
+  {
+   "site": "capiche-university",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-15",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 60.0,
+    "available": 94.0,
+    "pct": 63.8
+   },
+   "summary": "Overall standing — 60/94 (63.8%), Needs Improvement; all 39 checkpoints were scored. 4 of the 8 ★ criticals are Non-Compliant (K1, K15, K19, K23), but S1 passes — the licence is displayed and valid — and K4, K5 and K6 hold, so segregation and the chiller and freezer controls are sound.\nThe kitchen is the weaker half — 37/62 (59.7%) against the service area's 23/32 (71.9%). Front of house now largely holds: floors and walls, crockery and the waste bin all pass, and drinking water has moved up to Partial. The kitchen's losses are expired or undated stock (K1 ★), staff grooming (K17), waste segregation (K21) and the documentation set.\nFive items from Satisfactory — the three documentation items (K15, K16, K23) carry 10 marks and the pest pair (S14, K19) another 6; closing those five alone reaches 76/94 (80.9%), inside the Satisfactory band, with no other change required.",
+   "source_ref": "Capiche_UNI_REPORT 1st Audit.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "S1",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0d50741cc29083a7.jpeg",
+      "evidence/import/90f2ce2cf0790335.jpeg"
+     ]
+    },
+    {
+     "code": "S8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/c6be094f8e8ac027.jpeg"
+     ]
+    },
+    {
+     "code": "S13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": "No Date",
+     "photos": [
+      "evidence/import/cf6d021a89f7d17d.jpeg",
+      "evidence/import/56a80d87ff069e37.jpeg",
+      "evidence/import/3a7f736d6bfe7f09.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/b5f4ca6fd749cd6a.jpeg",
+      "evidence/import/c1ac5ba6d5bcd60d.jpeg"
+     ]
+    },
+    {
+     "code": "K22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S14",
+     "result": "fail",
+     "note": "No record",
+     "photos": []
+    },
+    {
+     "code": "K9",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/018ffac28582c201.jpeg"
+     ]
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/a5cb3ae1f23e83d5.jpeg"
+     ]
+    },
+    {
+     "code": "S6",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/98a5afa1c10c3d16.jpeg"
+     ]
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Not available. Fitness certificates not available.",
+     "photos": []
+    },
+    {
+     "code": "K17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/dba9b26951be95d1.jpeg"
+     ]
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K13",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/2e85ad7d9809925b.jpeg"
+     ]
+    },
+    {
+     "code": "S15",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0d50741cc29083a7.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "fail",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed. & TDS-63.",
+     "photos": [
+      "evidence/import/c6be094f8e8ac027.jpeg"
+     ]
+    },
+    {
+     "code": "K24",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "ahd-bakery",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-20",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 45.0,
+    "available": 72.0,
+    "pct": 62.5
+   },
+   "summary": "Overall standing — 45/72 (62.5%) for the kitchen area — Needs Improvement. 5 of the 8 ★ criticals are Non-Compliant (S1, K1, K15, K19, K23); only K4, K5, K6 pass.\nFood handling holds; the records do not — K4, K5 and K6 all pass, so raw/cooked and veg segregation and the chiller and freezer controls are sound. Almost every failure is a document or a log: the licence itself (S1 ★), medical fitness certificates (K15 ★), FoSTaC certification (K16), the water potability report (K23 ★), the pest-control record (K19 ★) and the deep-cleaning log (K24). The exceptions are expired or undated stock (K1 ★), unlabelled decanted containers (K2), staff grooming (K17), waste segregation (K21) and premises condition (S4).\nFive items from Satisfactory — the five failing ★ criticals (S1, K1, K15, K19, K23) carry 20 marks between them; closing those five alone reaches 59/72 (81.9%), inside the Satisfactory band, with no other change required.",
+   "source_ref": "Ahmedabad Bekary 1st Audit Report.docx",
+   "flag": "The report prints 45/72 (62.5%), but its own line ratings and its conclusion (\"closing those five reaches 59/72\") both give 39/72. Imported as 39/72 (54.2%). Please confirm with the auditor.",
+   "responses": [
+    {
+     "code": "S1",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "pass",
+     "note": null,
+     "photos": [
+      "evidence/import/20043ff8065b7884.jpeg"
+     ]
+    },
+    {
+     "code": "S13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": [
+      "evidence/import/87d592fde4a2d268.png"
+     ]
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0997d9748a3b25bc.jpeg",
+      "evidence/import/b6e642174d08bea8.jpeg",
+      "evidence/import/84b337f897f60734.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/fd5b64301970e6e2.jpeg",
+      "evidence/import/46c07eb0e04496b9.jpeg"
+     ]
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K9",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/996312d2528feb26.jpeg"
+     ]
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S4",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/f9af4d95ed77f8fb.jpeg"
+     ]
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Not available. Fitness certificates not available.",
+     "photos": []
+    },
+    {
+     "code": "K17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/becc868bc3f45c25.jpeg",
+      "evidence/import/b221d00c8abba86a.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "fail",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed.",
+     "photos": [
+      "evidence/import/20043ff8065b7884.jpeg"
+     ]
+    },
+    {
+     "code": "K24",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "ahd-hot-kitchen",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-20",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 45.0,
+    "available": 76.0,
+    "pct": 59.2
+   },
+   "summary": "Overall standing — 45/76 (59.2%) for the kitchen area — Needs Improvement. 5 of the 8 ★ criticals are Non-Compliant (S1, K1, K15, K19, K23); K4, K5, K6 pass.\nOperational control is largely sound — K6 passes, so the chiller and freezer temperatures and the temperature log are in order, and so are raw/cooked and veg segregation (K4, K5), chemical storage (K9), the dry store (K10) and waste handling (K21). The losses sit in the licence (S1 ★), stock dating (K1 ★, three photographs), decanted container labelling (K2), staff grooming (K17), premises condition (S4), extraction (K22, partial) and the records set (K15 ★, K16, K19 ★, K23 ★, K24).\nFour items from Satisfactory — the five failing ★ criticals (S1, K1, K15, K19, K23) carry 20 marks between them; closing any four of them reaches 61/76 (80.3%), and all five reaches 65/76 (85.5%) — comfortably inside the Satisfactory band.",
+   "source_ref": "Ahmedabad Prep Kitchen 1st Audit Report.docx",
+   "flag": "The report carries no date. Set to 20 Aug 2026, the date of the bakery report from the same site visit.",
+   "responses": [
+    {
+     "code": "S1",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "pass",
+     "note": null,
+     "photos": [
+      "evidence/import/20043ff8065b7884.jpeg"
+     ]
+    },
+    {
+     "code": "S13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": [
+      "evidence/import/c2a4146c8642fcbb.png"
+     ]
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/94d6c7a6e2f4b328.jpeg",
+      "evidence/import/4a0f2cf5e61f5b35.jpeg",
+      "evidence/import/7f6f1492f4007afd.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/85a96818a9f36817.jpeg",
+      "evidence/import/c3fe9b925795bf26.jpeg"
+     ]
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "S12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S4",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/bed2963212d28718.jpeg"
+     ]
+    },
+    {
+     "code": "K22",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/66ea9e14551158db.jpeg"
+     ]
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Not available. Fitness certificates not available.",
+     "photos": []
+    },
+    {
+     "code": "K17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/296e61a2f6b4fd62.jpeg",
+      "evidence/import/253788a9005f8246.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "fail",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed.",
+     "photos": [
+      "evidence/import/20043ff8065b7884.jpeg"
+     ]
+    },
+    {
+     "code": "K24",
+     "result": "fail",
+     "note": "No Record",
+     "photos": []
+    },
+    {
+     "code": "K13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "surat-bakery",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-20",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malviya",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 40.0,
+    "available": 72.0,
+    "pct": 55.6
+   },
+   "summary": "Overall standing — 40/72 (55.6%) for the kitchen area — Needs Improvement. 5 of the 8 ★ criticals are Non-Compliant (S1, K1, K15, K19, K23); K4, K5 and K6 pass, so raw/cooked segregation and the chiller and freezer controls are holding.\nStock dating is the operational gap — K1 ★ (expired or undated items, seven photographs) and K2 (unlabelled decanted containers, four) are the only live food-handling failures here; everything else that fails is documentation, pest control or housekeeping — a materially better position than a cold-chain or segregation failure.\nRoute to Satisfactory — S1 ★ plus the four documentation items (K15, K16, K23, K24) carry 16 marks between them; closing those reaches 56/72 (77.8%), and one further housekeeping fix (K17, K21 or S12) clears the 80% Satisfactory band.",
+   "source_ref": "Surat Bakery 1st audit report.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "S1",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0997d9748a3b25bc.jpeg",
+      "evidence/import/e63566c1580fc4be.jpeg",
+      "evidence/import/1371a43b4ee1015b.jpeg",
+      "evidence/import/e6ef2b80c60ee94a.jpeg",
+      "evidence/import/8eb96622c4df1624.jpeg",
+      "evidence/import/b2971211912063c5.jpeg",
+      "evidence/import/5569dc99cc023683.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/38cbc97cb77778db.jpeg",
+      "evidence/import/6b6f33034b21e9dc.jpeg",
+      "evidence/import/fa454a026043731c.jpeg",
+      "evidence/import/f16be89ed616cad7.jpeg"
+     ]
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S12",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/e5ceecaf0610a380.jpeg",
+      "evidence/import/def8417168a930f3.jpeg"
+     ]
+    },
+    {
+     "code": "K9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/cb56cacd1090ce11.jpeg"
+     ]
+    },
+    {
+     "code": "S4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Not available. Fitness certificates not available.",
+     "photos": []
+    },
+    {
+     "code": "K17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/40dbfd886b049175.jpeg",
+      "evidence/import/f0fc42a90b1ac7f5.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "fail",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed.",
+     "photos": [
+      "evidence/import/13f93a2861c02b3b.jpeg",
+      "evidence/import/758a02c3309c18fa.jpeg"
+     ]
+    },
+    {
+     "code": "K24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/999c8ba06bbb5cff.jpeg"
+     ]
+    }
+   ]
+  },
+  {
+   "site": "surat-hot-kitchen",
+   "domain": "food",
+   "template": 1,
+   "visit": 1,
+   "date": "2026-08-20",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malviya",
+   "audit_type": "Internal walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 36.0,
+    "available": 76.0,
+    "pct": 47.4
+   },
+   "summary": "Overall standing — 36/76 (47.4%) for the kitchen area — the Non-Compliance band, below the 50% floor. 6 of the 8 ★ criticals are Non-Compliant (S1, K1, K6, K15, K19, K23); only K4 and K5 pass.\nCold chain is the priority — K6 ★ fails: chiller/freezer temperatures and the temperature log are Non-Compliant, alongside expired or undated stock (K1 ★) and unlabelled decanted containers (K2). These are live food-safety failures rather than paperwork gaps, and as a central kitchen anything leaving here carries that risk to every outlet it supplies.\nNo statutory documents to produce — S1 ★ is recorded as “Not available” rather than merely undisplayed, and K15 ★ (medical fitness), K16 (FoSTaC) and K23 ★ (water potability) are likewise unavailable — so an FDCA visit today would find no licence, health records, trained-supervisor certificate or water report on site.",
+   "source_ref": "Surat prep kitchen 1st audit report.docx",
+   "flag": "The report carries no date. Set to 20 Aug 2026, the date of the bakery report from the same site visit.",
+   "responses": [
+    {
+     "code": "S1",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "S10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0997d9748a3b25bc.jpeg",
+      "evidence/import/34aa94674b909dae.jpeg",
+      "evidence/import/ed78b353ae92c024.jpeg",
+      "evidence/import/3bad5cb15cf6161e.jpeg",
+      "evidence/import/b970ae1ca9476118.jpeg"
+     ]
+    },
+    {
+     "code": "K2",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/6dfb2ada8497ca2c.jpeg",
+      "evidence/import/14a6387114a4863d.jpeg",
+      "evidence/import/a04da9225b1978fc.jpeg"
+     ]
+    },
+    {
+     "code": "K4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K6",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/76cacab7c9328a75.jpeg",
+      "evidence/import/095e27e1beaa30a0.jpeg"
+     ]
+    },
+    {
+     "code": "K7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K19",
+     "result": "fail",
+     "note": "No record. A pest (cockroach) was photographed on the floor on the audit day, despite this checkpoint being scored 2. The pest-control certificate on file is addressed to a different business name and had already lapsed for over a year.",
+     "photos": []
+    },
+    {
+     "code": "S12",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/57fcb70e53bb02aa.jpeg"
+     ]
+    },
+    {
+     "code": "K9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K21",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/2dd01b0741bfe2c1.jpeg"
+     ]
+    },
+    {
+     "code": "S4",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/2385fd6eda7bcfeb.jpeg"
+     ]
+    },
+    {
+     "code": "K22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "S7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K15",
+     "result": "fail",
+     "note": "Not available. Fitness certificates not available.",
+     "photos": []
+    },
+    {
+     "code": "K17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/f4a8c97ecb952018.jpeg",
+      "evidence/import/916f7cc7cb05b642.jpeg"
+     ]
+    },
+    {
+     "code": "K16",
+     "result": "fail",
+     "note": "Not available",
+     "photos": []
+    },
+    {
+     "code": "K23",
+     "result": "fail",
+     "note": "Team reports an informal daily check is done, but there is no documented report; the formal 6-monthly lab report has not been renewed.",
+     "photos": [
+      "evidence/import/598116c7b1099f25.jpeg",
+      "evidence/import/758a02c3309c18fa.jpeg"
+     ]
+    },
+    {
+     "code": "K24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/999c8ba06bbb5cff.jpeg"
+     ]
+    },
+    {
+     "code": "K13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "K10",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/71728980f82c837b.jpeg"
+     ]
+    }
+   ]
+  },
+  {
+   "site": "aiko-pal",
+   "domain": "food",
+   "template": 2,
+   "visit": 2,
+   "date": "2026-09-01",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malaviya",
+   "audit_type": "Surprise",
+   "time_range": "2:30PM to 6:00PM",
+   "reported": {
+    "obtained": 88.0,
+    "available": 142.0,
+    "pct": 62.0
+   },
+   "summary": "Overall standing — 88/142 (62.0%), Needs Improvement. By section: A Service Area 89.3% (Satisfactory), B Kitchen Area 62.1% (Needs Improvement), C Whole Premises and Documentation 45.8% (Non-Compliance).\nClose the ★ critical lines first — 8 ★ critical lines are rated Major (lines 15, 22, 25, 26, 41, 44, 49, 51) and they carry 32 marks between them. Closing those 8 alone takes the score to 120/142 (84.5%), inside the Satisfactory band. 80% needs 114 marks; the unit has 88, so it is 26 short.\nOf the 17 Major lines, 11 are paperwork and 6 are physical — paperwork: lines 1, 21, 23, 37, 38, 41, 43, 44, 49, 51, 52 (Menu information · Receiving · Stock rotation · FSSAI licence · Display · Water · Cleaning system · Pest control · FoSTaC · Records · Regulator follow-up). The work is being done but no record exists, and that set can be closed in a week or two. Physical: lines 14, 15, 16, 22, 25, 26 (Flooring · Segregation · Ventilation · Unsafe food · Storage · Cold chain) — real work on site, of which the expired stock on line 22 (★) is the most urgent.",
+   "source_ref": "AIKO_Pal_FSSAI_2nd Audit_Report.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "L1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/2299ddf500d5807e.png"
+     ]
+    },
+    {
+     "code": "L2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L4",
+     "result": "partial",
+     "note": "Complaints do come in from time to time — (1) the food is too salty, (2) when a table gets loud, to have the noise brought down.",
+     "photos": []
+    },
+    {
+     "code": "L5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L15",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/e60cc4e20934471e.png"
+     ]
+    },
+    {
+     "code": "L16",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/8f6cc36897f86dc6.jpeg"
+     ]
+    },
+    {
+     "code": "L17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/2eba771cb8ed6270.png"
+     ]
+    },
+    {
+     "code": "L18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L21",
+     "result": "partial",
+     "note": "Weighing scale calibration. Weight calibration",
+     "photos": [
+      "evidence/import/5d28a5b36842caba.png"
+     ]
+    },
+    {
+     "code": "L22",
+     "result": "fail",
+     "note": "Dates are not being checked on incoming goods.",
+     "photos": []
+    },
+    {
+     "code": "L23",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/bb40bc79136940e0.png",
+      "evidence/import/157c4116b4796da1.jpeg",
+      "evidence/import/6fe6a80078eb905e.jpeg",
+      "evidence/import/074c63bf933cc72f.jpeg",
+      "evidence/import/0555e6362dfaf114.jpeg",
+      "evidence/import/9d717c7f330a70dd.jpeg",
+      "evidence/import/1e382e55e6fde642.jpeg",
+      "evidence/import/dd6e82ab2af16d5d.jpeg",
+      "evidence/import/6fe6a80078eb905e.jpeg"
+     ]
+    },
+    {
+     "code": "L24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/f572e4cfe35cc2e3.png",
+      "evidence/import/a7651cfd0a7720c7.png",
+      "evidence/import/fdf7eae99e899feb.png",
+      "evidence/import/3ea800f1367fe7e8.png"
+     ]
+    },
+    {
+     "code": "L25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L26",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/8f6cc36897f86dc6.jpeg",
+      "evidence/import/0817cfed24e6ddae.png",
+      "evidence/import/98c117d49ca7f174.png"
+     ]
+    },
+    {
+     "code": "L27",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0415d9bd0cfeeacc.png",
+      "evidence/import/c162078a46b83a35.jpeg"
+     ]
+    },
+    {
+     "code": "L28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L41",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L43",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/79f3ff1975e4bd3f.png"
+     ]
+    },
+    {
+     "code": "L44",
+     "result": "fail",
+     "note": "Food Safety Display Board not put up; no-smoking notice not put up.",
+     "photos": []
+    },
+    {
+     "code": "L45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L47",
+     "result": "fail",
+     "note": "No lab report.",
+     "photos": []
+    },
+    {
+     "code": "L48",
+     "result": "pass",
+     "note": "There is a water tank, but it is never used.",
+     "photos": []
+    },
+    {
+     "code": "L51",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/6c15f90ea8d5b719.png"
+     ]
+    },
+    {
+     "code": "L52",
+     "result": "fail",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L56",
+     "result": "partial",
+     "note": "The notices are not put up.",
+     "photos": []
+    },
+    {
+     "code": "L57",
+     "result": "fail",
+     "note": "No certificate.",
+     "photos": []
+    },
+    {
+     "code": "L58",
+     "result": "partial",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L59",
+     "result": "fail",
+     "note": "No pest control record, no water report, no training record.",
+     "photos": []
+    },
+    {
+     "code": "L60",
+     "result": "fail",
+     "note": "Expired stock, records, training and certificate — all outstanding.",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "capiche-piplod",
+   "domain": "food",
+   "template": 2,
+   "visit": 2,
+   "date": "2026-09-02",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malviya",
+   "audit_type": "Surprise",
+   "time_range": "10:30AM to01:30PM",
+   "reported": {
+    "obtained": 104.0,
+    "available": 144.0,
+    "pct": 72.2
+   },
+   "summary": "Overall standing — 104/144 (72.2%), Needs Improvement. By section: A Service Area 85.7% (Satisfactory), B Kitchen Area 80.3% (Satisfactory), C Whole Premises and Documentation 54.0% (Needs Improvement).\nClose the ★ critical lines first — 5 ★ critical lines are rated Major (lines 22, 26, 41, 49, 51) and they carry 20 marks between them. Closing those 5 alone takes the score to 124/144 (86.1%), inside the Satisfactory band. 80% needs 116 marks; the unit has 104, so it is 12 short.\nOf the 14 Major lines, 10 are paperwork and 4 are physical — paperwork: lines 1, 23, 37, 38, 41, 43, 49, 50, 51, 52 (Menu information · Stock rotation · FSSAI licence · Display · Water · Cleaning system · FoSTaC · Training · Records · Regulator follow-up). The work is being done but no record exists, and that set can be closed in a week or two. Physical: lines 5, 17, 22, 26 (Crockery and cutlery · Drainage · Unsafe food · Cold chain) — real work on site, of which the expired stock on line 22 (★) is the most urgent.",
+   "source_ref": "Capiche_Piplod_FSSAI_2nd Audit_Report.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "L1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/64facdbd06545504.png"
+     ]
+    },
+    {
+     "code": "L2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L5",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/bd6f046610e0de91.png"
+     ]
+    },
+    {
+     "code": "L6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L15",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L18",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/965333a7f967b092.png",
+      "evidence/import/e3283785e20bee6c.png"
+     ]
+    },
+    {
+     "code": "L19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L21",
+     "result": "partial",
+     "note": "Weighing scale calibration.",
+     "photos": []
+    },
+    {
+     "code": "L22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L23",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/0f81224b8351ac0c.png",
+      "evidence/import/787827ff371c7c6a.png",
+      "evidence/import/9f8ef0e0622aec62.png",
+      "evidence/import/ae9ccddcefe88ad4.png",
+      "evidence/import/55ad10c6d1e6be90.png",
+      "evidence/import/779942db423eead4.png"
+     ]
+    },
+    {
+     "code": "L24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/20351a88d8ad6b88.png",
+      "evidence/import/5a55a10e368a2cfd.png",
+      "evidence/import/125fa1036af9cd84.png"
+     ]
+    },
+    {
+     "code": "L25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L27",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/7f61a66d596d40cc.png"
+     ]
+    },
+    {
+     "code": "L28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L41",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L43",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/316e9d0bbc848956.png"
+     ]
+    },
+    {
+     "code": "L44",
+     "result": "fail",
+     "note": "Food Safety Display Board not put up; no-smoking notice not put up.",
+     "photos": []
+    },
+    {
+     "code": "L45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L47",
+     "result": "fail",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L49",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L51",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/dc65d8f56fed01c7.png"
+     ]
+    },
+    {
+     "code": "L52",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L56",
+     "result": "partial",
+     "note": "The notices are not put up.",
+     "photos": []
+    },
+    {
+     "code": "L57",
+     "result": "fail",
+     "note": "No certificate.",
+     "photos": []
+    },
+    {
+     "code": "L58",
+     "result": "fail",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L59",
+     "result": "fail",
+     "note": "No water report, no training record.",
+     "photos": []
+    },
+    {
+     "code": "L60",
+     "result": "fail",
+     "note": "Expired stock; no water report; no training record. No rating was circled — read off the remark as Major.",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "capiche-vesu",
+   "domain": "food",
+   "template": 2,
+   "visit": 2,
+   "date": "2026-09-02",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malaviya",
+   "audit_type": "Surprise",
+   "time_range": "10:30AM to 01:30PM",
+   "reported": {
+    "obtained": 85.0,
+    "available": 140.0,
+    "pct": 60.7
+   },
+   "summary": "Overall standing — 85/140 (60.7%), Needs Improvement. By section: A Service Area 82.1% (Satisfactory), B Kitchen Area 63.6% (Needs Improvement), C Whole Premises and Documentation 43.5% (Non-Compliance).\nClose the ★ critical lines first — 8 ★ critical lines are rated Major (lines 15, 22, 25, 26, 41, 43, 48, 50) and they carry 32 marks between them. Closing those 8 alone takes the score to 117/140 (83.6%), inside the Satisfactory band. 80% needs 112 marks; the unit has 85, so it is 27 short.\nOf the 17 Major lines, 10 are paperwork and 7 are physical — paperwork: lines 1, 23, 37, 38, 41, 42, 43, 48, 50, 51 (Menu information · Stock rotation · FSSAI licence · Display · Water · Cleaning system · Pest control · FoSTaC · Records · Regulator follow-up). The work is being done but no record exists, and that set can be closed in a week or two. Physical: lines 5, 12, 15, 16, 22, 25, 26 (Crockery and cutlery · Layout · Segregation · Ventilation · Unsafe food · Storage · Cold chain) — real work on site, of which the expired stock on line 22 (★) is the most urgent.",
+   "source_ref": "Capiche_Vesu_FSSAI_2nd Audit_Report.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "L1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/61651221cdd6a544.png"
+     ]
+    },
+    {
+     "code": "L2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L4",
+     "result": "partial",
+     "note": "The pizza dough seemed a little thick.",
+     "photos": []
+    },
+    {
+     "code": "L5",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/6e955cb36b034858.png",
+      "evidence/import/4d6d479f6b35b25a.png"
+     ]
+    },
+    {
+     "code": "L6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L13",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/d761cb64f5e7cbcf.png",
+      "evidence/import/cb1641853a424616.png"
+     ]
+    },
+    {
+     "code": "L14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L15",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/0099f922a8f67bcc.png"
+     ]
+    },
+    {
+     "code": "L16",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L17",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/41f271287156ae1b.png"
+     ]
+    },
+    {
+     "code": "L18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L21",
+     "result": "partial",
+     "note": "Weighing scale calibration.",
+     "photos": []
+    },
+    {
+     "code": "L22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L23",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/297576ed0db0c545.png",
+      "evidence/import/adb2f722bc72a472.png",
+      "evidence/import/fd512cdb58f0c8e4.png",
+      "evidence/import/c56d8e6bccde7dde.png",
+      "evidence/import/51647447e9a83397.png"
+     ]
+    },
+    {
+     "code": "L24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/078143deb23165ab.png",
+      "evidence/import/d8651f25139c1ebf.png",
+      "evidence/import/89fff78a05e5cf2e.png"
+     ]
+    },
+    {
+     "code": "L25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L26",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/b6e6a11f3a2f1032.png",
+      "evidence/import/30194811bd320754.png",
+      "evidence/import/dc30c72bab94db1d.png"
+     ]
+    },
+    {
+     "code": "L27",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/05f5982e51354ef7.png"
+     ]
+    },
+    {
+     "code": "L28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L41",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L43",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/316e9d0bbc848956.png"
+     ]
+    },
+    {
+     "code": "L44",
+     "result": "fail",
+     "note": "Food Safety Display Board not put up; no-smoking notice not put up.",
+     "photos": []
+    },
+    {
+     "code": "L45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L47",
+     "result": "fail",
+     "note": "No record. No rating was circled — read off the remark as Major.",
+     "photos": []
+    },
+    {
+     "code": "L51",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/03ef6b1f36be2d6a.png"
+     ]
+    },
+    {
+     "code": "L52",
+     "result": "fail",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L56",
+     "result": "partial",
+     "note": "The notices are not put up.",
+     "photos": []
+    },
+    {
+     "code": "L57",
+     "result": "fail",
+     "note": "No certificate.",
+     "photos": []
+    },
+    {
+     "code": "L58",
+     "result": "partial",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L59",
+     "result": "fail",
+     "note": "No pest control record, no water report, no training record.",
+     "photos": []
+    },
+    {
+     "code": "L60",
+     "result": "fail",
+     "note": "Expired stock; no pest control record; no water report; no training record.",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "aiko-ambli",
+   "domain": "food",
+   "template": 2,
+   "visit": 2,
+   "date": "2026-09-03",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malviya",
+   "audit_type": "Surprise",
+   "time_range": "04:00PM to 07:00PM",
+   "reported": {
+    "obtained": 102.0,
+    "available": 144.0,
+    "pct": 70.8
+   },
+   "summary": "Overall standing — 102/144 (70.8%), Needs Improvement. By section: A Service Area 89.3% (Satisfactory), B Kitchen Area 74.2% (Needs Improvement), C Whole Premises and Documentation 56.0% (Needs Improvement).\nClose the ★ critical lines first — 7 ★ critical lines are rated Major (lines 22, 26, 32, 41, 47, 49, 51) and they carry 28 marks between them. Closing those 7 alone takes the score to 130/144 (90.3%), inside the Exemplar band. 80% needs 116 marks; the unit has 102, so it is 14 short.\nOf the 12 Major lines, 8 are paperwork and 4 are physical — paperwork: lines 1, 21, 23, 38, 41, 49, 51, 52 (Menu information · Receiving · Stock rotation · Display · Water · FoSTaC · Records · Regulator follow-up). The work is being done but no record exists, and that set can be closed in a week or two. Physical: lines 22, 26, 32, 47 (Unsafe food · Cold chain · Chemicals · Handwashing) — real work on site, of which the expired stock on line 22 (★) is the most urgent.",
+   "source_ref": "AIKO_Ambli_FSSAI_2nd Audit_Report.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "L1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/2299ddf500d5807e.png"
+     ]
+    },
+    {
+     "code": "L2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L4",
+     "result": "partial",
+     "note": "One guest complained of a fly in the food; on checking, nothing was found.",
+     "photos": []
+    },
+    {
+     "code": "L5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L15",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L21",
+     "result": "partial",
+     "note": "Weighing scale calibration is not being done.",
+     "photos": []
+    },
+    {
+     "code": "L22",
+     "result": "fail",
+     "note": "Dates are not being checked on incoming goods.",
+     "photos": []
+    },
+    {
+     "code": "L23",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/61d20224144ed380.png",
+      "evidence/import/bcb8b4e75ab0cf8c.png",
+      "evidence/import/07b2322cbc4acb4e.png"
+     ]
+    },
+    {
+     "code": "L24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/339ba1d330f0ce93.png",
+      "evidence/import/13a679b4692d7a79.png",
+      "evidence/import/4c10e308cfaec5af.png"
+     ]
+    },
+    {
+     "code": "L25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L27",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/fee9c1c58a1ff7fd.png"
+     ]
+    },
+    {
+     "code": "L28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L34",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/b0328969a6fd791c.png",
+      "evidence/import/626e2c05b43a93ca.png"
+     ]
+    },
+    {
+     "code": "L35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L41",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L42",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L44",
+     "result": "fail",
+     "note": "Food Safety Display Board not put up; no-smoking notice not put up.",
+     "photos": []
+    },
+    {
+     "code": "L45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L47",
+     "result": "fail",
+     "note": "No lab report.",
+     "photos": []
+    },
+    {
+     "code": "L49",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L52",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L55",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/726d56cfafb42c42.png",
+      "evidence/import/69c35db97a69fbd9.png"
+     ]
+    },
+    {
+     "code": "L56",
+     "result": "partial",
+     "note": "The notices are not put up.",
+     "photos": []
+    },
+    {
+     "code": "L57",
+     "result": "fail",
+     "note": "No certificate.",
+     "photos": []
+    },
+    {
+     "code": "L58",
+     "result": "partial",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L59",
+     "result": "fail",
+     "note": "No water report, no training record.",
+     "photos": []
+    },
+    {
+     "code": "L60",
+     "result": "fail",
+     "note": "Expired stock, records, training and certificate — all outstanding.",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "capiche-ambli",
+   "domain": "food",
+   "template": 2,
+   "visit": 2,
+   "date": "2026-09-03",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malviya",
+   "audit_type": "Surprise",
+   "time_range": "01:00PM to 03:00PM",
+   "reported": {
+    "obtained": 108.0,
+    "available": 148.0,
+    "pct": 73.0
+   },
+   "summary": "Overall standing — 108/148 (73.0%), Needs Improvement. By section: A Service Area 75.0% (Needs Improvement), B Kitchen Area 80.3% (Satisfactory), C Whole Premises and Documentation 63.0% (Needs Improvement).\nClose the ★ critical lines first — 6 ★ critical lines are rated Major (lines 6, 22, 26, 42, 50, 52) and they carry 24 marks between them. Closing those 6 alone takes the score to 132/148 (89.2%), inside the Satisfactory band. 80% needs 119 marks; the unit has 108, so it is 11 short.\nOf the 12 Major lines, 9 are paperwork and 3 are physical — paperwork: lines 1, 21, 23, 39, 42, 44, 50, 52, 53 (Menu information · Receiving · Stock rotation · Display · Water · Cleaning system · FoSTaC · Records · Regulator follow-up). The work is being done but no record exists, and that set can be closed in a week or two. Physical: lines 6, 22, 26 (Drinking water · Unsafe food · Cold chain) — real work on site, of which the expired stock on line 22 (★) is the most urgent.",
+   "source_ref": "Capiche_Ambli_FSSAI_2nd Audit_Report.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "L1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/b0df6b4a7d51dda3.png"
+     ]
+    },
+    {
+     "code": "L2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L5",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/ce3fbce28cf105e7.png"
+     ]
+    },
+    {
+     "code": "L6",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/9809e42228818d20.png"
+     ]
+    },
+    {
+     "code": "L7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L15",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L21",
+     "result": "partial",
+     "note": "Weighing scale calibration is not being done.",
+     "photos": []
+    },
+    {
+     "code": "L22",
+     "result": "fail",
+     "note": "Dates are not being checked on incoming goods.",
+     "photos": []
+    },
+    {
+     "code": "L23",
+     "result": "fail",
+     "note": "Rated Major but 4 marks were written — corrected to 0 to match the rating.",
+     "photos": [
+      "evidence/import/be72f10259b2b970.png",
+      "evidence/import/afaa7d0fddf37ccd.png",
+      "evidence/import/018e309ce48ce057.png",
+      "evidence/import/76f2279650d078ef.png",
+      "evidence/import/60c80ff673b00b52.png",
+      "evidence/import/8d675aaf96cc50dc.png"
+     ]
+    },
+    {
+     "code": "L24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/e142bca54a4bb723.png",
+      "evidence/import/731d540eff82c633.png"
+     ]
+    },
+    {
+     "code": "L25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L27",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/715bd4efd08d8f72.png",
+      "evidence/import/3befb158cc1c9e2c.png"
+     ]
+    },
+    {
+     "code": "L28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L41",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L42",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L43",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L44",
+     "result": "fail",
+     "note": "Food Safety Display Board not put up; no-smoking notice not put up.",
+     "photos": []
+    },
+    {
+     "code": "L45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L47",
+     "result": "fail",
+     "note": "No lab report.",
+     "photos": [
+      "evidence/import/b20b85128f18b9c4.png"
+     ]
+    },
+    {
+     "code": "L49",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L51",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/1cc5e3072e099c2c.png"
+     ]
+    },
+    {
+     "code": "L52",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L56",
+     "result": "partial",
+     "note": "The notices are not put up.",
+     "photos": []
+    },
+    {
+     "code": "L57",
+     "result": "fail",
+     "note": "No certificate.",
+     "photos": []
+    },
+    {
+     "code": "L58",
+     "result": "partial",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L59",
+     "result": "fail",
+     "note": "No water report, no training record.",
+     "photos": []
+    },
+    {
+     "code": "L60",
+     "result": "fail",
+     "note": "Expired stock, records, training and certificate — all outstanding.",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "ahd-bakery",
+   "domain": "food",
+   "template": 2,
+   "visit": 2,
+   "date": "2026-09-04",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malaviya",
+   "audit_type": "Surprise",
+   "time_range": "09:00AM to 10:00AM",
+   "reported": {
+    "obtained": 72.0,
+    "available": 116.0,
+    "pct": 62.1
+   },
+   "summary": "Overall standing — 72/116 (62.1%), Needs Improvement. By section: A Service Area 66.7% (Needs Improvement), B Kitchen Area 72.7% (Needs Improvement), C Whole Premises and Documentation 45.5% (Non-Compliance).\nClose the ★ critical lines first — 7 ★ critical lines are rated Major (lines 13, 17, 22, 30, 32, 37, 39) and they carry 28 marks between them. Closing those 7 alone takes the score to 100/116 (86.2%), inside the Satisfactory band. 80% needs 93 marks; the unit has 72, so it is 21 short.\nOf the 14 Major lines, 11 are paperwork and 3 are physical — paperwork: lines 11, 12, 14, 22, 27, 30, 31, 32, 37, 39, 40 (Equipment · Receiving · Stock rotation · Labelling · Display · Water · Cleaning system · Pest control · FoSTaC · Records · Regulator follow-up). The work is being done but no record exists, and that set can be closed in a week or two. Physical: lines 1, 13, 17 (Waste · Unsafe food · Cold chain) — real work on site, of which the expired stock on line 13 (★) is the most urgent.",
+   "source_ref": "Ahmedabad_Bakery_Kitchen_2nd Audit_Report.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "L11",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/05b11ad87c23c37f.jpeg",
+      "evidence/import/ae9918b2a88ac865.jpeg"
+     ]
+    },
+    {
+     "code": "L12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L15",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L21",
+     "result": "fail",
+     "note": "Weighing scale calibration is not being done.",
+     "photos": []
+    },
+    {
+     "code": "L22",
+     "result": "fail",
+     "note": "Dates are not being checked on incoming goods.",
+     "photos": []
+    },
+    {
+     "code": "L23",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/617ceb42d893da92.jpeg",
+      "evidence/import/d6a61bfa8eef0d5e.jpeg",
+      "evidence/import/e98fb46b8ca82e15.jpeg",
+      "evidence/import/be93540877ebfb48.jpeg"
+     ]
+    },
+    {
+     "code": "L24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/8f7958a5132b57b4.jpeg",
+      "evidence/import/9a6c743ac8c6d22a.jpeg",
+      "evidence/import/658e6d1e493589ca.jpeg"
+     ]
+    },
+    {
+     "code": "L25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L27",
+     "result": "fail",
+     "note": "No temperature log is being kept.",
+     "photos": []
+    },
+    {
+     "code": "L29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L36",
+     "result": "fail",
+     "note": "Labels are not being applied.",
+     "photos": []
+    },
+    {
+     "code": "L38",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L41",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L44",
+     "result": "fail",
+     "note": "Food Safety Display Board not put up; no-smoking notice not put up.",
+     "photos": []
+    },
+    {
+     "code": "L45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L47",
+     "result": "fail",
+     "note": "No lab report.",
+     "photos": [
+      "evidence/import/e05d3fd6b3cce96d.jpeg"
+     ]
+    },
+    {
+     "code": "L51",
+     "result": "fail",
+     "note": "Nothing has been put up at all.",
+     "photos": [
+      "evidence/import/7701fcb24a38ad79.jpeg"
+     ]
+    },
+    {
+     "code": "L52",
+     "result": "fail",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L56",
+     "result": "partial",
+     "note": "The notices are not put up.",
+     "photos": []
+    },
+    {
+     "code": "L57",
+     "result": "fail",
+     "note": "No certificate.",
+     "photos": []
+    },
+    {
+     "code": "L58",
+     "result": "partial",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L59",
+     "result": "fail",
+     "note": "No pest control record, no water report, no training record.",
+     "photos": []
+    },
+    {
+     "code": "L60",
+     "result": "fail",
+     "note": "Expired stock, records, training and certificate — all outstanding.",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "ahd-hot-kitchen",
+   "domain": "food",
+   "template": 2,
+   "visit": 2,
+   "date": "2026-09-04",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malaviya",
+   "audit_type": "Surprise",
+   "time_range": "10:00AM to 11:30AM",
+   "reported": {
+    "obtained": 80.0,
+    "available": 124.0,
+    "pct": 64.5
+   },
+   "summary": "Overall standing — 80/124 (64.5%), Needs Improvement. By section: A Service Area 66.7% (Needs Improvement), B Kitchen Area 78.4% (Needs Improvement), C Whole Premises and Documentation 40.9% (Non-Compliance).\nClose the ★ critical lines first — 6 ★ critical lines are rated Major (lines 13, 25, 33, 35, 40, 42) and they carry 24 marks between them. Closing those 6 alone takes the score to 104/124 (83.9%), inside the Satisfactory band. 80% needs 100 marks; the unit has 80, so it is 20 short.\nOf the 15 Major lines, 11 are paperwork and 4 are physical — paperwork: lines 11, 12, 14, 25, 30, 33, 34, 35, 40, 42, 43 (Equipment · Receiving · Stock rotation · Labelling · FSSAI licence · Water · Cleaning system · Pest control · FoSTaC · Records · Regulator follow-up). The work is being done but no record exists, and that set can be closed in a week or two. Physical: lines 1, 3, 13, 37 (Waste · Layout · Unsafe food · Appearance) — real work on site, of which the expired stock on line 13 (★) is the most urgent.",
+   "source_ref": "Ahmedabad_Hot_Kitchen2nd Audit_Report.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "L11",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/a3f4927a810d104f.jpeg",
+      "evidence/import/d654829561c42219.jpeg"
+     ]
+    },
+    {
+     "code": "L12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L13",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/96ca3315c44638ea.jpeg"
+     ]
+    },
+    {
+     "code": "L14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L15",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L21",
+     "result": "fail",
+     "note": "Weighing scale calibration is not being done.",
+     "photos": []
+    },
+    {
+     "code": "L22",
+     "result": "fail",
+     "note": "Dates are not being checked on incoming goods.",
+     "photos": []
+    },
+    {
+     "code": "L23",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/f2742d458581d2ef.jpeg",
+      "evidence/import/99a1d617bbce6091.jpeg"
+     ]
+    },
+    {
+     "code": "L24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/2c6be70306ba96ff.jpeg",
+      "evidence/import/b3db59dc68515af5.jpeg"
+     ]
+    },
+    {
+     "code": "L25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L27",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L36",
+     "result": "fail",
+     "note": "Labels are not being applied.",
+     "photos": []
+    },
+    {
+     "code": "L38",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L41",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L43",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/79f3ff1975e4bd3f.png"
+     ]
+    },
+    {
+     "code": "L45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L47",
+     "result": "fail",
+     "note": "No lab report.",
+     "photos": []
+    },
+    {
+     "code": "L51",
+     "result": "fail",
+     "note": "Nothing has been put up at all.",
+     "photos": [
+      "evidence/import/cdc55707525b52d2.jpeg"
+     ]
+    },
+    {
+     "code": "L52",
+     "result": "fail",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L54",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/68967308a8f6c4d2.jpeg"
+     ]
+    },
+    {
+     "code": "L55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L56",
+     "result": "partial",
+     "note": "The notices are not put up.",
+     "photos": []
+    },
+    {
+     "code": "L57",
+     "result": "fail",
+     "note": "No certificate.",
+     "photos": []
+    },
+    {
+     "code": "L58",
+     "result": "partial",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L59",
+     "result": "fail",
+     "note": "No pest control record, no water report, no training record.",
+     "photos": []
+    },
+    {
+     "code": "L60",
+     "result": "fail",
+     "note": "Expired stock, records, training and certificate — all outstanding.",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "capiche-university",
+   "domain": "food",
+   "template": 2,
+   "visit": 2,
+   "date": "2026-09-04",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malviya",
+   "audit_type": "Surprise",
+   "time_range": "12:00PM to 02:00PM",
+   "reported": {
+    "obtained": 107.0,
+    "available": 148.0,
+    "pct": 72.3
+   },
+   "summary": "Overall standing — 107/148 (72.3%), Needs Improvement. By section: A Service Area 85.7% (Satisfactory), B Kitchen Area 80.3% (Satisfactory), C Whole Premises and Documentation 55.6% (Needs Improvement).\nClose the ★ critical lines first — 6 ★ critical lines are rated Major (lines 22, 26, 42, 45, 50, 52) and they carry 24 marks between them. Closing those 6 alone takes the score to 131/148 (88.5%), inside the Satisfactory band. 80% needs 119 marks; the unit has 107, so it is 12 short.\nOf the 12 Major lines, 9 are paperwork and 3 are physical — paperwork: lines 1, 21, 23, 39, 42, 45, 50, 52, 53 (Menu information · Receiving · Stock rotation · Display · Water · Pest control · FoSTaC · Records · Regulator follow-up). The work is being done but no record exists, and that set can be closed in a week or two. Physical: lines 22, 26, 40 (Unsafe food · Cold chain · Construction) — real work on site, of which the expired stock on line 22 (★) is the most urgent.",
+   "source_ref": "Capiche_University_FSSAI_2nd Audit_Report.docx",
+   "flag": null,
+   "responses": [
+    {
+     "code": "L1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/61651221cdd6a544.png"
+     ]
+    },
+    {
+     "code": "L2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L4",
+     "result": "partial",
+     "note": "Complaints do come in from time to time — (1) the food is too salty, (2) some guests find the music too loud.",
+     "photos": []
+    },
+    {
+     "code": "L5",
+     "result": "partial",
+     "note": null,
+     "photos": [
+      "evidence/import/b0da051b8e526504.png"
+     ]
+    },
+    {
+     "code": "L6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L15",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L21",
+     "result": "partial",
+     "note": "Weighing scale calibration is not being done.",
+     "photos": []
+    },
+    {
+     "code": "L22",
+     "result": "fail",
+     "note": "Dates are not being checked on incoming goods.",
+     "photos": []
+    },
+    {
+     "code": "L23",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/b1f59ca9077819f3.png",
+      "evidence/import/f8e88435d8ac306d.png",
+      "evidence/import/81f8226eeaa63d97.png"
+     ]
+    },
+    {
+     "code": "L24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/448ca1756d4a2d19.png",
+      "evidence/import/e5038327046d7d9b.png"
+     ]
+    },
+    {
+     "code": "L25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L27",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/a024e68e1c0a4e5c.png"
+     ]
+    },
+    {
+     "code": "L28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L41",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L42",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L43",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L44",
+     "result": "fail",
+     "note": "Food Safety Display Board not put up; no-smoking notice not put up.",
+     "photos": []
+    },
+    {
+     "code": "L45",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/24ee079ea1dc8586.png",
+      "evidence/import/56f5d5ea5eb40920.png"
+     ]
+    },
+    {
+     "code": "L46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L47",
+     "result": "fail",
+     "note": "No report.",
+     "photos": []
+    },
+    {
+     "code": "L49",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L51",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L52",
+     "result": "fail",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L56",
+     "result": "partial",
+     "note": "The notices are not put up.",
+     "photos": []
+    },
+    {
+     "code": "L57",
+     "result": "fail",
+     "note": "No certificate.",
+     "photos": []
+    },
+    {
+     "code": "L58",
+     "result": "partial",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L59",
+     "result": "fail",
+     "note": "No pest control record, no water report, no training record.",
+     "photos": []
+    },
+    {
+     "code": "L60",
+     "result": "fail",
+     "note": "Expired stock, records, pest control record, water report and FoSTaC certificate — all outstanding.",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "beshak-dumas",
+   "domain": "food",
+   "template": 2,
+   "visit": 1,
+   "date": "2026-09-07",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Nikil Malaviya",
+   "audit_type": "Surprise",
+   "time_range": "03:00PM to 05:00PM",
+   "reported": {
+    "obtained": 91.0,
+    "available": 140.0,
+    "pct": 65.0
+   },
+   "summary": "Overall standing — 91/140 (65.0%), Needs Improvement. By section: A Service Area 92.9% (Exemplar), B Kitchen Area 62.1% (Needs Improvement), C Whole Premises and Documentation 52.2% (Needs Improvement).\nClose the ★ critical lines first — 8 ★ critical lines are rated Major (lines 15, 22, 26, 32, 41, 44, 49, 51) and they carry 32 marks between them. Closing those 8 alone takes the score to 123/140 (87.9%), inside the Satisfactory band. 80% needs 112 marks; the unit has 91, so it is 21 short.\nOf the 15 Major lines, 9 are paperwork and 6 are physical — paperwork: lines 1, 21, 23, 37, 38, 41, 44, 49, 51 (Menu information · Receiving · Stock rotation · FSSAI licence · Display · Water · Pest control · FoSTaC · Records). The work is being done but no record exists, and that set can be closed in a week or two. Physical: lines 14, 15, 16, 22, 26, 32 (Flooring · Segregation · Ventilation · Unsafe food · Cold chain · Chemicals) — real work on site, of which the expired stock on line 22 (★) is the most urgent.",
+   "source_ref": "Beshak_Surat_FSSAI_1st Audit_Report.docx",
+   "flag": "Line 37 (FSSAI licence number on menu) is marked Compliant in the table, but the printed total (91/140) and the conclusion count it as Major. Imported as Major to match the report total. Please confirm.",
+   "responses": [
+    {
+     "code": "L1",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/8e6681816dd0f113.png",
+      "evidence/import/350c1ffc02810e22.jpeg"
+     ]
+    },
+    {
+     "code": "L2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L9",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L10",
+     "result": "pass",
+     "note": "Not fitted — to be taken up with Yash bhai. The remark says the pest barrier is not fitted, yet the rating is compliant. Scored exactly as rated — worth a second look.",
+     "photos": []
+    },
+    {
+     "code": "L12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L14",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L15",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L16",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L17",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L21",
+     "result": "partial",
+     "note": "Weighing scale calibration is not being done.",
+     "photos": []
+    },
+    {
+     "code": "L22",
+     "result": "fail",
+     "note": "Dates are not being checked on incoming goods.",
+     "photos": []
+    },
+    {
+     "code": "L23",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/d0a59bb46438d543.jpeg",
+      "evidence/import/139378227f3bee73.jpeg",
+      "evidence/import/77075a97781aa601.jpeg"
+     ]
+    },
+    {
+     "code": "L24",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/508fc8ae213228d5.jpeg"
+     ]
+    },
+    {
+     "code": "L25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L27",
+     "result": "fail",
+     "note": "No temperature log is being kept.",
+     "photos": []
+    },
+    {
+     "code": "L28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L34",
+     "result": "fail",
+     "note": null,
+     "photos": [
+      "evidence/import/fa6ff1d7702a4f7a.jpeg"
+     ]
+    },
+    {
+     "code": "L35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L41",
+     "result": "pass",
+     "note": "The application has been made. The remark says the licence has been applied for — so it has not been granted yet — yet this ★ line is compliant, while line 43 is major for exactly the same reason. Scored exactly as rated — worth a second look.",
+     "photos": []
+    },
+    {
+     "code": "L43",
+     "result": "fail",
+     "note": "The application has been made. [Table showed Compliant; report total counts it as Major.]",
+     "photos": []
+    },
+    {
+     "code": "L44",
+     "result": "fail",
+     "note": "Food Safety Display Board not put up; no-smoking notice not put up.",
+     "photos": []
+    },
+    {
+     "code": "L45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L47",
+     "result": "fail",
+     "note": "No lab report, and the RO reads a TDS of only 21.",
+     "photos": []
+    },
+    {
+     "code": "L48",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L51",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L52",
+     "result": "fail",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "L56",
+     "result": "partial",
+     "note": "The notices are not put up.",
+     "photos": []
+    },
+    {
+     "code": "L57",
+     "result": "fail",
+     "note": "No certificate.",
+     "photos": []
+    },
+    {
+     "code": "L58",
+     "result": "partial",
+     "note": "No record.",
+     "photos": []
+    },
+    {
+     "code": "L59",
+     "result": "fail",
+     "note": "No pest control record, no water report, no training record.",
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "aiko-ambli",
+   "domain": "maintenance",
+   "template": 3,
+   "visit": 1,
+   "date": "2026-09-17",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal maintenance walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 46.0,
+    "available": 65.0,
+    "pct": 70.8
+   },
+   "summary": "The walk-through evaluated all 65 applicable check points. AIKO scored 46 of 65 — 70.8% — which sits in the Needs Improvement band. Weakest areas: PM Records / Safety Training 0%, Energy Efficiency 0%, HVAC 33%, Fire & Life Safety 40%, Refrigeration 50%, Waste / Housekeeping 50%. 1 Close the fire-safety gaps first — alarm panel fault, missing emergency exit, no drill or training on record. These carry the highest life-safety and legal exposure. 2 Replace or repair equipment marked completely non-functional — the missing thermometer (#39) and the dishwasher (#32) block food-safety checks entirely. 3 Start a PM and energy-tracking log; both categories currently score 0%. 4 Tighten housekeeping — cover the waste bins and clean the garbage area (#61), and label all cleaning chemicals (#63). 5 Re-audit three to four weeks after the above are closed.",
+   "source_ref": "AIKO_Ambli_Inspection_Docket_Bookends (1).pdf",
+   "flag": null,
+   "responses": [
+    {
+     "code": "M1",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M3",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M4",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M5",
+     "result": "fail",
+     "note": "No report available",
+     "photos": []
+    },
+    {
+     "code": "M6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M9",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M11",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M14",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M15",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M21",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M22",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M23",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M24",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M25",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M27",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M28",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M31",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M32",
+     "result": "fail",
+     "note": "Not working",
+     "photos": []
+    },
+    {
+     "code": "M33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M35",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M36",
+     "result": "partial",
+     "note": "Door does not close by itself",
+     "photos": []
+    },
+    {
+     "code": "M37",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M38",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M39",
+     "result": "fail",
+     "note": "No thermometer available",
+     "photos": []
+    },
+    {
+     "code": "M40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M41",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M42",
+     "result": "partial",
+     "note": "No record available",
+     "photos": []
+    },
+    {
+     "code": "M43",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M44",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M47",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M48",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M49",
+     "result": "fail",
+     "note": "No alarm",
+     "photos": []
+    },
+    {
+     "code": "M50",
+     "result": "fail",
+     "note": "No emergency exit door",
+     "photos": []
+    },
+    {
+     "code": "M51",
+     "result": "fail",
+     "note": "Fire drill not conducted, training not given",
+     "photos": []
+    },
+    {
+     "code": "M52",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M56",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M57",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M58",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M59",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M60",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M61",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M62",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M63",
+     "result": "partial",
+     "note": "Some items are not labelled",
+     "photos": []
+    },
+    {
+     "code": "M64",
+     "result": "fail",
+     "note": "No training given",
+     "photos": []
+    },
+    {
+     "code": "M65",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "capiche-ambli",
+   "domain": "maintenance",
+   "template": 3,
+   "visit": 1,
+   "date": "2026-09-18",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal maintenance walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 50.5,
+    "available": 65.0,
+    "pct": 77.7
+   },
+   "summary": "The walk-through evaluated all 65 applicable check points. CAPICHE scored 50.5 of 65 — 77.7% — which sits in the Needs Improvement band. Weakest areas: PM Records / Safety Training 0%, Fire & Life Safety 40%, Civil / Building 50%, Statutory Documents 57%. 1 Close the fire-safety gaps first — alarm panel fault, missing emergency exit, no drill or training on record. 2 Start a PM and safety-training tracking log — currently zero record-keeping. 3 Repair floor/tile defects in civil areas. 4 Close the critical electrical and water items — distribution board (#11), wiring (#14) and water tank (#41) are all on the 48-hour list. 5 Re-audit three to four weeks after the above are closed.",
+   "source_ref": "CAPICHE_Ambli_Inspection_Docket_Bookends.pdf",
+   "flag": null,
+   "responses": [
+    {
+     "code": "M1",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M2",
+     "result": "fail",
+     "note": "It exists but location unknown at time of audit",
+     "photos": []
+    },
+    {
+     "code": "M3",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M4",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M5",
+     "result": "fail",
+     "note": "No report available",
+     "photos": []
+    },
+    {
+     "code": "M6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M8",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M9",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M11",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M14",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M15",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M21",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M23",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M24",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M27",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M31",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M32",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M36",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M37",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M38",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M41",
+     "result": "fail",
+     "note": "No accessible space to clean it",
+     "photos": []
+    },
+    {
+     "code": "M42",
+     "result": "partial",
+     "note": "No record available",
+     "photos": []
+    },
+    {
+     "code": "M43",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M44",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M47",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M48",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M49",
+     "result": "fail",
+     "note": "No alarm",
+     "photos": []
+    },
+    {
+     "code": "M50",
+     "result": "fail",
+     "note": "No emergency exit door",
+     "photos": []
+    },
+    {
+     "code": "M51",
+     "result": "fail",
+     "note": "Fire drill not conducted, training not given",
+     "photos": []
+    },
+    {
+     "code": "M52",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M56",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M57",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M58",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M59",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M60",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M61",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M62",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M63",
+     "result": "partial",
+     "note": "Some items are not labelled",
+     "photos": []
+    },
+    {
+     "code": "M64",
+     "result": "fail",
+     "note": "No training given",
+     "photos": []
+    },
+    {
+     "code": "M65",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "capiche-university",
+   "domain": "maintenance",
+   "template": 3,
+   "visit": 1,
+   "date": "2026-09-19",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal maintenance walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 47.0,
+    "available": 65.0,
+    "pct": 72.3
+   },
+   "summary": "The walk-through evaluated all 65 applicable check points. CAPICHE scored 47 of 65 — 72.3% — which sits in the Needs Improvement band. Weakest areas: PM Records / Safety Training 0%, Energy Efficiency 0%, Fire & Life Safety 40%, Refrigeration 50%, Waste / Housekeeping 50%. 1 Close the fire-safety gaps first — alarm panel fault, missing emergency exit, no drill or training on record. 2 Start a PM and energy-tracking log — both categories currently score 0%. 3 Complete condenser cleaning and thermometer calibration records in refrigeration. 4 Strengthen cleaning record-keeping and chemical labelling in housekeeping. 5 Re-audit three to four weeks after the above are closed.",
+   "source_ref": "CAPICHE_University_Inspection_Docket_Bookends.pdf",
+   "flag": null,
+   "responses": [
+    {
+     "code": "M1",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M3",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M4",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M5",
+     "result": "fail",
+     "note": "No report available",
+     "photos": []
+    },
+    {
+     "code": "M6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M9",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M11",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M12",
+     "result": "pass",
+     "note": "On Torrent Power's supply side, so it does not trip",
+     "photos": []
+    },
+    {
+     "code": "M13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M14",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M15",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M21",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M23",
+     "result": "fail",
+     "note": "Sensor not working properly",
+     "photos": []
+    },
+    {
+     "code": "M24",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M25",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M27",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M30",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M31",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M36",
+     "result": "partial",
+     "note": "Door does not close by itself",
+     "photos": []
+    },
+    {
+     "code": "M37",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M38",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M39",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M41",
+     "result": "fail",
+     "note": "Not being cleaned",
+     "photos": []
+    },
+    {
+     "code": "M42",
+     "result": "partial",
+     "note": "No record available",
+     "photos": []
+    },
+    {
+     "code": "M43",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M44",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M47",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M48",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M49",
+     "result": "fail",
+     "note": "No alarm",
+     "photos": []
+    },
+    {
+     "code": "M50",
+     "result": "fail",
+     "note": "No emergency exit door",
+     "photos": []
+    },
+    {
+     "code": "M51",
+     "result": "fail",
+     "note": "Fire drill not conducted, training not given",
+     "photos": []
+    },
+    {
+     "code": "M52",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M55",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M56",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M57",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M58",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M59",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M60",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M61",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M62",
+     "result": "fail",
+     "note": "No record available",
+     "photos": []
+    },
+    {
+     "code": "M63",
+     "result": "partial",
+     "note": "Some items are not labelled",
+     "photos": []
+    },
+    {
+     "code": "M64",
+     "result": "fail",
+     "note": "No training given",
+     "photos": []
+    },
+    {
+     "code": "M65",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "aiko-pal",
+   "domain": "maintenance",
+   "template": 3,
+   "visit": 1,
+   "date": "2026-09-21",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal maintenance walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 47.0,
+    "available": 65.0,
+    "pct": 72.3
+   },
+   "summary": "The walk-through evaluated all 65 applicable check points. AIKO scored 47 of 65 — 72.3% — which sits in the Needs Improvement band. Weakest areas: PM Records / Safety Training 0%, Energy Efficiency 0%, HVAC 33%, Fire & Life Safety 40%, Refrigeration 50%, Waste / Housekeeping 50%. 1 Close the fire-safety gaps first — alarm panel fault, missing emergency exit, no drill or training on record. These carry the highest life-safety and legal exposure. 2 Replace or repair equipment marked completely non-functional — the missing thermometer (#39) and the dishwasher (#32) block food-safety checks entirely. 3 Start a PM and energy-tracking log; both categories currently score 0%. 4 Tighten housekeeping — cover the waste bins and clean the garbage area (#61), and label all cleaning chemicals (#63). 5 Re-audit three to four weeks after the above are closed.",
+   "source_ref": "AIKO_Pal_Inspection_Docket_Bookends.pdf",
+   "flag": null,
+   "responses": [
+    {
+     "code": "M1",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M3",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M4",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M9",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M11",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M14",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M15",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M21",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M22",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M23",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M24",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M25",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M26",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M27",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M28",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M30",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M31",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M32",
+     "result": "fail",
+     "note": "Not working",
+     "photos": []
+    },
+    {
+     "code": "M33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M35",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M36",
+     "result": "partial",
+     "note": "Door does not close by itself",
+     "photos": []
+    },
+    {
+     "code": "M37",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M38",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M39",
+     "result": "fail",
+     "note": "No thermometer available",
+     "photos": []
+    },
+    {
+     "code": "M40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M41",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M42",
+     "result": "partial",
+     "note": "No record available",
+     "photos": []
+    },
+    {
+     "code": "M43",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M44",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M47",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M48",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M49",
+     "result": "fail",
+     "note": "No alarm",
+     "photos": []
+    },
+    {
+     "code": "M50",
+     "result": "fail",
+     "note": "No emergency exit door",
+     "photos": []
+    },
+    {
+     "code": "M51",
+     "result": "fail",
+     "note": "Fire drill not conducted, training not given",
+     "photos": []
+    },
+    {
+     "code": "M52",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M55",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M56",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M57",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M58",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M59",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M60",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M61",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M62",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M63",
+     "result": "partial",
+     "note": "Some items are not labelled",
+     "photos": []
+    },
+    {
+     "code": "M64",
+     "result": "fail",
+     "note": "No training given",
+     "photos": []
+    },
+    {
+     "code": "M65",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "capiche-vesu",
+   "domain": "maintenance",
+   "template": 3,
+   "visit": 1,
+   "date": "2026-09-22",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal maintenance walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 50.5,
+    "available": 65.0,
+    "pct": 77.7
+   },
+   "summary": "The walk-through evaluated all 65 applicable check points. CAPICHE scored 50.5 of 65 — 77.7% — which sits in the Needs Improvement band. Weakest areas: PM Records / Safety Training 0%, Energy Efficiency 0%, HVAC 50%. 1 Complete the refrigeration temperature log (#35) — a critical gap for food-safety traceability. 2 Fix the emergency exit and conduct fire drill/training (#50, #51) — highest life-safety and legal exposure. 3 Start staff safety training records (#64) and a PM/energy-tracking log — both currently at zero. 4 Review civil/building and drainage items flagged in the 60–70% range for medium-priority repairs. 5 Re-audit three to four weeks after the above are closed.",
+   "source_ref": "CAPICHE_Vesu_Inspection_Docket_Bookends.pdf",
+   "flag": null,
+   "responses": [
+    {
+     "code": "M1",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M3",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M4",
+     "result": "partial",
+     "note": "Needs to be verified from accounts",
+     "photos": []
+    },
+    {
+     "code": "M5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M9",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M11",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M12",
+     "result": "pass",
+     "note": "It's the building's own supply, so it trips directly (confirmed fine)",
+     "photos": []
+    },
+    {
+     "code": "M13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M14",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M15",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M21",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M23",
+     "result": "fail",
+     "note": "Sensor not working properly",
+     "photos": []
+    },
+    {
+     "code": "M24",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M25",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M26",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M27",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M30",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M31",
+     "result": "partial",
+     "note": "Push button not working properly",
+     "photos": []
+    },
+    {
+     "code": "M32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M35",
+     "result": "fail",
+     "note": "No log maintained",
+     "photos": []
+    },
+    {
+     "code": "M36",
+     "result": "partial",
+     "note": "Door does not close by itself",
+     "photos": []
+    },
+    {
+     "code": "M37",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M38",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M41",
+     "result": "pass",
+     "note": "It's the building's shared tank",
+     "photos": []
+    },
+    {
+     "code": "M42",
+     "result": "partial",
+     "note": "No record available",
+     "photos": []
+    },
+    {
+     "code": "M43",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M44",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M45",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M47",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M48",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M49",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M50",
+     "result": "fail",
+     "note": "No emergency exit door",
+     "photos": []
+    },
+    {
+     "code": "M51",
+     "result": "fail",
+     "note": "Fire drill not conducted, training not given",
+     "photos": []
+    },
+    {
+     "code": "M52",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M55",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M56",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M57",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M58",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M59",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M60",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M61",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M62",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M63",
+     "result": "partial",
+     "note": "Some items are not labelled",
+     "photos": []
+    },
+    {
+     "code": "M64",
+     "result": "fail",
+     "note": "No training given",
+     "photos": []
+    },
+    {
+     "code": "M65",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "site": "capiche-piplod",
+   "domain": "maintenance",
+   "template": 3,
+   "visit": 1,
+   "date": "2026-09-23",
+   "auditor": "Vishal Patel",
+   "prepared_by": "Vishal Patel",
+   "audit_type": "Internal maintenance walk-through",
+   "time_range": null,
+   "reported": {
+    "obtained": 54.0,
+    "available": 65.0,
+    "pct": 83.1
+   },
+   "summary": "The walk-through evaluated all 65 applicable check points. CAPICHE scored 54 of 65 — 83.1% — which sits in the Satisfactory band. Weakest areas: PM Records / Safety Training 0%. 1 Fix the emergency exit and conduct fire drill/training (#50, #51) — highest life-safety and legal exposure. 2 Investigate the two critical electrical NC items immediately (#11 distribution board, #14 wiring). 3 Start staff safety training records (#64) and a PM-tracking log — currently the only category at 0%. 4 Review Electrical/Power (75%), HVAC (67%) and Drainage/Grease Trap (67%) for the remaining gaps. 5 Re-audit in 2–3 weeks to confirm closure and aim for the Exemplar band (90%+).",
+   "source_ref": "CAPICHE_Piplod_Inspection_Docket_Bookends.pdf",
+   "flag": null,
+   "responses": [
+    {
+     "code": "M1",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M2",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M3",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M4",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M5",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M6",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M7",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M8",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M9",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M10",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M11",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M12",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M13",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M14",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M15",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M16",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M17",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M18",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M19",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M20",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M21",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M22",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M23",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M24",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M25",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M26",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M27",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M28",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M29",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M30",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M31",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M32",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M33",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M34",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M35",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M36",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M37",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M38",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M39",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M40",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M41",
+     "result": "pass",
+     "note": "It's the building's shared tank",
+     "photos": []
+    },
+    {
+     "code": "M42",
+     "result": "partial",
+     "note": "No record available",
+     "photos": []
+    },
+    {
+     "code": "M43",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M44",
+     "result": "fail",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M45",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M46",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M47",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M48",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M49",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M50",
+     "result": "fail",
+     "note": "No emergency exit door",
+     "photos": []
+    },
+    {
+     "code": "M51",
+     "result": "fail",
+     "note": "Fire drill not conducted, training not given",
+     "photos": []
+    },
+    {
+     "code": "M52",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M53",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M54",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M55",
+     "result": "partial",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M56",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M57",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M58",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M59",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M60",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M61",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M62",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    },
+    {
+     "code": "M63",
+     "result": "partial",
+     "note": "Some items are not labelled",
+     "photos": []
+    },
+    {
+     "code": "M64",
+     "result": "fail",
+     "note": "No training given",
+     "photos": []
+    },
+    {
+     "code": "M65",
+     "result": "pass",
+     "note": null,
+     "photos": []
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bookends Compliance</title>
+  <meta name="description" content="Bookends Hospitality food safety and maintenance compliance: where each unit is, where it has to be, and what to fix first.">
+  <meta name="theme-color" content="#00249C">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400..500,0..1,0&display=block">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <a class="skip" href="#view">Skip to content</a>
+  <div class="app" id="app" hidden>
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="#/" aria-label="Bookends Compliance home"><b>BOOKENDS</b><small>COMPLIANCE</small></a>
+      <a class="nav-item" href="#/" data-nav="overview"><span class="nav-ind"><span class="ms" aria-hidden="true">space_dashboard</span></span><span class="nav-label">Overview</span></a>
+      <a class="nav-item" href="#/fixes" data-nav="fixes"><span class="nav-ind"><span class="ms" aria-hidden="true">construction</span><span class="badge" id="fixBadge" hidden></span></span><span class="nav-label">Fix plan</span></a>
+      <a class="nav-item" href="#/units" data-nav="units"><span class="nav-ind"><span class="ms" aria-hidden="true">storefront</span></span><span class="nav-label">Units</span></a>
+      <a class="nav-item" href="#/audits" data-nav="audits"><span class="nav-ind"><span class="ms" aria-hidden="true">fact_check</span></span><span class="nav-label">Audits</span></a>
+      <a class="nav-item" href="#/licences" data-nav="licences"><span class="nav-ind"><span class="ms" aria-hidden="true">verified</span></span><span class="nav-label">Licences</span></a>
+      <a class="nav-item rail-only" href="#/framework" data-nav="framework"><span class="nav-ind"><span class="ms" aria-hidden="true">menu_book</span></span><span class="nav-label">Framework</span></a>
+    </nav>
+    <div class="main-col">
+      <header class="topbar">
+        <button class="icon-btn" id="backBtn" type="button" aria-label="Back" hidden><span class="ms" aria-hidden="true">arrow_back</span></button>
+        <div class="topbar-titles">
+          <span class="topbar-kicker" id="kicker"></span>
+          <h1 class="topbar-title" id="pageTitle">Overview</h1>
+        </div>
+        <div class="topbar-actions">
+          <a class="btn filled wide-only" id="newAuditBtn" href="#/audits/new"><span class="ms" aria-hidden="true">add</span>New audit</a>
+          <a class="icon-btn narrow-only" href="#/framework" aria-label="Framework and rules"><span class="ms" aria-hidden="true">menu_book</span></a>
+          <button class="avatar" id="avatar" type="button" title="Sign out">·</button>
+        </div>
+      </header>
+      <main id="view" tabindex="-1"></main>
+    </div>
+    <a class="fab" id="fab" href="#/audits/new"><span class="ms" aria-hidden="true">add</span><span>New audit</span></a>
+  </div>
+  <div id="signin" hidden></div>
+
+  <dialog id="dialog" aria-labelledby="dialog-title"></dialog>
+  <dialog id="confirmDlg" aria-labelledby="confirmDlg-title"></dialog>
+  <div class="snackbar" id="snackbar" role="status" aria-live="polite"></div>
+  <input type="file" id="filePicker" hidden>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
