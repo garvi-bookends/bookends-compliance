@@ -20,8 +20,10 @@ function loginLimit(pool, limit = 5, seconds = 60) {
 let cached = null;
 export function appEnv(e = process.env) {
   if (cached) return cached;
-  if (!e.DATABASE_URL) throw new Error('DATABASE_URL is not set');
-  const pool = createPool(e.DATABASE_URL);
+  // DATABASE_URL if set; otherwise POSTGRES_URL, which the Supabase integration adds on Vercel (its pooled connection).
+  const url = e.DATABASE_URL || e.POSTGRES_URL;
+  if (!url) throw new Error('DATABASE_URL (or POSTGRES_URL) is not set');
+  const pool = createPool(url);
   cached = {
     ACCESS_CODE: e.ACCESS_CODE,
     TZ_OFFSET_MINUTES: e.TZ_OFFSET_MINUTES || '330', // business-day boundary; 330 = IST (UTC+5:30)

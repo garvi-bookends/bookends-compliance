@@ -128,7 +128,8 @@ async function loginAccount(env, request, body) {
 /** Public: which sign-in form to show. The team code is offered only until the first Compliance Head exists. */
 async function authOptions({ env }) {
   const heads = await activeHeads(env);
-  return json({ teamCode: !heads, setup: !env.ACCESS_CODE });
+  // heads is null when the database cannot be read; that is not "no Compliance Head yet".
+  return json({ teamCode: heads === 0, setup: !env.ACCESS_CODE });
 }
 function logout({ request }) {
   const secure = new URL(request.url).protocol === 'https:' ? '; Secure' : '';

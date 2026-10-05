@@ -33,7 +33,7 @@ async function api(path, { method = 'GET', body, file } = {}) {
   try { res = await fetch(path, init); }
   catch { const e = new ApiError('Could not reach the server. Check the connection and try again.'); e.offline = true; throw e; }
   const data = await res.json().catch(() => null);
-  if (res.status === 401 && data?.signin) { showSignin(data.setup); throw new SignInNeeded('Please sign in'); }
+  if (res.status === 401 && data?.signin) { showSignin(); throw new SignInNeeded('Please sign in'); }
   if (!res.ok) { const e = new ApiError(data?.error || `The server could not complete this (error ${res.status}). Try again.`); e.status = res.status; throw e; }
   if (method !== 'GET') alertsCache = null; // a saved change may add or clear an alert
   return data;
@@ -497,37 +497,29 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').cat
 function localStorageGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function localStorageSet(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } }
 function localStorageDel(k) { try { localStorage.removeItem(k); } catch { /* private mode */ } }
-async function showSignin(setup = false) {
+async function showSignin() {
   $('#app').hidden = true;
   closeDialog(dlg); closeDialog(cdlg);
   const box = $('#signin');
   box.hidden = false;
-  let opts = { teamCode: false, setup };
-  try { opts = { ...opts, ...(await (await fetch('/api/auth/options')).json()) }; } catch { /* offline: show the form anyway */ }
-  // Username + password. The team code appears only for first-time setup, before any Compliance Head exists.
-  const firstSetup = !!opts.teamCode;
+  // Everyone signs in with their own username and password: the Compliance Head, or a Unit Manager.
   const inputWithIcon = (ic, input, extra = '') => html`<div class="input-icon">${icon(ic)}${input}${extra}</div>`;
   box.innerHTML = part(html`<div class="signin">
     <div class="signin-bg" aria-hidden="true"><span class="glow g1"></span><span class="glow g2"></span><span class="glow g3"></span></div>
     <form class="signin-card" id="signinForm" novalidate>
       <span class="brand"><span class="brand-mark" aria-hidden="true">B</span><span class="brand-text"><b>BOOKENDS</b><small>Compliance</small></span></span>
-      <div><h1>${firstSetup ? 'First-time setup' : 'Welcome back'}</h1>
-        <p class="muted small" style="margin-top:4px">${firstSetup ? 'Sign in with the team access code, then create the Compliance Head in Settings → Team members.' : 'Sign in to manage food safety, maintenance and licences.'}</p></div>
-      ${opts.setup ? html`<div class="banner warn">${icon('key')}<span class="b-body">Sign-in is not set up yet. The administrator sets the team access code once, with <b>npx wrangler secret put ACCESS_CODE</b>.</span></div>` : ''}
-      ${firstSetup ? html`
-        <div class="field"><label for="siName">Your name</label>${inputWithIcon('person', html`<input class="input" id="siName" name="name" autocomplete="name" required value="${localStorageGet('bk-name') || ''}">`)}</div>
-        <div class="field"><label for="siCode">Team access code</label>${inputWithIcon('key', html`<input class="input" id="siCode" name="code" type="password" autocomplete="current-password" required>`)}</div>`
-      : html`
-        <div class="field"><label for="siUser">Username</label>${inputWithIcon('person', html`<input class="input" id="siUser" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required value="${localStorageGet('bk-username') || ''}">`)}</div>
-        <div class="field"><label for="siPass">Password</label>${inputWithIcon('lock', html`<input class="input" id="siPass" name="password" type="password" autocomplete="current-password" required>`,
-          html`<button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password" title="Show password">${icon('visibility')}</button>`)}</div>`}
+      <div><h1>Welcome back</h1>
+        <p class="muted small" style="margin-top:4px">Sign in to manage food safety, maintenance and licences.</p></div>
+      <div class="field"><label for="siUser">Username</label>${inputWithIcon('person', html`<input class="input" id="siUser" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required value="${localStorageGet('bk-username') || ''}">`)}</div>
+      <div class="field"><label for="siPass">Password</label>${inputWithIcon('lock', html`<input class="input" id="siPass" name="password" type="password" autocomplete="current-password" required>`,
+        html`<button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password" title="Show password">${icon('visibility')}</button>`)}</div>
       <div class="error-text" id="siErr" role="alert" hidden></div>
       <button class="btn primary lg block" type="submit">${icon('login')}Sign in</button>
-      ${firstSetup ? '' : html`<p class="small muted signin-note">No account yet? Ask the Compliance Head to add you.</p>`}
+      <p class="small muted signin-note">Compliance Head or Unit Manager. No account yet? Ask the Compliance Head to add you.</p>
     </form>
     <p class="signin-foot">Bookends Hospitality · Food safety · Maintenance · Licences</p>
   </div>`);
-  $('#pwToggle', box)?.addEventListener('click', (e) => {
+  $('#pwToggle', box).addEventListener('click', (e) => {
     const input = $('#siPass', box);
     const show = input.type === 'password';
     input.type = show ? 'text' : 'password';
@@ -541,25 +533,22 @@ async function showSignin(setup = false) {
     const fd = new FormData(e.currentTarget);
     const btn = $('button[type=submit]', e.currentTarget);
     const err = $('#siErr');
-    const body = firstSetup ? { name: fd.get('name'), code: fd.get('code') } : { username: (fd.get('username') || '').trim(), password: fd.get('password') || '' };
-    if (!firstSetup && (!body.username || !body.password)) { err.hidden = false; err.textContent = 'Enter your username and password.'; return; }
+    const body = { username: (fd.get('username') || '').trim(), password: fd.get('password') || '' };
+    if (!body.username || !body.password) { err.hidden = false; err.textContent = 'Enter your username and password.'; return; }
     btn.disabled = true;
     try {
       let res;
       try { res = await fetch('/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); }
       catch { throw new Error('Could not reach the server. Check the connection and try again.'); }
       const data = await res.json().catch(() => ({}));
-      if (!data.setup) $('.banner', box)?.remove(); // the code has been set since this page loaded
-      if (res.status === 403 && firstSetup) { showSignin(); return; } // a Compliance Head was created meanwhile
       if (!res.ok) throw new Error(data.error || 'Could not sign in');
-      if (firstSetup) localStorageSet('bk-name', data.name); else localStorageSet('bk-username', body.username);
+      localStorageSet('bk-username', body.username);
       box.hidden = true; box.innerHTML = '';
       boot();
     } catch (x) { err.hidden = false; err.textContent = x.message; }
     finally { btn.disabled = false; }
   });
-  const first = firstSetup ? ($('#siName').value ? $('#siCode') : $('#siName')) : ($('#siUser').value ? $('#siPass') : $('#siUser'));
-  first.focus();
+  ($('#siUser').value ? $('#siPass') : $('#siUser')).focus();
 }
 
 // =================================================================== router & shell
@@ -692,7 +681,7 @@ async function signOut({ ask = true } = {}) {
   $('#outboxBanner')?.remove();
   alertsCache = null;
   $('#alertCount').hidden = true;
-  showSignin(false);
+  showSignin();
 }
 const ROLE_LABEL = { head: 'Compliance Head', manager: 'Unit Manager', team: 'Team access' };
 /** Unit Managers see and work on their own unit only. The server enforces it; the screens just leave out what they cannot use. */
