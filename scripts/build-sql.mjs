@@ -1,4 +1,4 @@
-// Turns data/checklists.json and data/import-*.json into D1 migrations.
+// Turns data/checklists.json and data/import-*.json into the seed migrations (D1 in migrations/, PostgreSQL in migrations-pg/).
 //   node scripts/build-sql.mjs
 // Re-scores every imported audit with public/rules.js and prints it next to the total printed in the report,
 // so any disagreement is visible before anything reaches the database.
@@ -28,7 +28,7 @@ for (const t of checklists) {
     tplSql.push(insert('template_items', row));
   });
 }
-writeFileSync(new URL('migrations/0002_checklists.sql', root), tplSql.join('\n') + '\n');
+for (const dir of ['migrations', 'migrations-pg']) writeFileSync(new URL(`${dir}/0002_checklists.sql`, root), tplSql.join('\n') + '\n');
 
 // ---------------------------------------------------------------- audit import
 const data = read('data/import-2026-09.json');
@@ -91,6 +91,6 @@ data.audits.forEach((a, n) => {
     detail: `${R.DOMAINS[a.domain].label} visit ${a.visit}: ${R.fmtPct(scored.score)}, ${R.bandLabel(scored.band)}`,
   }));
 });
-writeFileSync(new URL('migrations/0003_import_2026_09.sql', root), out.join('\n') + '\n');
+for (const dir of ['migrations', 'migrations-pg']) writeFileSync(new URL(`${dir}/0003_import_2026_09.sql`, root), out.join('\n') + '\n');
 console.table(report);
 console.log(`${checklists.map((t) => `${t.scheme}: ${t.items.length} items`).join(' · ')} · ${data.sites.length} units · ${data.audits.length} audits · ${findingCount} open fixes`);

@@ -101,3 +101,39 @@ test('dates are calendar dates, not affected by time zones', () => {
   assert.equal(R.daysBetween('2026-09-02', '2026-09-26'), 24);
   assert.equal(R.fmtDate('2026-09-02', true), '2 Sep 2026');
 });
+
+test('audit time: recorded start/finish, imported written ranges, and totals', () => {
+  const a = { started_at: '2026-10-02T04:35:00Z', finished_at: '2026-10-02T06:10:00Z' };
+  assert.equal(R.auditMinutes(a), 95);
+  assert.equal(R.auditTimeRange(a), '10:05 am – 11:40 am'); // India time
+  assert.equal(R.fmtDuration(95), '1 h 35 min');
+  assert.equal(R.fmtDuration(45), '45 min');
+  assert.equal(R.fmtDuration(null), '—');
+  // The imported reports' own spellings, including the missing space.
+  assert.equal(R.rangeMinutes('10:30AM to01:30PM'), 180);
+  assert.equal(R.rangeMinutes('2:30PM to 6:00PM'), 210);
+  assert.equal(R.rangeMinutes('nonsense'), null);
+  assert.equal(R.auditMinutes({ time_range: '09:00AM to 10:00AM' }), 60);
+  assert.equal(R.auditMinutes({}), null);
+  assert.equal(R.auditTimeRange({ finished_at: '2026-10-02T06:10:00Z' }), 'Submitted 11:40 am');
+});
+
+test('alerts: P1/P2 by their own deadline window, licences only when passed in', () => {
+  const today = '2026-10-02';
+  const f = (id, priority, due_date, status = 'open') => ({ id, priority, due_date, status, title: `Fix ${id}`, site_name: 'Unit' });
+  const findings = [f(1, 'critical', '2026-10-03'), f(2, 'critical', '2026-10-05'), f(3, 'major', '2026-10-04'), f(4, 'major', '2026-10-05'),
+    f(5, 'minor', '2026-09-01'), f(6, 'major', '2026-09-30'), f(7, 'critical', '2026-09-01', 'fixed')];
+  const licences = [{ id: 9, type: 'FSSAI', expires_on: '2026-10-20', site_name: 'Unit' }, { id: 10, type: 'Fire NOC', expires_on: '2027-03-01', site_name: 'Unit' }];
+  const ids = (xs) => xs.map((a) => `${a.kind}${a.id}`);
+  // P1 alerts a day ahead, P2 two days ahead; overdue always; P3 and fixes awaiting review never.
+  assert.deepEqual(ids(R.alertsFor({ findings, licences: null, today })), ['fix1', 'fix6', 'fix3']);
+  assert.deepEqual(ids(R.alertsFor({ findings, licences, today })), ['fix1', 'fix6', 'fix3', 'licence9']);
+  assert.equal(R.alertsFor({ findings, licences, today }).find((a) => a.id === 6).sub, 'P2 · Unit · overdue by 2 days');
+});
+
+test('alert keys change when an alert becomes overdue or its date moves, so marked-done alerts come back', () => {
+  const a = (due, today) => R.alertsFor({ findings: [{ id: 5, priority: 'critical', status: 'open', due_date: due, title: 't', site_name: 'u' }], licences: null, today })[0].key;
+  assert.equal(a('2026-10-03', '2026-10-02'), 'fix:5:2026-10-03:soon');
+  assert.equal(a('2026-10-03', '2026-10-04'), 'fix:5:2026-10-03:over');
+  assert.equal(a('2026-10-04', '2026-10-03'), 'fix:5:2026-10-04:soon');
+});

@@ -1,7 +1,14 @@
 node_modules/
 .wrangler/
 .dev.vars
+.env
 data/raw/
 backups/
 .DS_Store
 *.log
+.data/
+.vercel/
+
+.vercel
+.env*
+!.env.example

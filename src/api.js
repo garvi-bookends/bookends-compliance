@@ -33,8 +33,8 @@ function log(env, { actor, site_id = null, entity, entity_id = null, action, det
 }
 
 // ================================================================= sign-in
-// One shared access code (a Worker secret) plus the person's name. The session cookie is signed with the code,
-// so changing the code signs everyone out. Cloudflare Access can replace this later without code changes elsewhere.
+// One shared access code (the ACCESS_CODE environment variable) plus the person's name. The session cookie is signed
+// with the code, so changing the code signs everyone out.
 const COOKIE = 'bk_session';
 const SESSION_DAYS = 30;
 const enc = new TextEncoder();
@@ -64,39 +64,98 @@ async function readSession(request, env) {
     return s.exp > Date.now() ? s : null;
   } catch { return null; }
 }
+/** Signed session cookie: { name, exp } for the team code, plus { uid } for a personal account. */
+async function sessionResponse(env, request, claims, body) {
+  const payload = b64url(enc.encode(JSON.stringify({ ...claims, exp: Date.now() + SESSION_DAYS * 864e5 })));
+  const secure = new URL(request.url).protocol === 'https:' ? '; Secure' : '';
+  return json(body, 200, { 'set-cookie': `${COOKIE}=${payload}.${await hmac(env.ACCESS_CODE, payload)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}${secure}` });
+}
+const slowDown = () => new Promise((r) => setTimeout(r, 800)); // slow down guessing
+
+// Passwords are kept only as PBKDF2-SHA256 hashes with a random salt (100,000 rounds: the most Workers allow).
+const PBKDF2_ROUNDS = 100000;
+async function hashPassword(password, salt = crypto.getRandomValues(new Uint8Array(16)), rounds = PBKDF2_ROUNDS) {
+  const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: rounds }, key, 256);
+  return `pbkdf2$${rounds}$${b64url(salt)}$${b64url(bits)}`;
+}
+async function checkPassword(password, stored) {
+  const [scheme, rounds, salt] = String(stored || '').split('$');
+  if (scheme !== 'pbkdf2' || !salt) return false;
+  return sameSecret(await hashPassword(password, fromB64url(salt), +rounds), stored);
+}
+const MIN_PASSWORD = 8;
+const checkNewPassword = (p) => { if (typeof p !== 'string' || p.length < MIN_PASSWORD) bad(`Passwords need at least ${MIN_PASSWORD} characters`); if (p.length > 200) bad('That password is too long'); return p; };
+
 async function login({ env, request }) {
   if (!env.ACCESS_CODE) throw new HttpError(503, 'Sign-in is not set up yet. Set the ACCESS_CODE secret (see README).', { setup: true });
   if (env.LOGIN_LIMIT) {
-    const { success } = await env.LOGIN_LIMIT.limit({ key: request.headers.get('cf-connecting-ip') || 'unknown' });
+    const ip = (request.headers.get('x-forwarded-for') || '').split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown';
+    const { success } = await env.LOGIN_LIMIT.limit({ key: ip });
     if (!success) throw new HttpError(429, 'Too many sign-in attempts. Wait a minute, then try again.');
   }
   const body = await readJson(request);
+  if (body.username !== undefined) return loginAccount(env, request, body);
+  // The team code is only for first-time setup: once a Compliance Head exists, everyone signs in with their own account.
+  if ((await activeHeads(env)) > 0) throw new HttpError(403, 'The team access code is no longer used. Sign in with your username and password.');
   const name = str(body.name, 60);
   if (!name) bad('Enter your name');
   if (!(await sameSecret(String(body.code || ''), env.ACCESS_CODE))) {
-    await new Promise((r) => setTimeout(r, 800)); // slow down guessing
+    await slowDown();
     throw new HttpError(401, 'That access code is not right');
   }
-  const payload = b64url(enc.encode(JSON.stringify({ name, exp: Date.now() + SESSION_DAYS * 864e5 })));
-  const secure = new URL(request.url).protocol === 'https:' ? '; Secure' : '';
-  return json({ name }, 200, { 'set-cookie': `${COOKIE}=${payload}.${await hmac(env.ACCESS_CODE, payload)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}${secure}` });
+  return sessionResponse(env, request, { name }, { name });
+}
+
+/** Personal account sign-in: username + password. Unknown username and wrong password look the same from outside. */
+async function loginAccount(env, request, body) {
+  const username = str(body.username, 40)?.toLowerCase();
+  const password = String(body.password || '');
+  if (!username || !password) bad('Enter your username and password');
+  const user = await env.DB.prepare('SELECT * FROM users WHERE lower(username) = ?').bind(username).first();
+  const ok = user && user.active ? await checkPassword(password, user.password_hash) : (await hashPassword(password), false);
+  if (!ok) {
+    await slowDown();
+    throw new HttpError(401, 'That username or password is not right');
+  }
+  await env.DB.batch([
+    env.DB.prepare("UPDATE users SET last_login_at = utc_now() WHERE id = ?").bind(user.id),
+    log(env, { actor: user.name, entity: 'user', entity_id: user.id, action: 'signed in', detail: 'Signed in with their account' }),
+  ]);
+  return sessionResponse(env, request, { name: user.name, uid: user.id }, { name: user.name, role: user.role, mustChange: !!user.must_change });
+}
+/** Public: which sign-in options to offer. */
+/** Public: which sign-in form to show. The team code is offered only until the first Compliance Head exists. */
+async function authOptions({ env }) {
+  const heads = await activeHeads(env);
+  return json({ teamCode: !heads, setup: !env.ACCESS_CODE });
 }
 function logout({ request }) {
   const secure = new URL(request.url).protocol === 'https:' ? '; Secure' : '';
   return json({ ok: true }, 200, { 'set-cookie': `${COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}` });
 }
 
+// ================================================================= roles
+// Compliance Head (and the shared team code): everything. Unit Manager: their own unit only, enforced here on every request.
+/** The one unit a session is limited to, or null for full access. A manager without a unit sees nothing. */
+const scopeOf = (session) => (session?.user?.role === 'manager' ? (session.user.site_id ?? -1) : null);
+const canSee = (session, siteId) => { const s = scopeOf(session); return s == null || s === Number(siteId); };
+
 // ================================================================= shared state
 /** Everything the status rules need, in one round trip. Volumes are small (units × visits). */
-async function loadState(env) {
-  const [sites, audits, findings, licences] = await env.DB.batch([
+async function loadState(env, scope = null) {
+  const [sitesR, auditsR, findingsR, licencesR] = await env.DB.batch([
     env.DB.prepare('SELECT * FROM sites WHERE active = 1 ORDER BY city, name'),
-    env.DB.prepare(`SELECT a.id, a.site_id, a.domain, a.audit_date, a.score, a.earned, a.possible, a.band, a.auditor, a.source, a.flag, t.scheme
+    env.DB.prepare(`SELECT a.id, a.site_id, a.domain, a.audit_date, a.score, a.earned, a.possible, a.band, a.auditor, a.source, a.flag, a.time_range, a.started_at, a.finished_at, t.scheme
       FROM audits a JOIN templates t ON t.id = a.template_id ORDER BY a.audit_date, a.id`),
     env.DB.prepare(`SELECT f.*, i.code AS item_code, i.area AS item_area, i.critical AS item_critical FROM findings f
       LEFT JOIN template_items i ON i.id = f.item_id WHERE f.status != 'closed' ORDER BY f.due_date`),
     env.DB.prepare('SELECT * FROM licences ORDER BY expires_on IS NULL, expires_on'),
   ]);
+  // A unit manager's state holds their unit only, so everything built from it is limited to that unit.
+  const mine = (rows) => (scope == null ? rows : rows.filter((r) => (r.site_id ?? r.id) === scope));
+  const sites = { results: mine(sitesR.results) }, audits = { results: mine(auditsR.results) };
+  const findings = { results: mine(findingsR.results) }, licences = { results: mine(licencesR.results) };
   const byUnit = new Map(); // site -> domain -> audits oldest first, with visit numbers
   for (const a of audits.results) {
     if (!byUnit.has(a.site_id)) byUnit.set(a.site_id, { food: [], maintenance: [] });
@@ -176,18 +235,16 @@ function sharedProblems(state, units) {
 }
 
 // ================================================================= overview
-async function overview({ env }) {
+async function overview({ env, session }) {
   const today = todayFor(env);
-  const state = await loadState(env);
+  const scope = scopeOf(session);
+  const state = await loadState(env, scope);
   const units = state.sites.map((s) => unitSummary(state, s, today));
   const avg = (xs) => (xs.length ? R.round1(xs.reduce((a, b) => a + b, 0) / xs.length) : null);
   const twoVisits = units.filter((u) => u.food.visits.length > 1);
   const counts = Object.fromEntries(Object.keys(R.LEVELS).map((k) => [k, 0]));
   for (const u of units) counts[u.status.domains.food.level] += 1;
   const open = state.findings.filter((f) => R.UNRESOLVED.includes(f.status));
-  const activity = await env.DB.prepare(`SELECT a.*, s.name AS site_name, s.city AS site_city, f.title AS finding_title FROM activity a
-      LEFT JOIN sites s ON s.id = a.site_id LEFT JOIN findings f ON a.entity = 'finding' AND f.id = a.entity_id
-      ORDER BY a.at DESC, a.id DESC LIMIT 8`).all();
   return json({
     today,
     units,
@@ -218,7 +275,6 @@ async function overview({ env }) {
       },
     },
     shared: sharedProblems(state, units).filter((g) => g.units.length >= 3).slice(0, 12),
-    activity: activity.results,
   });
 }
 
@@ -230,9 +286,9 @@ function siteInput(body) {
   return [name, str(body.brand, 60), str(body.area, 80), str(body.city, 80), SITE_KINDS.includes(body.kind) ? body.kind : 'restaurant',
     str(body.manager, 120), str(body.manager_phone, 30)];
 }
-async function listSites({ env }) {
+async function listSites({ env, session }) {
   const today = todayFor(env);
-  const state = await loadState(env);
+  const state = await loadState(env, scopeOf(session));
   return json({ today, units: state.sites.map((s) => ({ ...s, ...unitSummary(state, s, today) })) });
 }
 async function createSite({ env, request, actor }) {
@@ -263,11 +319,11 @@ async function sectionScores(env, auditIds) {
   return out;
 }
 
-async function getSite({ env, params: [id] }) {
+async function getSite({ env, session, params: [id] }) {
   const today = todayFor(env);
   const site = await env.DB.prepare('SELECT * FROM sites WHERE id = ?').bind(id).first();
-  if (!site) notFound('Unit');
-  const state = await loadState(env);
+  if (!site || !canSee(session, site.id)) notFound('Unit');
+  const state = await loadState(env, scopeOf(session));
   const a = unitAudits(state, site.id);
   const closed = await env.DB.prepare(`SELECT f.*, i.code AS item_code, i.area AS item_area FROM findings f LEFT JOIN template_items i ON i.id = f.item_id
     WHERE f.site_id = ? AND f.status = 'closed' ORDER BY f.closed_at DESC LIMIT 30`).bind(id).all();
@@ -300,8 +356,8 @@ async function listTemplates({ env }) {
 /** Lines a unit is audited on: restaurant-only lines are skipped at kitchens and kitchen (CPK) lines at restaurants. */
 const appliesTo = (item, kind) => item.applies === 'Both' || (kind === 'kitchen' ? item.applies === 'CPK' : item.applies === 'Restaurant');
 
-async function listAudits({ env, url }) {
-  const state = await loadState(env);
+async function listAudits({ env, url, session }) {
+  const state = await loadState(env, scopeOf(session));
   const site = url.searchParams.get('site'), domain = url.searchParams.get('domain');
   const names = new Map(state.sites.map((s) => [s.id, s]));
   const counts = await env.DB.prepare('SELECT audit_id, COUNT(*) AS n FROM findings WHERE audit_id IS NOT NULL GROUP BY audit_id').all();
@@ -322,10 +378,10 @@ async function listAudits({ env, url }) {
   return json({ audits: rows });
 }
 
-async function getAudit({ env, params: [id] }) {
+async function getAudit({ env, session, params: [id] }) {
   const audit = await env.DB.prepare(`SELECT a.*, s.name AS site_name, s.city AS site_city, s.kind AS site_kind, t.scheme, t.name AS template_name
     FROM audits a JOIN sites s ON s.id = a.site_id JOIN templates t ON t.id = a.template_id WHERE a.id = ?`).bind(id).first();
-  if (!audit) notFound('Audit');
+  if (!audit || !canSee(session, audit.site_id)) notFound('Audit');
   const [items, responses, findings, siblings] = await env.DB.batch([
     env.DB.prepare('SELECT * FROM template_items WHERE template_id = ? ORDER BY sort').bind(audit.template_id),
     env.DB.prepare('SELECT * FROM audit_responses WHERE audit_id = ?').bind(id),
@@ -355,6 +411,17 @@ async function createAudit({ env, request, actor }) {
   if (!R.AUDIT_DOMAINS.includes(domain)) bad('Audit type must be food or maintenance');
   if (!isDate(body.audit_date)) bad('Audit date is required');
   if (body.audit_date > today) bad('Audit date cannot be in the future');
+  // An audit sent again from a phone's outbox (the first send got through but the reply was lost): answer with the saved one.
+  const clientId = typeof body.client_id === 'string' && /^[A-Za-z0-9-]{8,64}$/.test(body.client_id) ? body.client_id : null;
+  let hasClientId = true; // false until migration 0009 has run: audits are then saved as before, without the check
+  const already = async () => {
+    if (!clientId || !hasClientId) return null;
+    const a = await env.DB.prepare('SELECT id, score, band FROM audits WHERE client_id = ?').bind(clientId).first()
+      .catch((e) => { if (/client_id/.test(e.message)) { hasClientId = false; return null; } throw e; });
+    return a && json({ id: a.id, score: a.score, band: a.band, created: 0, repeats: 0, autoClosed: 0, duplicate: true });
+  };
+  const dup = await already();
+  if (dup) return dup;
   const site = await env.DB.prepare('SELECT * FROM sites WHERE id = ? AND active = 1').bind(Number(body.site_id) || 0).first();
   if (!site) notFound('Unit');
 
@@ -374,11 +441,33 @@ async function createAudit({ env, request, actor }) {
   if (noRemark.length) bad(`Every ${labels.partial} or ${labels.fail} needs a remark (first: ${noRemark[0].code})`);
 
   const scored = R.scoreAudit(lines, answers);
-  const audit = await env.DB.prepare(
-    `INSERT INTO audits (site_id, template_id, domain, audit_date, auditor, prepared_by, audit_type, score, earned, possible, band, summary, created_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
-  ).bind(site.id, template.id, domain, body.audit_date, str(body.auditor, 120) || actor, actor, str(body.audit_type, 60) || 'Surprise',
-    scored.score, scored.earned, scored.possible, scored.band, str(body.summary, 4000), actor).first();
+  // Finished = when it is submitted. Started = when the auditor began the checklist on their device; kept only if it is
+  // a real time in the past 7 days, so a stale or tampered draft cannot record a nonsense duration.
+  const now = Date.now();
+  const stamp = (ms) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  const started = typeof body.started_at === 'string' ? Date.parse(body.started_at) : NaN;
+  const startedAt = started <= now && started > now - 7 * 86400000 ? stamp(started) : null;
+  // An audit submitted with no network is sent later from the phone's outbox, with the time Submit was pressed.
+  // Same checks as the start time (and not before it), otherwise the time it arrives here.
+  const finished = typeof body.finished_at === 'string' ? Date.parse(body.finished_at) : NaN;
+  const finishedAt = stamp(finished <= now && finished > now - 7 * 86400000 && !(startedAt && finished < started) ? finished : now);
+  const values = [site.id, template.id, domain, body.audit_date, str(body.auditor, 120) || actor, actor, str(body.audit_type, 60) || 'Surprise',
+    scored.score, scored.earned, scored.possible, scored.band, str(body.summary, 4000), actor, startedAt, finishedAt];
+  const cols = 'site_id, template_id, domain, audit_date, auditor, prepared_by, audit_type, score, earned, possible, band, summary, created_by, started_at, finished_at';
+  const insertPlain = () => env.DB.prepare(`INSERT INTO audits (${cols}) VALUES (${'?, '.repeat(14)}?) RETURNING id`).bind(...values).first();
+  let audit;
+  try {
+    audit = hasClientId
+      ? await env.DB.prepare(`INSERT INTO audits (${cols}, client_id) VALUES (${'?, '.repeat(15)}?) RETURNING id`).bind(...values, clientId).first()
+      : await insertPlain();
+  } catch (e) {
+    if (/no column named client_id|no such column: client_id/.test(e.message)) audit = await insertPlain(); // migration 0009 not run yet
+    else {
+      const twin = await already(); // the same audit arrived twice at once: the other request saved it
+      if (twin) return twin;
+      throw e;
+    }
+  }
 
   // Repeat detection and auto-verification only when this is the unit's newest audit in the domain.
   const [prevAudit, unresolved] = await env.DB.batch([
@@ -407,7 +496,7 @@ async function createAudit({ env, request, actor }) {
       // The previous record is settled by this visit: verified if the line now passes, carried forward if not.
       if (result === 'pass') autoClosed += 1;
       const why = result === 'pass' ? `Verified: rated ${labels.pass}` : result === 'na' ? 'Closed: line rated N/A' : `Carried forward: still ${labels[result]}`;
-      stmts.push(env.DB.prepare("UPDATE findings SET status = 'closed', closed_at = datetime('now'), closed_by = ?, close_note = ?, updated_at = datetime('now') WHERE id = ?")
+      stmts.push(env.DB.prepare("UPDATE findings SET status = 'closed', closed_at = utc_now(), closed_by = ?, close_note = ?, updated_at = utc_now() WHERE id = ?")
         .bind(actor, `${why} in audit #${audit.id} on ${R.fmtDate(body.audit_date, true)}`, existing.id));
     }
     if (!priority) continue;
@@ -421,7 +510,7 @@ async function createAudit({ env, request, actor }) {
       photos[item.id].length ? JSON.stringify(photos[item.id]) : null, isRepeat));
   }
   stmts.push(log(env, { actor, site_id: site.id, entity: 'audit', entity_id: audit.id, action: 'submitted',
-    detail: `${R.DOMAINS[domain].label} audit: ${R.fmtPct(scored.score)}, ${R.bandLabel(scored.band)}; ${R.plural(created, 'fix', 'fixes')} raised` }));
+    detail: `${R.DOMAINS[domain].label} audit: ${R.fmtPct(scored.score)}, ${R.bandLabel(scored.band)}; ${R.plural(created, 'fix', 'fixes')} raised${startedAt ? `; took ${R.fmtDuration(R.auditMinutes({ started_at: startedAt, finished_at: finishedAt }))}` : ''}` }));
   await env.DB.batch(stmts);
   return json({ id: audit.id, score: scored.score, band: scored.band, created, repeats, autoClosed }, 201);
 }
@@ -431,14 +520,16 @@ const FINDING_SELECT = `SELECT f.*, s.name AS site_name, s.city AS site_city, s.
   i.guidance, i.critical AS item_critical, i.criticality, a.audit_date FROM findings f JOIN sites s ON s.id = f.site_id
   LEFT JOIN template_items i ON i.id = f.item_id LEFT JOIN audits a ON a.id = f.audit_id`;
 
-async function listFindings({ env }) {
-  const rows = await env.DB.prepare(`${FINDING_SELECT} WHERE s.active = 1 ORDER BY CASE f.status WHEN 'closed' THEN 1 ELSE 0 END, f.due_date LIMIT 3000`).all();
+async function listFindings({ env, session }) {
+  const scope = scopeOf(session);
+  const rows = await env.DB.prepare(`${FINDING_SELECT} WHERE s.active = 1${scope == null ? '' : ' AND f.site_id = ?'} ORDER BY CASE f.status WHEN 'closed' THEN 1 ELSE 0 END, f.due_date LIMIT 3000`)
+    .bind(...(scope == null ? [] : [scope])).all();
   return json({ today: todayFor(env), findings: rows.results.map((f) => ({ ...f, photos: parseList(f.photos) })) });
 }
 
-async function getFinding({ env, params: [id] }) {
+async function getFinding({ env, session, params: [id] }) {
   const f = await env.DB.prepare(`${FINDING_SELECT} WHERE f.id = ?`).bind(id).first();
-  if (!f) notFound('Fix');
+  if (!f || !canSee(session, f.site_id)) notFound('Fix');
   const [history, audit] = await env.DB.batch([
     env.DB.prepare("SELECT * FROM activity WHERE entity = 'finding' AND entity_id = ? ORDER BY id DESC").bind(id),
     env.DB.prepare('SELECT a.possible, t.scheme FROM audits a JOIN templates t ON t.id = a.template_id WHERE a.id = ?').bind(f.audit_id ?? -1),
@@ -447,9 +538,9 @@ async function getFinding({ env, params: [id] }) {
   return json({ today: todayFor(env), finding: { ...f, photos: parseList(f.photos), possible: meta.possible, scheme: meta.scheme }, history: history.results });
 }
 
-async function updateFinding({ env, request, actor, params: [id] }) {
+async function updateFinding({ env, request, actor, session, params: [id] }) {
   const f = await env.DB.prepare('SELECT * FROM findings WHERE id = ?').bind(id).first();
-  if (!f) notFound('Fix');
+  if (!f || !canSee(session, f.site_id)) notFound('Fix');
   const body = await readJson(request);
   const next = {
     owner: body.owner !== undefined ? str(body.owner, 120) : f.owner,
@@ -461,6 +552,14 @@ async function updateFinding({ env, request, actor, params: [id] }) {
     close_note: body.close_note !== undefined ? str(body.close_note) : f.close_note,
   };
   if (!R.FINDING_STATUS[next.status]) bad('Unknown status');
+  if (scopeOf(session) != null) {
+    // Unit managers do the work and mark it fixed. Verifying, closing, sending back, reopening and moving deadlines is the Compliance Head's.
+    if (f.status === 'closed') throw new HttpError(403, 'This fix is closed. Ask the Compliance Head if it needs reopening.');
+    if (next.status === 'closed') throw new HttpError(403, 'Only the Compliance Head can verify and close a fix');
+    if (f.status === 'fixed' && next.status !== 'fixed') throw new HttpError(403, 'Only the Compliance Head can send a fix back');
+    if (next.due_date !== f.due_date) throw new HttpError(403, 'Only the Compliance Head can move a due date');
+    next.close_note = f.close_note;
+  }
   if (!isDate(next.due_date)) bad('Due date must be a date');
   if (next.status === 'fixed' && !next.action_taken) bad('Describe what was done before marking it fixed');
   if (next.status === 'closed' && f.status !== 'closed' && !next.action_taken && !next.close_note) bad('Add what was done, or a closing note, before closing');
@@ -483,9 +582,9 @@ async function updateFinding({ env, request, actor, params: [id] }) {
   await env.DB.batch([
     env.DB.prepare(
       `UPDATE findings SET owner = ?, root_cause = ?, action_taken = ?, evidence_key = ?, due_date = ?, status = ?, close_note = ?,
-         fixed_at = CASE WHEN ? THEN datetime('now') ELSE ? END,
-         closed_at = CASE WHEN ? THEN datetime('now') ELSE ? END,
-         closed_by = ?, updated_at = datetime('now') WHERE id = ?`,
+         fixed_at = CASE WHEN ? THEN utc_now() ELSE ? END,
+         closed_at = CASE WHEN ? THEN utc_now() ELSE ? END,
+         closed_by = ?, updated_at = utc_now() WHERE id = ?`,
     ).bind(next.owner, next.root_cause, next.action_taken, next.evidence_key, next.due_date, next.status, next.close_note,
       becameFixed || (becameClosed && !f.fixed_at) ? 1 : 0, fixedAt, becameClosed ? 1 : 0, closedAt, closedBy, id),
     log(env, { actor, site_id: f.site_id, entity: 'finding', entity_id: f.id, action: 'updated',
@@ -504,19 +603,57 @@ function licenceInput(body) {
   return [+body.site_id, type, str(body.number, 80), str(body.authority, 120), body.issued_on || null, body.expires_on || null, severity,
     typeof body.file_key === 'string' && body.file_key.startsWith('evidence/') ? body.file_key : null, str(body.notes)];
 }
-async function listLicences({ env }) {
-  const rows = await env.DB.prepare('SELECT l.*, s.name AS site_name, s.city AS site_city FROM licences l JOIN sites s ON s.id = l.site_id WHERE s.active = 1 ORDER BY l.expires_on IS NULL, l.expires_on').all();
+/** Alerts for the signed-in person: P1/P2 fixes they can see; licences only for the Compliance Head. */
+async function listAlerts({ env, session }) {
+  const scope = scopeOf(session);
+  const [fx, li] = await env.DB.batch([
+    env.DB.prepare(`SELECT f.id, f.priority, f.status, f.due_date, f.title, s.name AS site_name FROM findings f JOIN sites s ON s.id = f.site_id
+      WHERE s.active = 1 AND f.status IN ('open', 'in_progress') AND f.priority IN ('critical', 'major')${scope == null ? '' : ' AND f.site_id = ?'}`).bind(...(scope == null ? [] : [scope])),
+    env.DB.prepare('SELECT l.id, l.type, l.expires_on, s.name AS site_name FROM licences l JOIN sites s ON s.id = l.site_id WHERE s.active = 1 AND l.expires_on IS NOT NULL'),
+  ]);
+  const today = todayFor(env);
+  const all = R.alertsFor({ findings: fx.results, licences: scope == null ? li.results : null, today });
+  const done = await env.DB.prepare('SELECT alert_key FROM alert_dismissals WHERE user_key = ?').bind(alertUser(session)).all();
+  const hidden = new Set(done.results.map((r) => r.alert_key));
+  const alerts = all.filter((a) => !hidden.has(a.key));
+  return json({ today, alerts, done: all.length - alerts.length });
+}
+/** Whose "done" list this is: the account, or the name for a team-code session. */
+const alertUser = (session) => (session.user ? `u:${session.user.id}` : `n:${session.name || ''}`);
+/** Marks alerts done for this person only: { keys: [...] }; { undo: [...] } or { undoAll: true } brings them back.
+ *  It only ever changes this person's own list, so a key for something they cannot see just hides nothing. */
+async function markAlertsDone({ env, request, session }) {
+  const body = await readJson(request);
+  const clean = (xs) => (Array.isArray(xs) ? xs : []).filter((k) => typeof k === 'string' && /^(fix|licence):\d+:\d{4}-\d{2}-\d{2}:(soon|over)$/.test(k)).slice(0, 500);
+  const who = alertUser(session);
+  const stmts = [
+    ...clean(body.keys).map((k) => env.DB.prepare('INSERT INTO alert_dismissals (user_key, alert_key) VALUES (?, ?) ON CONFLICT DO NOTHING').bind(who, k)),
+    ...clean(body.undo).map((k) => env.DB.prepare('DELETE FROM alert_dismissals WHERE user_key = ? AND alert_key = ?').bind(who, k)),
+    ...(body.undoAll === true ? [env.DB.prepare('DELETE FROM alert_dismissals WHERE user_key = ?').bind(who)] : []),
+  ];
+  if (stmts.length) await env.DB.batch(stmts);
+  return json({ ok: true });
+}
+
+async function listLicences({ env, session }) {
+  const scope = scopeOf(session);
+  const rows = await env.DB.prepare(`SELECT l.*, s.name AS site_name, s.city AS site_city FROM licences l JOIN sites s ON s.id = l.site_id WHERE s.active = 1${scope == null ? '' : ' AND l.site_id = ?'} ORDER BY l.expires_on IS NULL, l.expires_on`)
+    .bind(...(scope == null ? [] : [scope])).all();
   return json({ today: todayFor(env), licences: rows.results });
 }
-async function createLicence({ env, request, actor }) {
+async function createLicence({ env, request, actor, session }) {
   const v = licenceInput(await readJson(request));
+  if (!canSee(session, v[0])) throw new HttpError(403, 'You can only add licences for your own unit');
   const row = await env.DB.prepare('INSERT INTO licences (site_id, type, number, authority, issued_on, expires_on, severity, file_key, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id').bind(...v).first();
   await log(env, { actor, site_id: v[0], entity: 'licence', entity_id: row.id, action: 'added', detail: `Licence added: ${v[1]}${v[5] ? `, expires ${R.fmtDate(v[5], true)}` : ''}` }).run();
   return json({ id: row.id }, 201);
 }
-async function updateLicence({ env, request, actor, params: [id] }) {
+async function updateLicence({ env, request, actor, session, params: [id] }) {
   const v = licenceInput(await readJson(request));
-  const res = await env.DB.prepare("UPDATE licences SET site_id = ?, type = ?, number = ?, authority = ?, issued_on = ?, expires_on = ?, severity = ?, file_key = ?, notes = ?, updated_at = datetime('now') WHERE id = ?").bind(...v, id).run();
+  const was = await env.DB.prepare('SELECT site_id FROM licences WHERE id = ?').bind(id).first();
+  if (!was || !canSee(session, was.site_id)) notFound('Licence');
+  if (!canSee(session, v[0])) throw new HttpError(403, 'You can only keep licences for your own unit');
+  const res = await env.DB.prepare("UPDATE licences SET site_id = ?, type = ?, number = ?, authority = ?, issued_on = ?, expires_on = ?, severity = ?, file_key = ?, notes = ?, updated_at = utc_now() WHERE id = ?").bind(...v, id).run();
   if (!res.meta.changes) notFound('Licence');
   await log(env, { actor, site_id: v[0], entity: 'licence', entity_id: +id, action: 'updated', detail: `Licence updated: ${v[1]}${v[5] ? `, expires ${R.fmtDate(v[5], true)}` : ''}` }).run();
   return json({ ok: true });
@@ -529,9 +666,10 @@ async function deleteLicence({ env, actor, params: [id] }) {
   return json({ ok: true });
 }
 
-// ================================================================= files (audit photos, proof of fixes, licence scans) in Workers KV
+// ================================================================= files (audit photos, proof of fixes, licence scans) in Vercel Blob
 const UPLOAD_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' };
-const MAX_UPLOAD = 8 * 1024 * 1024;
+// Vercel Functions take request bodies up to 4.5 MB. Photos are shrunk on the phone first (app.js downscale), so only big PDFs hit this.
+const MAX_UPLOAD = 4 * 1024 * 1024;
 const FILE_KEY = /^evidence\/(\d{4}-\d{2}\/[0-9a-f-]{36}|import\/[0-9a-f]{16})\.(jpg|jpeg|png|webp|pdf)$/;
 const TYPE_OF = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', pdf: 'application/pdf' };
 
@@ -541,25 +679,137 @@ async function upload({ env, request, actor }) {
   if (!ext) bad('Upload a JPEG, PNG, WebP or PDF');
   const body = await request.arrayBuffer();
   if (!body.byteLength) bad('Empty file');
-  if (body.byteLength > MAX_UPLOAD) bad('File is larger than 8 MB');
+  if (body.byteLength > MAX_UPLOAD) bad('File is larger than 4 MB');
   const key = `evidence/${todayFor(env).slice(0, 7)}/${crypto.randomUUID()}.${ext}`;
-  await env.FILES.put(key, body, { metadata: { type, by: actor } });
+  await env.FILES.put(key, body, type);
   return json({ key, url: `/api/files/${key}` }, 201);
 }
+/** Files are private: they are only served here, to people who are signed in. */
 async function getFile({ env, params: [key] }) {
   if (!FILE_KEY.test(key)) notFound('File');
-  const { value, metadata } = await env.FILES.getWithMetadata(key, { type: 'arrayBuffer', cacheTtl: 3600 });
-  if (!value) notFound('File');
-  return new Response(value, { headers: { 'content-type': metadata?.type || TYPE_OF[key.split('.').pop()], 'cache-control': 'private, max-age=31536000, immutable' } });
+  const file = await env.FILES.get(key);
+  if (!file) notFound('File');
+  return new Response(file.body, { headers: { 'content-type': file.type || TYPE_OF[key.split('.').pop()], 'cache-control': 'private, max-age=31536000, immutable' } });
 }
 
-async function me({ env, actor }) {
-  return json({ name: actor, today: todayFor(env) });
+// ================================================================= team members (personal accounts)
+/** Number of active Compliance Heads, or null when the users table does not exist yet (migrations 0004/0005 not applied). */
+async function activeHeads(env) {
+  try { return (await env.DB.prepare("SELECT COUNT(*) AS n FROM users WHERE role = 'head' AND active = 1").first()).n; } catch { return null; }
 }
+/**
+ * The Compliance Head adds and manages people. Until the first one exists, anyone signed in with the team code may create
+ * that first Compliance Head, so a new installation can be set up from the app.
+ */
+async function userAdmin(env, session) {
+  if (session.user?.role === 'head') return { firstHead: false };
+  if (!session.user && (await activeHeads(env)) === 0) return { firstHead: true };
+  throw new HttpError(403, 'Only the Compliance Head can add or change team members');
+}
+const USER_ROLES = ['head', 'manager'];
+const ROLE_NAMES = { head: 'Compliance Head', manager: 'Unit Manager' };
+const USER_FIELDS = 'u.id, u.username, u.name, u.role, u.site_id, s.name AS site_name, s.city AS site_city, s.kind AS site_kind, u.must_change, u.active, u.created_at, u.created_by, u.last_login_at';
+// Usernames: 3–40 letters, numbers, dots, underscores or hyphens; not case-sensitive.
+const USERNAME = /^[a-z0-9._-]{3,40}$/;
+/** A Unit Manager must look after an existing, active unit; a Compliance Head has none. */
+async function unitFor(env, role, siteId) {
+  if (role !== 'manager') return null;
+  const site = Number(siteId) ? await env.DB.prepare('SELECT id, name FROM sites WHERE id = ? AND active = 1').bind(Number(siteId)).first() : null;
+  if (!site) bad('Choose the unit this manager looks after');
+  return site;
+}
+
+async function me({ env, actor, session }) {
+  const heads = await activeHeads(env);
+  const u = session.user;
+  const site = u?.site_id ? await env.DB.prepare('SELECT id, name, city, kind FROM sites WHERE id = ?').bind(u.site_id).first() : null;
+  return json({
+    name: actor, today: todayFor(env),
+    role: u ? u.role : 'team', username: u?.username || null, mustChange: !!u?.must_change,
+    unit: u?.role === 'manager' ? site : null,
+    accountsReady: heads !== null,
+    canManageUsers: heads !== null && (u?.role === 'head' || (!u && heads === 0)),
+    firstAdminSetup: heads === 0,
+  });
+}
+async function listUsers({ env, session }) {
+  await userAdmin(env, session);
+  const rows = await env.DB.prepare(`SELECT ${USER_FIELDS} FROM users u LEFT JOIN sites s ON s.id = u.site_id ORDER BY u.active DESC, u.role, s.name, u.name`).all();
+  return json({ users: rows.results });
+}
+async function createUser({ env, request, actor, session }) {
+  const { firstHead } = await userAdmin(env, session);
+  const body = await readJson(request);
+  const name = str(body.name, 80);
+  const username = str(body.username, 40)?.toLowerCase();
+  const role = firstHead ? 'head' : USER_ROLES.includes(body.role) ? body.role : 'manager';
+  if (!name) bad('Enter the person’s name');
+  if (!username || !USERNAME.test(username)) bad('Usernames need 3–40 letters or numbers (dots, _ and - are fine, no spaces)');
+  const site = await unitFor(env, role, body.site_id);
+  const hash = await hashPassword(checkNewPassword(body.password));
+  if (await env.DB.prepare('SELECT 1 AS x FROM users WHERE lower(username) = ?').bind(username).first()) throw new HttpError(409, 'That username is taken. Choose another.');
+  const row = await env.DB.prepare('INSERT INTO users (username, name, role, site_id, password_hash, must_change, created_by) VALUES (?, ?, ?, ?, ?, 0, ?) RETURNING id')
+    .bind(username, name, role, site?.id ?? null, hash, actor).first();
+  await log(env, { actor, site_id: site?.id ?? null, entity: 'user', entity_id: row.id, action: 'created', detail: `Account added: ${name} (${username}), ${ROLE_NAMES[role]}${site ? ` for ${site.name}` : ''}` }).run();
+  return json({ id: row.id }, 201);
+}
+async function updateUser({ env, request, actor, session, params: [id] }) {
+  if (session.user?.role !== 'head') throw new HttpError(403, 'Only the Compliance Head can change team members');
+  const u = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+  if (!u) notFound('Person');
+  const body = await readJson(request);
+  const name = body.name !== undefined ? str(body.name, 80) : u.name;
+  const role = body.role !== undefined ? body.role : u.role;
+  const active = body.active !== undefined ? (body.active ? 1 : 0) : u.active;
+  if (!name) bad('Enter the person’s name');
+  if (!USER_ROLES.includes(role)) bad('Role must be Compliance Head or Unit Manager');
+  if (u.id === session.user.id && (!active || role !== 'head')) bad('You cannot remove your own Compliance Head access or disable yourself. Ask another Compliance Head.');
+  if (u.role === 'head' && u.active && (role !== 'head' || !active) && (await activeHeads(env)) <= 1) bad('This is the only Compliance Head. Make someone else Compliance Head first.');
+  const site = await unitFor(env, role, body.site_id !== undefined ? body.site_id : u.site_id);
+  const siteId = site?.id ?? null;
+  const changes = [];
+  if (name !== u.name) changes.push(`name → ${name}`);
+  if (role !== u.role) changes.push(`role → ${ROLE_NAMES[role]}`);
+  if (siteId !== u.site_id) changes.push(site ? `unit → ${site.name}` : 'no unit');
+  if (active !== u.active) changes.push(active ? 'enabled' : 'disabled');
+  await env.DB.batch([
+    env.DB.prepare('UPDATE users SET name = ?, role = ?, site_id = ?, active = ? WHERE id = ?').bind(name, role, siteId, active, u.id),
+    log(env, { actor, site_id: siteId, entity: 'user', entity_id: u.id, action: 'updated', detail: `${u.name} (${u.username}): ${changes.join('; ') || 'no change'}` }),
+  ]);
+  return json({ ok: true });
+}
+async function resetUserPassword({ env, request, actor, session, params: [id] }) {
+  if (session.user?.role !== 'head') throw new HttpError(403, 'Only the Compliance Head can reset passwords');
+  const u = await env.DB.prepare('SELECT id, name, username FROM users WHERE id = ?').bind(id).first();
+  if (!u) notFound('Person');
+  const hash = await hashPassword(checkNewPassword((await readJson(request)).password));
+  await env.DB.batch([
+    env.DB.prepare('UPDATE users SET password_hash = ?, must_change = 0 WHERE id = ?').bind(hash, u.id),
+    log(env, { actor, entity: 'user', entity_id: u.id, action: 'password reset', detail: `New password set for ${u.name} (${u.username})` }),
+  ]);
+  return json({ ok: true });
+}
+async function changeOwnPassword({ env, request, actor, session }) {
+  if (!session.user) bad('You signed in with the team code, which has no password to change');
+  const body = await readJson(request);
+  const u = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(session.user.id).first();
+  if (!(await checkPassword(String(body.current || ''), u.password_hash))) { await slowDown(); throw new HttpError(400, 'Your current password is not right'); }
+  const next = checkNewPassword(body.password);
+  if (next === body.current) bad('Choose a password different from the current one');
+  await env.DB.batch([
+    env.DB.prepare('UPDATE users SET password_hash = ?, must_change = 0 WHERE id = ?').bind(await hashPassword(next), u.id),
+    log(env, { actor, entity: 'user', entity_id: u.id, action: 'password changed', detail: 'Changed their own password' }),
+  ]);
+  return json({ ok: true });
+}
+/** The audit log: who did what, when, newest first. Compliance Head only. */
 async function listActivity({ env, url }) {
   const site = url.searchParams.get('site');
-  const rows = await env.DB.prepare(`SELECT a.*, s.name AS site_name FROM activity a LEFT JOIN sites s ON s.id = a.site_id ${site ? 'WHERE a.site_id = ?' : ''} ORDER BY a.at DESC, a.id DESC LIMIT 100`)
-    .bind(...(site ? [+site] : [])).all();
+  const limit = Math.min(1000, Math.max(1, Number(url.searchParams.get('limit')) || 200));
+  const rows = await env.DB.prepare(`SELECT a.*, s.name AS site_name, s.city AS site_city, s.kind AS site_kind, f.title AS finding_title FROM activity a
+    LEFT JOIN sites s ON s.id = a.site_id LEFT JOIN findings f ON a.entity = 'finding' AND f.id = a.entity_id
+    ${site ? 'WHERE a.site_id = ?' : ''} ORDER BY a.at DESC, a.id DESC LIMIT ?`)
+    .bind(...(site ? [+site] : []), limit).all();
   return json({ activity: rows.results });
 }
 
@@ -567,59 +817,78 @@ async function listActivity({ env, url }) {
 const PUBLIC = [
   ['POST', /^\/api\/auth\/login$/, login],
   ['POST', /^\/api\/auth\/logout$/, logout],
+  ['GET', /^\/api\/auth\/options$/, authOptions],
 ];
 const routes = [
-  ['GET', /^\/api\/me$/, me],
-  ['GET', /^\/api\/overview$/, overview],
-  ['GET', /^\/api\/sites$/, listSites],
-  ['POST', /^\/api\/sites$/, createSite],
-  ['GET', /^\/api\/sites\/(\d+)$/, getSite],
-  ['PUT', /^\/api\/sites\/(\d+)$/, updateSite],
-  ['GET', /^\/api\/templates$/, listTemplates],
-  ['GET', /^\/api\/audits$/, listAudits],
-  ['POST', /^\/api\/audits$/, createAudit],
-  ['GET', /^\/api\/audits\/(\d+)$/, getAudit],
-  ['GET', /^\/api\/findings$/, listFindings],
-  ['GET', /^\/api\/findings\/(\d+)$/, getFinding],
-  ['PATCH', /^\/api\/findings\/(\d+)$/, updateFinding],
-  ['GET', /^\/api\/licences$/, listLicences],
-  ['POST', /^\/api\/licences$/, createLicence],
-  ['PUT', /^\/api\/licences\/(\d+)$/, updateLicence],
-  ['DELETE', /^\/api\/licences\/(\d+)$/, deleteLicence],
-  ['POST', /^\/api\/uploads$/, upload],
-  ['GET', /^\/api\/files\/(.+)$/, getFile],
-  ['GET', /^\/api\/activity$/, listActivity],
+  ['GET', /^\/api\/me$/, me, 'all'],
+  ['POST', /^\/api\/me\/password$/, changeOwnPassword, 'all'],
+  ['GET', /^\/api\/users$/, listUsers, 'head'],
+  ['POST', /^\/api\/users$/, createUser, 'head'],
+  ['PUT', /^\/api\/users\/(\d+)$/, updateUser, 'head'],
+  ['POST', /^\/api\/users\/(\d+)\/password$/, resetUserPassword, 'head'],
+  ['GET', /^\/api\/overview$/, overview, 'all'],
+  ['GET', /^\/api\/sites$/, listSites, 'all'],
+  ['POST', /^\/api\/sites$/, createSite, 'head'],
+  ['GET', /^\/api\/sites\/(\d+)$/, getSite, 'all'],
+  ['PUT', /^\/api\/sites\/(\d+)$/, updateSite, 'head'],
+  ['GET', /^\/api\/templates$/, listTemplates, 'all'],
+  ['GET', /^\/api\/audits$/, listAudits, 'all'],
+  ['POST', /^\/api\/audits$/, createAudit, 'head'],
+  ['GET', /^\/api\/audits\/(\d+)$/, getAudit, 'all'],
+  ['GET', /^\/api\/findings$/, listFindings, 'all'],
+  ['GET', /^\/api\/findings\/(\d+)$/, getFinding, 'all'],
+  ['PATCH', /^\/api\/findings\/(\d+)$/, updateFinding, 'all'],
+  ['GET', /^\/api\/licences$/, listLicences, 'all'],
+  ['GET', /^\/api\/alerts$/, listAlerts, 'all'],
+  ['POST', /^\/api\/alerts\/done$/, markAlertsDone, 'all'],
+  ['POST', /^\/api\/licences$/, createLicence, 'all'],
+  ['PUT', /^\/api\/licences\/(\d+)$/, updateLicence, 'all'],
+  ['DELETE', /^\/api\/licences\/(\d+)$/, deleteLicence, 'head'],
+  ['POST', /^\/api\/uploads$/, upload, 'all'],
+  ['GET', /^\/api\/files\/(.+)$/, getFile, 'all'],
+  ['GET', /^\/api\/activity$/, listActivity, 'head'],
 ];
 
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-    if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
-    // Browsers always send Origin on cross-site writes; refuse them.
-    const origin = request.headers.get('origin');
-    if (request.method !== 'GET' && origin && origin !== url.origin) return json({ error: 'Cross-origin request refused' }, 403);
-    const run = async (handler, params, actor) => {
-      try {
-        return await handler({ env, request, url, actor, params });
-      } catch (err) {
-        if (err instanceof HttpError) return json({ error: err.message, ...err.extra }, err.status);
-        console.error(err);
-        return json({ error: 'Something went wrong on the server' }, 500);
-      }
-    };
-    for (const [method, pattern, handler] of PUBLIC) {
-      const m = url.pathname.match(pattern);
-      if (m && method === request.method) return run(handler, m.slice(1), null);
+/**
+ * Answers one /api/* request. env holds the settings (ACCESS_CODE, TZ_OFFSET_MINUTES) and the services:
+ * DB (src/db.js), FILES (src/files.js) and LOGIN_LIMIT (src/platform.js).
+ */
+export async function handleApi(request, env) {
+  const url = new URL(request.url);
+  // Browsers always send Origin on cross-site writes; refuse them.
+  const origin = request.headers.get('origin');
+  if (request.method !== 'GET' && origin && origin !== url.origin) return json({ error: 'Cross-origin request refused' }, 403);
+  const run = async (handler, params, actor, session = null) => {
+    try {
+      return await handler({ env, request, url, actor, params, session });
+    } catch (err) {
+      if (err instanceof HttpError) return json({ error: err.message, ...err.extra }, err.status);
+      console.error(err);
+      return json({ error: 'Something went wrong on the server' }, 500);
     }
-    // Only trust the Cloudflare Access e-mail header once Access really sits in front (TRUST_ACCESS = "1");
-    // without Access anyone could send that header. Otherwise the signed session cookie identifies people.
-    const accessEmail = env.TRUST_ACCESS === '1' ? request.headers.get('cf-access-authenticated-user-email') : null;
-    const session = accessEmail ? { name: accessEmail } : await readSession(request, env);
-    if (!session) return json({ error: 'Please sign in', signin: true, setup: !env.ACCESS_CODE }, 401);
-    for (const [method, pattern, handler] of routes) {
-      const m = url.pathname.match(pattern);
-      if (m && method === request.method) return run(handler, m.slice(1), session.name);
+  };
+  for (const [method, pattern, handler] of PUBLIC) {
+    const m = url.pathname.match(pattern);
+    if (m && method === request.method) return run(handler, m.slice(1), null);
+  }
+  // The signed session cookie identifies people.
+  const session = await readSession(request, env);
+  if (!session) return json({ error: 'Please sign in', signin: true, setup: !env.ACCESS_CODE }, 401);
+  if (!session.uid && (await activeHeads(env)) > 0) return json({ error: 'Please sign in with your username and password', signin: true }, 401);
+  // A personal-account session is only good while the account is active; its current name is used on everything recorded.
+  if (session.uid) {
+    const user = await env.DB.prepare('SELECT id, username, name, role, site_id, must_change, active FROM users WHERE id = ?').bind(session.uid).first().catch(() => null);
+    if (!user || !user.active) return json({ error: 'Please sign in', signin: true }, 401);
+    session.user = user;
+    session.name = user.name;
+  }
+  for (const [method, pattern, handler, access] of routes) {
+    const m = url.pathname.match(pattern);
+    if (!m || method !== request.method) continue;
+    if (access === 'head' && scopeOf(session) != null) {
+      return json({ error: 'Only the Compliance Head can do this' }, 403);
     }
-    return json({ error: 'Not found' }, 404);
-  },
-};
+    return run(handler, m.slice(1), session.name, session);
+  }
+  return json({ error: 'Not found' }, 404);
+}

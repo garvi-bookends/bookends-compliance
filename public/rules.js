@@ -79,6 +79,37 @@ export const PRIORITY = {
   },
 };
 export const PRIORITY_ORDER = ['critical', 'major', 'minor'];
+
+// ---------- alerts ----------
+// Priority 1 and 2 fixes alert everyone who can see them; licences alert the Compliance Head only.
+// A fix alerts once it is overdue, or when its deadline is this close (P1 has 48 hours, so it alerts a day before; P2 has 7 days, so two days before).
+export const ALERT_DAYS = { critical: 1, major: 2 };
+/**
+ * Everything that needs attention now, most urgent first. Each alert has a key naming it, its date and its stage (soon / over),
+ * so one marked done comes back if it becomes overdue or its date is changed.
+ * @param findings  open fixes [{ id, priority, status, due_date, title, site_name }]
+ * @param licences  [{ id, type, expires_on, site_name }], or null when this person does not get licence alerts
+ */
+export function alertsFor({ findings, licences, today }) {
+  const out = [];
+  for (const f of findings) {
+    if (!UNRESOLVED.includes(f.status) || !(f.priority in ALERT_DAYS) || !f.due_date) continue;
+    const left = daysBetween(today, f.due_date);
+    if (left > ALERT_DAYS[f.priority]) continue;
+    const when = left < 0 ? `overdue by ${plural(-left, 'day')}` : left === 0 ? 'due today' : left === 1 ? 'due tomorrow' : `due in ${plural(left, 'day')}`;
+    out.push({ kind: 'fix', key: `fix:${f.id}:${f.due_date}:${left < 0 ? 'over' : 'soon'}`, group: f.priority, id: f.id, overdue: left < 0, left, tone: left < 0 || f.priority === 'critical' ? 'bad' : 'warn',
+      title: f.title, sub: `${PRIORITY[f.priority].short} · ${f.site_name} · ${when}` });
+  }
+  for (const l of licences || []) {
+    if (!l.expires_on) continue;
+    const left = daysBetween(today, l.expires_on);
+    if (left > LICENCE_WARN_DAYS) continue;
+    out.push({ kind: 'licence', key: `licence:${l.id}:${l.expires_on}:${left < 0 ? 'over' : 'soon'}`, group: 'licence', id: l.id, overdue: left < 0, left, tone: left < 0 ? 'bad' : 'warn',
+      title: `${l.type}${left < 0 ? ' expired' : ' expiring soon'}`, sub: `${l.site_name} · ${left < 0 ? `expired ${plural(-left, 'day')} ago` : left === 0 ? 'expires today' : `expires in ${plural(left, 'day')}`}` });
+  }
+  const rank = { critical: 0, major: 1, licence: 2 };
+  return out.sort((a, b) => rank[a.group] - rank[b.group] || a.left - b.left || a.id - b.id);
+}
 export const KINDS = {
   paperwork: { label: 'Paperwork', icon: 'description', hint: 'The work may be happening but there is no record. Quick to close.' },
   physical: { label: 'On-site fix', icon: 'build', hint: 'Needs real work at the site.' },
@@ -161,6 +192,50 @@ export function fmtDelta(d) {
   if (d == null) return '—';
   const v = round1(d);
   return `${v > 0 ? '+' : v < 0 ? '−' : '±'}${Math.abs(v).toFixed(1)} pts`;
+}
+
+// ---------- audit time ----------
+// App audits record started_at / finished_at (UTC); imported ones carry a written range such as '10:30AM to 01:30PM'.
+export const TZ_OFFSET_MINUTES = 330; // India
+/** '10:30 am' for a UTC timestamp, in India time. */
+export function fmtClock(ts, offset = TZ_OFFSET_MINUTES) {
+  const d = new Date(Date.parse(ts) + offset * 60000);
+  if (Number.isNaN(d.getTime())) return '';
+  const h = d.getUTCHours(), m = d.getUTCMinutes();
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'am' : 'pm'}`;
+}
+const clockMinutes = (t) => {
+  const m = /^\s*(\d{1,2})(?:[:.](\d{2}))?\s*([ap])\.?m?\.?\s*$/i.exec(t);
+  if (!m || +m[1] > 12 || +(m[2] || 0) > 59) return null;
+  return ((+m[1] % 12) + (m[3].toLowerCase() === 'p' ? 12 : 0)) * 60 + +(m[2] || 0);
+};
+/** Minutes in a written range like '10:30AM to 01:30PM' (or '10:30 am - 1:30 pm'); null if it cannot be read. */
+export function rangeMinutes(range) {
+  const parts = String(range || '').split(/\s*(?:to|–|—|-)\s*/i);
+  if (parts.length !== 2) return null;
+  const [a, b] = parts.map(clockMinutes);
+  if (a == null || b == null) return null;
+  return b >= a ? b - a : b + 1440 - a;
+}
+/** How long an audit took, in minutes, or null when no time was recorded. */
+export function auditMinutes(a) {
+  if (a.started_at && a.finished_at) {
+    const m = Math.round((Date.parse(a.finished_at) - Date.parse(a.started_at)) / 60000);
+    return Number.isFinite(m) && m >= 0 ? m : null;
+  }
+  return rangeMinutes(a.time_range);
+}
+/** '10:30 am – 1:30 pm', or the written range for imported audits, or '' when unknown. */
+export function auditTimeRange(a) {
+  if (a.started_at && a.finished_at) return `${fmtClock(a.started_at)} – ${fmtClock(a.finished_at)}`;
+  if (a.time_range) return String(a.time_range).replace(/\s*to\s*/i, ' – ');
+  return a.finished_at ? `Submitted ${fmtClock(a.finished_at)}` : '';
+}
+/** '45 min', '2 h 15 min', or '—'. */
+export function fmtDuration(m) {
+  if (m == null) return '—';
+  const h = Math.floor(m / 60), r = m % 60;
+  return h ? `${h} h${r ? ` ${r} min` : ''}` : `${r} min`;
 }
 
 // ---------- scoring ----------

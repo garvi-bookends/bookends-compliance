@@ -1,0 +1,13 @@
+# Not needed on Vercel: only public/, api/, src/ and package files are used.
+data/
+source-reports/
+backups/
+migrations/
+migrations-pg/
+scripts/
+test/
+docs/
+.wrangler/
+.data/
+.dev.vars
+.env

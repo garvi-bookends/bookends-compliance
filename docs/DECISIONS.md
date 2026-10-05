@@ -48,3 +48,6 @@ The units are in Gujarat. "Today" and every deadline use UTC+5:30 (`TZ_OFFSET_MI
 The audit in progress is kept in `localStorage`, so closing the tab or losing the signal mid-audit loses nothing. Submitting still needs a connection. Full offline sync was out of scope.
 
 **16. Figma diagrams were dropped** at the owner's request. The lifecycle and rules are drawn in the app (Framework page) and in these docs.
+
+**17. Hosting moved to Vercel + Supabase + Vercel Blob (Oct 2026).**
+The owner wanted the data in PostgreSQL and the app on Vercel. The API code was kept as it was: `src/db.js` offers the same `prepare/bind/batch` calls D1 had, so only a few SQLite-only bits of SQL changed, and the schema keeps text timestamps and 0/1 flags so the front end did not change. Photos are a **private** Blob store served through `/api/files/…`, so they stay behind sign-in as they were on KV. Uploads are capped at 4 MB because of Vercel's request size limit. *Changes if:* the app moves again; `src/api.js` only needs an `env` with `DB`, `FILES` and `LOGIN_LIMIT`.

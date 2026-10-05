@@ -4,27 +4,29 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --port 8787",
+    "dev": "node --env-file-if-exists=.env scripts/dev-server.mjs",
+    "dev:wifi": "node --env-file-if-exists=.env scripts/dev-server.mjs --wifi",
     "test": "node --test test/*.test.mjs",
-    "check": "node --check src/worker.js && node --check public/app.js && node --check public/rules.js && npm test",
-    "deploy": "npm run check && wrangler deploy",
-    "db:migrate:local": "wrangler d1 migrations apply bookends-compliance --local",
-    "db:migrate:remote": "wrangler d1 migrations apply bookends-compliance --remote",
-    "photos:local": "node scripts/upload-photos.mjs --local",
-    "photos:remote": "node scripts/upload-photos.mjs --remote",
-    "setup:local": "npm run db:migrate:local && npm run photos:local",
+    "check": "node --check src/api.js && node --check src/db.js && node --check src/files.js && node --check src/platform.js && node --check api/index.js && node --check public/app.js && node --check public/rules.js && npm test",
+    "deploy": "npm run check && npx vercel --prod",
+    "db:migrate": "node --env-file-if-exists=.env scripts/pg-migrate.mjs",
+    "db:copy": "node --env-file-if-exists=.env scripts/copy-data.mjs",
+    "photos:copy": "node --env-file-if-exists=.env scripts/copy-photos.mjs",
+    "setup:local": "npm run db:migrate && npm run photos:copy -- --import",
     "import:parse": "python3 scripts/parse-reports.py",
     "import:prepare": "python3 scripts/prepare-import.py",
-    "import:sql": "node scripts/build-sql.mjs",
-    "backup": "mkdir -p backups && wrangler d1 export bookends-compliance --remote --output backups/bookends-compliance-$(date +%Y-%m-%d).sql",
-    "logs": "wrangler tail bookends-compliance"
+    "import:sql": "node scripts/build-sql.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.141.0"
   },
-  "description": "Bookends Hospitality compliance dashboard: food safety (FSSAI) and maintenance audits, fix plans and licences. Cloudflare Workers + D1 + KV.",
+  "description": "Bookends Hospitality compliance dashboard: food safety (FSSAI) and maintenance audits, fix plans and licences. Vercel + Supabase PostgreSQL + Vercel Blob.",
   "license": "UNLICENSED",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.0",
+    "pg": "^8.23.1"
   }
 }

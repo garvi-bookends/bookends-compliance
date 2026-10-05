@@ -7,7 +7,8 @@ Written 30 Sep 2026 for whoever takes this project over. If a question isn't ans
 Bookends Hospitality appointed **Vishal Patel** as Compliance Head. He audits every unit for food safety (an internal FSSAI Schedule 4 checklist) and maintenance (an inspection docket).
 This web app holds those audits and shows, for each unit, **where it is** (visit 1 → visit 2), **where it has to be** (80% Satisfactory), and **what to fix first** (a prioritised fix plan and the shortest route to 80%).
 He can also run new audits in it on his phone. The first 25 audits (Aug–Sep 2026) were imported from his Word and PDF reports.
-It runs on Cloudflare (Worker + D1 database + KV file store) on the free plan.
+It runs on Vercel (website + API), Supabase PostgreSQL (data) and Vercel Blob (photos): see [docs/DEPLOY-VERCEL.md](docs/DEPLOY-VERCEL.md).
+Until Oct 2026 it ran on Cloudflare (Worker + D1 + KV); the Cloudflare details below describe that old setup, kept until the old site is switched off.
 
 ## 2. What you are receiving
 
