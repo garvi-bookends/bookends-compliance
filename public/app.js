@@ -1930,17 +1930,12 @@ async function pageFixes({ token, query }) {
     ${selectFilter({ name: 'priority', value: state.priority, label: 'Priority', options: [['', 'Any priority'], ...R.PRIORITY_ORDER.map((p) => [p, R.PRIORITY[p].label])] })}
     ${selectFilter({ name: 'status', value: state.status, label: 'Status', options: STATUS_FILTERS.map(([k, l]) => [k, l]) })}
     <span id="extraChip">${extraChip()}</span>`;
-  const summaryHtml = () => {
-    const rs = rows();
-    return html`<b>${R.plural(rs.length, 'fix', 'fixes')}</b> · ${R.PRIORITY_ORDER.map((p) => `${rs.filter((f) => f.priority === p).length} ${R.PRIORITY[p].short}`).join(' · ')} · ${rs.filter((f) => f.kind === 'paperwork').length} paperwork · ${R.fmtNum(R.round1(rs.reduce((s, f) => s + (f.domain === 'food' ? f.marks : 0), 0)))} food safety marks to win back`;
-  };
   const sync = ({ filters = true } = {}) => {
     const q = new URLSearchParams(Object.entries(state).filter(([k, v]) => v && !(k === 'status' && v === 'open') && !(k === 'view' && v === 'priority')));
     history.replaceState(null, '', `#/${q.toString() ? `?${q}` : ''}`);
     $('#fixStrip').innerHTML = part(stripHtml());
     if (filters) $$('select[data-change]', $('#fixFilters')).forEach((s) => { s.value = state[s.dataset.change]; });
     $('#viewSeg').innerHTML = part(segmented({ name: 'view', value: state.view, label: 'View', options: [['priority', 'By priority'], ['problem', 'By problem']] }));
-    $('#fixSummary').innerHTML = part(summaryHtml());
     $('#fixList').innerHTML = part(listHtml());
     $('#extraChip').innerHTML = part(extraChip());
   };
@@ -1953,7 +1948,7 @@ async function pageFixes({ token, query }) {
       <div class="stack">
         <section class="strip swipe" id="fixStrip" aria-label="Summary">${stripHtml()}</section>
         <div class="filterbar" id="fixFilters">${filtersHtml()}</div>
-        <div class="row"><span id="viewSeg">${segmented({ name: 'view', value: state.view, label: 'View', options: [['priority', 'By priority'], ['problem', 'By problem']] })}</span><span class="spacer"></span><span class="small muted" id="fixSummary">${summaryHtml()}</span></div>
+        <div class="row"><span id="viewSeg">${segmented({ name: 'view', value: state.view, label: 'View', options: [['priority', 'By priority'], ['problem', 'By problem']] })}</span></div>
         <section class="card flush" id="fixList">${listHtml()}</section>
         <p class="small muted">Priority 1: 48 hours · Priority 2: 7 days · Priority 3: 30 days. Paperwork first.</p>
       </div>`,
