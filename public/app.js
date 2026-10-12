@@ -3033,7 +3033,7 @@ async function pageSettings({ token }) {
     title: 'Settings',
     body: html`
       ${pageHeader({ title: 'Settings', sub: 'Account, team and preferences.' })}
-      <div class="stack" style="max-width:860px">
+      <div class="stack">
         <section class="card stack">
           <div class="section-head" style="margin:0"><h2>Account</h2></div>
           <div class="row" style="gap:12px"><span class="avatar">${(me.name || '?').trim()[0] || '?'}</span>

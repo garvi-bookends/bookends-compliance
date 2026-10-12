@@ -187,7 +187,7 @@ p { margin: 0; }
   font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1; color: var(--text-2);
   background: var(--surface-2); border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 6px;
 }
-#view { display: block; max-width: 1240px; margin: 0 auto; padding: 4px 16px 48px; outline: none; }
+#view { display: block; margin: 0; padding: 4px 16px 48px; outline: none; }
 #view.loading { opacity: .6; pointer-events: none; transition: opacity .15s .1s; }
 body.has-bottom-bar #view { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
 
@@ -197,8 +197,8 @@ body.has-bottom-bar #view { padding-bottom: calc(110px + env(safe-area-inset-bot
   .sidebar { position: sticky; top: 0; height: 100dvh; width: auto; transform: none; transition: none; }
   .nav-scrim, .menu-btn, .topbar-title { display: none !important; }
   .sidebar .sb-collapse { display: inline-grid; }
-  /* line the top bar up with the page content, which is centred at up to 1240px wide */
-  .topbar { height: 64px; padding: 0 max(32px, calc((100% - 1240px) / 2 + 32px)); }
+  /* the page content fills the width beside the sidebar; the top bar lines up with it */
+  .topbar { height: 64px; padding: 0 32px; }
   .search-trigger { display: flex; }
   .search-icon-btn { display: none !important; }
   .topbar-spacer { display: none; } /* the search box spans the same width as the page content */
