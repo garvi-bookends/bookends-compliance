@@ -214,7 +214,7 @@ function routeList(route, { domain, unitId, compact = false }) {
       ${compact && route.steps.length > steps.length ? html`<li class="goal"><span class="what"><a href="#/units/${unitId}#route-${domain}">${R.plural(route.steps.length - steps.length, 'more fix', 'more fixes')} to ${R.TARGET}%</a></span><span class="after"><b>${pct(last.after)}</b></span></li>`
         : route.reached ? html`<li class="goal"><span class="what"><b>${R.bandLabel(R.bandFor(last.after))}</b><span class="small muted">Target reached</span></span><span class="after"><b>${pct(last.after)}</b></span></li>` : ''}
     </ol>
-    ${route.pending ? html`<p class="small muted">Once the fixes already marked fixed are verified at the next visit: ${pct(route.pending)}.</p>` : ''}
+    ${route.pending ? html`<p class="small muted">After fixed items are checked: ${pct(route.pending)}.</p>` : ''}
   </div>`;
 }
 function routeSummary(route, domain) {
@@ -393,7 +393,7 @@ function pickAuditPhoto() {
         const key = `local:${newId()}`;
         await idb.put(key, blob);
         localThumbs.set(key, URL.createObjectURL(blob));
-        toast('No network: photo saved on this phone. It uploads by itself when the network is back.', { ms: 6000 });
+        toast('No network. Photo saved; it uploads when the network is back.', { ms: 6000 });
         resolve(key);
       } catch { toast('Could not keep the photo on this phone. Try again.', { error: true }); resolve(null); }
     };
@@ -459,7 +459,7 @@ function drawOutbox() {
   el.innerHTML = part(html`
     ${waiting.length ? html`<div class="banner ${navigator.onLine ? 'info' : 'warn'}">${icon(syncing ? 'sync' : navigator.onLine ? 'cloud_upload' : 'cloud_off', syncing ? 'spin' : '')}
       <span class="b-body"><b>${R.plural(waiting.length, 'audit')} saved on this phone, ${syncing ? 'sending now…' : 'waiting to be sent'}.</b>
-        <span class="small">${navigator.onLine ? 'It goes by itself in a moment.' : 'No network. It is sent by itself when the network is back; keep this app on this phone until then.'} ${waiting.map(outboxName).join('; ')}</span></span>
+        <span class="small">${navigator.onLine ? 'It goes by itself in a moment.' : 'No network. It will be sent when the network is back.'} ${waiting.map(outboxName).join('; ')}</span></span>
       ${syncing ? '' : html`<button class="btn sm" type="button" data-ob="send">${icon('send')}Send now</button>`}</div>` : ''}
     ${failed.map((x) => html`<div class="banner bad">${icon('error')}<span class="b-body"><b>Not sent: ${outboxName(x)}.</b> <span class="small">${x.error}</span></span>
       <button class="btn sm" type="button" data-ob="open" data-id="${x.client_id}">Open to fix</button><button class="btn ghost sm" type="button" data-ob="drop" data-id="${x.client_id}">Delete</button></div>`)}`);
@@ -476,7 +476,7 @@ function drawOutbox() {
     // back into the audit form, with every rating, remark and photo, to correct and submit again
     const cur = loadDraft();
     if (cur && Object.keys(cur.answers || {}).length) {
-      const ok = await confirmDialog({ title: 'Replace the unfinished audit?', text: 'There is an unfinished audit on this phone. Opening this one replaces it.', ok: 'Replace', danger: true });
+      const ok = await confirmDialog({ title: 'Replace the unfinished audit?', text: 'This replaces the unfinished audit on this phone.', ok: 'Replace', danger: true });
       if (!ok) return;
       dropLocalPhotos(Object.values(cur.answers));
     }
@@ -516,7 +516,7 @@ async function showSignin() {
         html`<button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password" title="Show password">${icon('visibility')}</button>`)}</div>
       <div class="error-text" id="siErr" role="alert" hidden></div>
       <button class="btn primary lg block" type="submit">${icon('login')}Sign in</button>
-      <p class="small muted signin-note">Compliance Head or Unit Manager. No account yet? Ask the Compliance Head to add you.</p>
+      <p class="small muted signin-note">No account? Ask the Compliance Head.</p>
     </form>
     <p class="signin-foot">Bookends Hospitality · Food safety · Maintenance · Licences</p>
   </div>`);
@@ -604,7 +604,7 @@ async function router() {
   closeDialog(cdlg); closeDialog(dlg); closeDialog(sdlg);
   setNavOpen(false);
   const route = routes.find(([re]) => re.test(path));
-  if (!route) { mount({ title: 'Not found', body: emptyState({ iconName: 'explore_off', title: 'This page does not exist', text: 'The link may be old. Start again from the dashboard.', action: html`<a class="btn primary" href="#/">Go to dashboard</a>` }) }); return; }
+  if (!route) { mount({ title: 'Not found', body: emptyState({ iconName: 'explore_off', title: 'This page does not exist', text: 'Go back to the dashboard.', action: html`<a class="btn primary" href="#/">Go to dashboard</a>` }) }); return; }
   const [re, page, nav] = route;
   $$('.nav-item').forEach((a) => (a.dataset.nav === nav ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
   const quiet = keepScrollOnce;
@@ -720,7 +720,7 @@ function openWipeDialog() {
     title: 'Wipe all data?',
     body: html`<div class="form">
       <div class="banner bad">${icon('warning')}<span class="b-body"><b>This permanently deletes, for every unit:</b> all audits and their ratings, all fixes, all licences, every photo, proof and scan, the audit log and alert history. It cannot be undone.</span></div>
-      <p class="small muted">Kept: units, the checklists and every account, so audits can start again straight away. Download any reports you need first.</p>
+      <p class="small muted">Units, checklists and accounts are kept. Download any reports you need first.</p>
       <div class="field"><label for="wipePw">Your password</label><input class="input" id="wipePw" name="password" type="password" autocomplete="current-password" required></div>
       <div class="field"><label for="wipeWord">Type <b>WIPE</b> to confirm</label><input class="input" id="wipeWord" name="confirm" autocomplete="off" autocapitalize="characters" spellcheck="false" required></div>
       <span class="error-text" id="wipeErr" hidden></span>
@@ -748,7 +748,7 @@ function openPasswordDialog({ forced = false } = {}) {
     title: forced ? 'Choose your own password' : 'Change password',
     locked: forced,
     body: html`<div class="form">
-      ${forced ? html`<div class="banner info">${icon('key')}<span class="b-body">You signed in with a temporary password from the Compliance Head. Choose your own password to continue.</span></div>` : ''}
+      ${forced ? html`<div class="banner info">${icon('key')}<span class="b-body">Choose your own password to continue.</span></div>` : ''}
       <div class="field"><label for="pwCur">${forced ? 'Temporary password' : 'Current password'}</label><input class="input" id="pwCur" name="current" type="password" autocomplete="current-password" required></div>
       <div class="field"><label for="pwNew">New password</label><input class="input" id="pwNew" name="password" type="password" autocomplete="new-password" minlength="8" required><span class="hint">At least 8 characters.</span></div>
       <div class="field"><label for="pwNew2">New password again</label><input class="input" id="pwNew2" name="again" type="password" autocomplete="new-password" required></div>
@@ -793,7 +793,7 @@ async function loadSearchData() {
 function openSearch() {
   sdlg.innerHTML = part(html`<div class="dlg-wrap">
     <div class="s-input">${icon('search', 'muted')}<input id="sQ" type="search" placeholder="Search units, audits, fixes, licences…" autocomplete="off" aria-label="Search"><button class="icon-btn" type="button" id="sClose" aria-label="Close search">${icon('close')}</button></div>
-    <div class="s-results" id="sRes"><p class="s-hint">Type a unit name, a fix (for example “pest control”), an auditor or a licence.</p></div></div>`);
+    <div class="s-results" id="sRes"><p class="s-hint">Search units, fixes, auditors or licences.</p></div></div>`);
   sdlg.showModal();
   const input = $('#sQ', sdlg);
   input.focus();
@@ -801,7 +801,7 @@ function openSearch() {
   const loading = loadSearchData().catch((e) => { $('#sRes', sdlg).innerHTML = part(html`<p class="s-hint">${friendly(e)}</p>`); return null; });
   const run = async () => {
     const q = input.value.trim().toLowerCase();
-    if (!q) { $('#sRes', sdlg).innerHTML = part(html`<p class="s-hint">Type a unit name, a fix (for example “pest control”), an auditor or a licence.</p>`); return; }
+    if (!q) { $('#sRes', sdlg).innerHTML = part(html`<p class="s-hint">Search units, fixes, auditors or licences.</p>`); return; }
     const d = await loading;
     if (!d || input.value.trim().toLowerCase() !== q) return;
     const words = q.split(/\s+/);
@@ -850,7 +850,7 @@ const ALERT_GROUPS = [['critical', 'Priority 1 fixes', 'Act within 48 hours', '#
 function alertsBody(list, { undo = null, done = 0 } = {}) {
   const undoBar = undo ? html`<div class="banner good alert-undo">${icon('done_all')}<span class="b-body">${R.plural(undo.length, 'alert')} marked done.</span><button class="btn sm" type="button" data-click="alertUndo">Undo</button></div>` : '';
   const doneNote = done && !undo ? html`<p class="small muted row" style="gap:8px">${R.plural(done, 'alert')} marked done earlier.<button class="btn ghost sm" type="button" data-click="alertRestore">Show them again</button></p>` : '';
-  if (!list.length) return html`<div class="stack">${undoBar}${emptyState({ compact: true, iconName: 'notifications_off', tone: 'good', title: 'No alerts', text: 'Nothing due soon or overdue that you have not marked done.' })}${doneNote}</div>`;
+  if (!list.length) return html`<div class="stack">${undoBar}${emptyState({ compact: true, iconName: 'notifications_off', tone: 'good', title: 'No alerts', text: 'Nothing due.' })}${doneNote}</div>`;
   const groups = ALERT_GROUPS.filter(([g]) => list.some((a) => a.group === g));
   return html`<div class="stack">${undoBar}<div class="alert-sum">${groups.map(([g, label]) => { const xs = list.filter((a) => a.group === g); const over = xs.filter((a) => a.overdue).length;
       return html`<button type="button" class="as-item tone-${over ? 'bad' : 'warn'}" data-click="alertJump" data-v="${g}"><b>${xs.length}</b><span>${label}</span><small>${over ? `${over} ${g === 'licence' ? 'expired' : 'overdue'}` : g === 'licence' ? 'expiring soon' : 'due soon'}</small></button>`; })}</div>${ALERT_GROUPS.map(([g, label, sub, all]) => {
@@ -873,9 +873,9 @@ const b64ToBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g
  *  Returns null when done, or a sentence for people saying why it could not. */
 async function pushOn({ ask = false, welcome = false } = {}) {
   if (!pushSupported()) {
-    return /iPhone|iPad/.test(navigator.userAgent) ? 'On iPhone: tap Share → Add to Home Screen, open the app from the Home Screen, then switch Notifications on there.' : 'This browser cannot show notifications.';
+    return /iPhone|iPad/.test(navigator.userAgent) ? 'On iPhone: Share → Add to Home Screen, open it from there, then switch this on.' : 'This browser cannot show notifications.';
   }
-  if (Notification.permission === 'denied') return 'Notifications are blocked for this site: allow them in the browser’s site settings, then switch this on again.';
+  if (Notification.permission === 'denied') return 'Notifications are blocked. Allow them in browser settings, then try again.';
   if (Notification.permission !== 'granted') {
     if (!ask) return 'Not allowed yet.';
     if ((await Notification.requestPermission()) !== 'granted') return 'Notifications were not allowed on this device.';
@@ -1036,7 +1036,7 @@ function unitCard(u) {
 async function pageUnits({ token, query }) {
   if (isManager()) {
     if (app.me.unit) { location.replace(`#/units/${app.me.unit.id}`); return; }
-    mount({ title: 'Units', body: html`${pageHeader({ title: 'My unit' })}<div class="card">${emptyState({ iconName: 'storefront', title: 'You are not linked to a unit yet', text: 'Ask the Compliance Head to set your unit in Settings → Team members.' })}</div>` });
+    mount({ title: 'Units', body: html`${pageHeader({ title: 'My unit' })}<div class="card">${emptyState({ iconName: 'storefront', title: 'You are not linked to a unit yet', text: 'Ask the Compliance Head to set your unit.' })}</div>` });
     return;
   }
   const d = await api('/api/sites');
@@ -1071,7 +1071,7 @@ async function pageUnits({ token, query }) {
           ${selectFilter({ name: 'status', value: state.status, label: 'Status', options: [['', 'Any status'], ...['noncompliance', 'improve', 'satisfactory', 'exemplar', 'none'].map((k) => [k, R.LEVELS[k].label])] })}
         </div>
         <div id="unitGrid">${grid()}</div>`
-        : html`<div class="card">${emptyState({ iconName: 'storefront', title: 'No units yet', text: 'Add each outlet and central kitchen, then run the first audit at each.', action: html`<button class="btn primary" data-click="add">${icon('add')}Add unit</button>` })}</div>`}
+        : html`<div class="card">${emptyState({ iconName: 'storefront', title: 'No units yet', text: 'Add your outlets and kitchens.', action: html`<button class="btn primary" data-click="add">${icon('add')}Add unit</button>` })}</div>`}
       </div>`,
   });
   on.click = {
@@ -1134,7 +1134,7 @@ async function pageUnit({ token, params: [id], query }) {
       </section>
 
       <section class="card">
-        <div class="section-head"><h2>Why this status</h2>${statusBadge(st.overall)}<span class="sub">Overall status is the lower of food safety and maintenance (and licences, once recorded).</span></div>
+        <div class="section-head"><h2>Why this status</h2>${statusBadge(st.overall)}<span class="sub">Overall = the lower of food safety and maintenance.</span></div>
         ${reasonsList(st.reasons, { siteId: s.id, showDomain: true })}
       </section>
 
@@ -1185,12 +1185,12 @@ async function pageUnit({ token, params: [id], query }) {
   const licencesTab = () => html`<div class="stack">
     <div class="row"><span class="muted small">${R.plural(d.licences.length, 'licence')} recorded${missingLic.length ? ` · ${missingLic.length} core licences not added` : ''}</span><span class="spacer"></span><button class="btn primary sm" data-click="addLicence">${icon('add')}Add licence</button></div>
     ${d.licences.length ? html`<section class="card flush"><div class="list">${d.licences.map(licRow)}</div></section>` : ''}
-    ${missingLic.length ? html`<section class="card flush"><div class="section-head"><h2>Not added yet</h2><span class="sub">Record each with its expiry date to get 30-day warnings.</span></div><div class="list">${missingLic.map((t) => html`<div class="list-row"><span class="lead-icon tone-neutral">${icon('add_card')}</span><span class="lr-body"><span class="lr-title">${t}</span><span class="lr-meta">Not added</span></span><button class="btn sm" data-click="addLicence" data-type="${t}">Add</button></div>`)}</div></section>` : ''}
+    ${missingLic.length ? html`<section class="card flush"><div class="section-head"><h2>Not added yet</h2><span class="sub">Add expiry dates to get 30-day warnings.</span></div><div class="list">${missingLic.map((t) => html`<div class="list-row"><span class="lead-icon tone-neutral">${icon('add_card')}</span><span class="lr-body"><span class="lr-title">${t}</span><span class="lr-meta">Not added</span></span><button class="btn sm" data-click="addLicence" data-type="${t}">Add</button></div>`)}</div></section>` : ''}
     ${!d.licences.length && !missingLic.length ? html`<div class="card">${emptyState({ iconName: 'verified', title: 'No licences added', action: html`<button class="btn primary" data-click="addLicence">${icon('add')}Add licence</button>` })}</div>` : ''}
   </div>`;
   const photosTab = () => (photos.length ? html`<section class="card"><div class="gallery">${photos.map((p) => html`<figure><a href="${fileUrl(p.key)}" target="_blank" rel="noopener"><img src="${fileUrl(p.key)}" alt="${p.proof ? 'Proof of fix' : 'Audit photo'}: ${p.f.title}" loading="lazy"></a>
       <figcaption>${p.proof ? html`<span class="badge tone-good" style="height:20px;font-size:11px;margin-bottom:3px">Proof</span><br>` : ''}<a href="#/fixes/${p.f.id}" class="clamp-2">${p.f.title}</a></figcaption></figure>`)}</div></section>`
-    : html`<div class="card">${emptyState({ iconName: 'photo_library', title: 'No photos yet', text: 'Photos taken during audits and proof photos uploaded for fixes appear here.' })}</div>`);
+    : html`<div class="card">${emptyState({ iconName: 'photo_library', title: 'No photos yet', text: 'Audit and proof photos show here.' })}</div>`);
   const tabContent = () => ({ overview: overviewTab, audits: auditsTab, fixes: fixesTab, licences: licencesTab, photos: photosTab })[tab]();
   const tabs = () => tabsBar({ name: 'tab', value: tab, tabs: [['overview', 'Overview'], ['audits', 'Audits', allAudits.length], ['fixes', 'Fixes', open.length], ['licences', 'Licences', d.licences.length], ['photos', 'Photos', photos.length]] });
 
@@ -1272,7 +1272,7 @@ async function pageAudits({ token, query }) {
           <label class="sr-only" for="aTo">To date</label><input class="date-input" type="date" id="aTo" data-change="to" value="${state.to}" title="To date">
         </div>
         <section class="card flush" id="auditList">${list()}</section>
-        ${downloadBar({ title: 'Download these audits', text: 'Every audit matching the filters above, as a formatted PDF or an Excel spreadsheet.' })}
+        ${downloadBar({ title: 'Download these audits', text: 'Download these audits as PDF or Excel.' })}
       </div>`,
   });
   const describe = () => [state.domain ? R.DOMAINS[state.domain].label : 'Food safety & maintenance',
@@ -1394,7 +1394,7 @@ async function pageAudit({ token, params: [id] }) {
             ${statCard({ label: L.na, value: html`${counts.na}` })}
           </div>
           ${counts.criticalFails ? html`<div class="banner bad">${icon('report')}<span class="b-body"><span class="star">★</span> ${R.plural(counts.criticalFails, 'critical line')} rated ${L.fail}. Critical lines count double.</span></div>` : ''}
-          ${prev && a.domain === 'food' ? html`<p class="small muted">If the previous visit used a different checklist (the Aug 2026 first visits used the 39-line Schedule 4 readiness checklist), read the change as a direction, not an exact like-for-like measurement.</p>` : ''}
+          ${prev && a.domain === 'food' ? html`<p class="small muted">The earlier visit used a different checklist, so compare roughly.</p>` : ''}
           ${a.flag ? html`<div class="banner warn">${icon('info')}<span class="b-body"><b>Data note:</b> ${a.flag}</span></div>` : ''}
           <div class="facts" style="padding-top:6px;border-top:1px solid var(--border)">
             <div class="fact"><div class="k">Unit</div><div class="v"><a href="#/units/${a.site_id}">${a.site_name}</a></div></div>
@@ -1409,7 +1409,7 @@ async function pageAudit({ token, params: [id] }) {
         ${a.summary ? html`<section class="card"><div class="section-head"><h2>Auditor’s conclusion</h2></div><div class="prose">${a.summary.split('\n').map((p) => html`<p>${p}</p>`)}</div></section>` : ''}
 
         <section class="card flush">
-          <div class="section-head"><h2>Findings</h2><span class="count">${findings.length}</span><span class="sub">Every gap raised by this audit, by priority. Open one for the full details, evidence and review.</span></div>
+          <div class="section-head"><h2>Findings</h2><span class="count">${findings.length}</span><span class="sub">Problems found in this audit.</span></div>
           ${findings.length ? priorityGroups(findings)
             : counts.fail + counts.partial ? emptyState({ compact: true, iconName: 'link_off', title: 'No fixes are tracked from this visit', text: `Its ${R.plural(counts.fail + counts.partial, 'gap')} are listed in the full checklist below. Fixes are tracked from the unit’s latest ${R.DOMAINS[a.domain].label.toLowerCase()} visit.`, action: html`<a class="btn" href="#/fixes?unit=${a.site_id}&domain=${a.domain}">See the unit’s fixes</a>` })
               : emptyState({ iconName: 'task_alt', tone: 'good', title: 'No findings', text: 'Every line was compliant or N/A.' })}
@@ -1420,7 +1420,7 @@ async function pageAudit({ token, params: [id] }) {
         ${collapse({ iconName: 'checklist', title: 'Full checklist', sub: `${d.items.length} lines · ${counts.fail + counts.partial} gaps`, flush: true, open: !findings.length && counts.fail + counts.partial > 0, body: html`
           <div class="row" style="padding:14px 24px">${segmented({ name: 'gaps', value: '1', label: 'Show', options: [['1', 'Gaps only'], ['0', `All ${d.items.length} lines`]] })}</div>
           <div class="list" id="lines">${linesHtml()}</div>` })}
-        ${downloadBar({ title: 'Download this audit', text: 'The full audit report: summary, conclusion, section scores, findings, route to 80% and every checklist line.' })}
+        ${downloadBar({ title: 'Download this audit', text: 'Full report as PDF.' })}
       </div>`,
   });
   /** Downloads this audit in full: summary, conclusion, section scores, findings, route to 80% and every checklist line. */
@@ -1447,7 +1447,7 @@ async function pageAudit({ token, params: [id] }) {
       k.details(pairs);
       if (counts.criticalFails) k.note(`${R.plural(counts.criticalFails, 'critical line')} (*) rated ${L.fail}. Critical lines count double.`, { tone: 'bad' });
       if (a.flag) k.note(`Data note: ${a.flag}`, { tone: 'warn' });
-      if (prev && a.domain === 'food') k.note('If the previous visit used a different checklist (the Aug 2026 first visits used the 39-line Schedule 4 readiness checklist), read the change as a direction, not an exact like-for-like measurement.');
+      if (prev && a.domain === 'food') k.note('The earlier visit used a different checklist, so compare roughly.');
       if (a.summary) { k.section('Auditor’s conclusion'); k.paragraphs(a.summary); }
       k.section(`Score by ${a.domain === 'food' ? 'section' : 'category'}`);
       k.table([a.domain === 'food' ? 'Section' : 'Category', 'Score', 'Grade'],
@@ -1491,7 +1491,7 @@ async function pageAudit({ token, params: [id] }) {
       ...(counts.criticalFails || a.flag || (prev && a.domain === 'food') ? [{ heading: 'Notes', rows: [
         ...(counts.criticalFails ? [['Critical lines', `${R.plural(counts.criticalFails, 'critical line')} rated ${L.fail}. Critical lines count double.`, { tone: 'bad' }]] : []),
         ...(a.flag ? [['Data note', a.flag, { tone: 'warn' }]] : []),
-        ...(prev && a.domain === 'food' ? [['Different checklists', 'If the previous visit used a different checklist (the Aug 2026 first visits used the 39-line Schedule 4 readiness checklist), read the change as a direction, not an exact like-for-like measurement.']] : []),
+        ...(prev && a.domain === 'food' ? [['Different checklists', 'The earlier visit used a different checklist, so compare roughly.']] : []),
       ] }] : []),
       ...(a.summary ? [{ heading: 'Auditor’s conclusion', rows: [['Conclusion', a.summary]] }] : []),
       { heading: 'Marking', rows: [['How lines are marked', R.SCHEMES[scheme].marking]] },
@@ -1538,7 +1538,7 @@ const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY); } catch { /
 
 async function pageNewAudit({ token, query }) {
   if (isManager()) {
-    mount({ title: 'New audit', body: html`${pageHeader({ title: 'Start an audit', crumb: { href: '#/audits', label: 'Audits' } })}<div class="card">${emptyState({ iconName: 'lock', title: 'Only the Compliance Head runs audits', text: 'You can see your unit’s audits, and work on its fixes on the Dashboard.', action: html`<a class="btn primary" href="#/">${icon('construction')}Go to dashboard</a>` })}</div>` });
+    mount({ title: 'New audit', body: html`${pageHeader({ title: 'Start an audit', crumb: { href: '#/audits', label: 'Audits' } })}<div class="card">${emptyState({ iconName: 'lock', title: 'Only the Compliance Head runs audits', text: 'See your fixes on the Dashboard.', action: html`<a class="btn primary" href="#/">${icon('construction')}Go to dashboard</a>` })}</div>` });
     return;
   }
   const [sitesRes, templates] = await Promise.all([api('/api/sites'), getTemplates()]);
@@ -1632,7 +1632,7 @@ async function pageNewAudit({ token, query }) {
         <div class="field"><label for="aBy">Auditor</label><input class="input" id="aBy" value="${draft.auditor}" data-input="auditor" autocomplete="name"></div>
       </div>
       ${t ? html`<div class="banner info">${icon('checklist')}<span class="b-body">${t.name}: ${R.plural(lines().length, 'line')} in ${R.plural(secs().length, 'section')} apply to this ${unit().kind === 'kitchen' ? 'kitchen' : 'restaurant'}. ${R.SCHEMES[t.scheme].marking}</span></div>`
-        : html`<p class="small muted">Choose the unit and the audit to begin. Food safety uses the FSSAI internal checklist; maintenance uses the inspection docket.</p>`}
+        : html`<p class="small muted">Pick a unit and audit type.</p>`}
     </section>`;
   };
   const sectionStep = () => {
@@ -1677,9 +1677,9 @@ async function pageNewAudit({ token, query }) {
       <section class="card form" id="submit">
         <div class="field"><label for="aSum">Conclusion <span class="muted">(optional)</span></label><textarea class="input" id="aSum" data-input="summary" placeholder="Overall standing, what to close first, who was present">${draft.summary || ''}</textarea></div>
         <div id="submitErr" class="error-text" hidden></div>
-        <p class="small muted">${icon('schedule', 'muted')} ${draft.started_at ? `Started at ${R.fmtClock(draft.started_at)}. The finish time is recorded when you submit.` : 'The finish time is recorded when you submit.'}</p>
-        <p class="small muted">${icon('save', 'muted')} Ratings, remarks and photos are saved on this phone as you go, so you can close the page and come back.</p>
-        <p class="small muted">${icon('cloud_off', 'muted')} No network? Submit anyway: the audit waits on this phone and is sent by itself when the network is back.</p>
+        ${draft.started_at ? html`<p class="small muted">${icon('schedule', 'muted')} Started at ${R.fmtClock(draft.started_at)}.</p>` : ''}
+        <p class="small muted">${icon('save', 'muted')} Saved as you go. You can come back later.</p>
+        <p class="small muted">${icon('cloud_off', 'muted')} No network? Submit anyway; it sends when back online.</p>
         <div><button class="btn danger sm" type="button" data-click="discard">${icon('delete')}Discard draft</button></div>
       </section>
     </div>`;
@@ -1761,7 +1761,7 @@ async function pageNewAudit({ token, query }) {
     goStep: (el) => go(+el.dataset.v),
     save: () => { persist(); toast('Draft saved on this device', { success: true }); },
     discard: async () => {
-      const ok = await confirmDialog({ title: 'Discard this draft?', text: 'All ratings, remarks and photos for this audit are removed from this device.', ok: 'Discard', danger: true });
+      const ok = await confirmDialog({ title: 'Discard this draft?', text: 'All ratings and photos for this audit will be deleted.', ok: 'Discard', danger: true });
       if (!ok) return;
       dropLocalPhotos(Object.values(draft.answers)); clearDraft(); draft = fresh(); conflict = null; render();
     },
@@ -1797,7 +1797,7 @@ async function pageNewAudit({ token, query }) {
           // no network: keep it on the phone and send it by itself later
           outboxPut({ client_id: draft.client_id, owner: outboxOwner(), queued_at: new Date().toISOString(), unit: unitName(unit()), body });
           clearDraft();
-          toast('No network. The audit is saved on this phone and is sent by itself when the network is back.', { ms: 9000 });
+          toast('No network. Audit saved; it will be sent when the network is back.', { ms: 9000 });
           location.hash = '#/audits';
           return;
         }
@@ -1810,7 +1810,7 @@ async function pageNewAudit({ token, query }) {
     unit: async (el) => {
       const v = +el.value || null;
       if (Object.keys(draft.answers).length && v !== draft.site_id) {
-        const ok = await confirmDialog({ title: 'Change unit?', text: 'Ratings given so far move with the audit. Only continue if the wrong unit was picked.', ok: 'Change unit' });
+        const ok = await confirmDialog({ title: 'Change unit?', text: 'Ratings stay with the audit.', ok: 'Change unit' });
         if (!ok) { el.value = draft.site_id || ''; return; }
       }
       draft.site_id = v; persist(); render();
@@ -1951,14 +1951,14 @@ async function pageFixes({ token, query }) {
     title: 'Dashboard',
     body: html`
       ${pageHeader({ title: 'Dashboard',
-        sub: isManager() && app.me.unit ? html`<span>${unitName(app.me.unit)}</span><span>·</span><span>What to fix, in what order. Open a fix to add what was done and proof, then mark it fixed.</span>` : 'What to fix, in what order. Open a fix to update it, add proof, or review it.',
+        sub: isManager() && app.me.unit ? html`<span>${unitName(app.me.unit)}</span><span>·</span><span>Open a fix, add proof, mark it fixed.</span>` : 'Open a fix to update or review it.',
         actions: isManager() ? '' : html`<a class="btn primary" href="#/audits/new">${icon('add')}Start audit</a>` })}
       <div class="stack">
         <section class="strip swipe" id="fixStrip" aria-label="Summary">${stripHtml()}</section>
         <div class="filterbar" id="fixFilters">${filtersHtml()}</div>
         <div class="row"><span id="viewSeg">${segmented({ name: 'view', value: state.view, label: 'View', options: [['priority', 'By priority'], ['problem', 'By problem']] })}</span><span class="spacer"></span><span class="small muted" id="fixSummary">${summaryHtml()}</span></div>
         <section class="card flush" id="fixList">${listHtml()}</section>
-        <p class="small muted">Inside each priority: paperwork first (quick to close), then the biggest mark gains. Priority 1: act within 48 hours · Priority 2: 7 days · Priority 3: 30 days. Deadlines for the Aug–Sep reports start from 26 Sep 2026, the day they were loaded.</p>
+        <p class="small muted">Priority 1: 48 hours · Priority 2: 7 days · Priority 3: 30 days. Paperwork first.</p>
       </div>`,
   });
   on.click = {
@@ -2008,7 +2008,7 @@ async function pageFix({ token, params: [id] }) {
         ${sentBack ? html`<div class="banner bad">${icon('undo')}<span class="b-body"><b>Rejected by ${sentBack.actor}, ${ago(sentBack.at)}:</b> “${sentBackReason}”</span></div>` : ''}
         ${f.status === 'fixed' && !head ? html`<div class="banner info">${icon('hourglass_top')}<span class="b-body"><b>Marked fixed.</b> Waiting for the Compliance Head to check it and close it.</span></div>` : ''}
         ${f.status === 'fixed' && head ? html`<section class="card stack" style="border-color:var(--primary)">
-          <div class="section-head" style="margin:0"><h2>Review</h2><span class="sub">The unit marked this fixed. Check what was done and the proof, then approve or reject it.</span></div>
+          <div class="section-head" style="margin:0"><h2>Review</h2><span class="sub">Check the proof, then approve or reject.</span></div>
           <div class="row"><button class="btn danger" data-click="reject">${icon('close')}Reject</button><button class="btn success" data-click="approve">${icon('verified')}Approve &amp; close</button></div>
         </section>` : ''}
 
@@ -2041,7 +2041,7 @@ async function pageFix({ token, params: [id] }) {
         </section>
 
         <section class="card form" aria-label="Corrective action">
-          <div class="section-head" style="margin:0"><h2>Corrective action</h2><span class="sub">${closed ? 'Closed fixes cannot be edited. Reopen it if the problem has come back.' : 'Who fixes it, by when, and what was done.'}</span></div>
+          <div class="section-head" style="margin:0"><h2>Corrective action</h2><span class="sub">${closed ? 'Closed. Reopen if the problem is back.' : 'Who fixes it, by when, and what was done.'}</span></div>
           <div class="form-2">
             <div class="field"><label for="fOwner">Assigned to</label><input class="input" id="fOwner" value="${f.owner || ''}" ${closed ? 'disabled' : ''} placeholder="Who will fix it"></div>
             <div class="field"><label for="fDue">Due date</label><input class="input" type="date" id="fDue" value="${f.due_date}" ${closed || !head ? 'disabled' : ''}><span class="hint">${head ? 'Moving a date is recorded in the history.' : 'Only the Compliance Head can move a due date.'}</span></div>
@@ -2069,17 +2069,17 @@ async function pageFix({ token, params: [id] }) {
     to: (el) => {
       if (el.dataset.v === 'fixed' && !$('#fAct').value.trim()) {
         $('#fAct').classList.add('invalid'); $('#fAct').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('#fAct').focus();
-        const err = $('#formErr'); err.hidden = false; err.textContent = 'Describe what was done before marking it fixed. A proof photo makes verification quick.';
+        const err = $('#formErr'); err.hidden = false; err.textContent = 'Write what was done. Add a proof photo.';
         return;
       }
       patch({ status: el.dataset.v }, el.dataset.v === 'fixed' ? 'Marked fixed. The Compliance Head will review it.' : 'Work started');
     },
     approve: async () => {
-      const r = await confirmDialog({ title: 'Approve this fix?', text: 'Approve and close it only after checking the fix yourself, on site or from the proof photo.', ok: 'Approve & close', tone: 'success', withNote: { label: 'Closing note' } });
+      const r = await confirmDialog({ title: 'Approve this fix?', text: 'Only approve after checking the fix or its photo.', ok: 'Approve & close', tone: 'success', withNote: { label: 'Closing note' } });
       if (r) patch({ status: 'closed', close_note: r.note || null }, 'Fix approved and closed');
     },
     reject: async () => {
-      const r = await confirmDialog({ title: 'Reject this fix', text: 'It goes back to the unit as Open. The reason is recorded in the fix history and shown to the unit.', ok: 'Reject fix', danger: true,
+      const r = await confirmDialog({ title: 'Reject this fix', text: 'It goes back to the unit as Open with your reason.', ok: 'Reject fix', danger: true,
         withNote: { label: 'Rejection reason', required: true, large: true, placeholder: 'What is still missing or not good enough?', requiredText: 'Enter a rejection reason.' } });
       if (r) patch({ status: 'open', note: r.note }, 'Fix rejected and sent back to the unit');
     },
@@ -2127,7 +2127,7 @@ function openLicenceDialog(l, units, presetUnit = null, presetType = null) {
         file: async () => { const k = await pickAndUpload({ accept: 'image/*,application/pdf' }).catch(() => null); if (k) { fileKey = k; $('#lFile', dlg).innerHTML = part(fileHtml()); } },
         rmFile: () => { fileKey = null; $('#lFile', dlg).innerHTML = part(fileHtml()); },
         del: async () => {
-          const ok = await confirmDialog({ title: 'Delete this licence?', text: 'It is removed from the register; the deletion is recorded.', ok: 'Delete', danger: true });
+          const ok = await confirmDialog({ title: 'Delete this licence?', text: 'It will be removed.', ok: 'Delete', danger: true });
           if (!ok) return;
           try { await api(`/api/licences/${l.id}`, { method: 'DELETE' }); }
           catch (e) { if (!(e instanceof SignInNeeded)) toast(friendly(e), { error: true }); return; }
@@ -2194,7 +2194,7 @@ async function pageLicences({ token, params: [openId], query }) {
     const missShown = showAllMissing ? miss : miss.slice(0, 12);
     return dataTable(cols, html`
       ${rec.length ? html`<div class="dt-group"><h3>Recorded</h3><span class="muted small">${rec.length}</span></div>${sorted.map(recRow)}`
-        : html`<div class="dt-group"><h3>No licences added yet</h3><span class="sub">The audits show gaps in FSSAI display, water reports, pest-control records, medical fitness and FoSTaC. Record each with its expiry date and the dashboard warns 30 days ahead.</span></div>`}
+        : html`<div class="dt-group"><h3>No licences added yet</h3><span class="sub">Add each licence with its expiry date. You get a warning 30 days before.</span></div>`}
       ${miss.length ? html`<div class="dt-group"><h3>Not added</h3><span class="muted small">${miss.length}</span><span class="sub">Core licences every unit should hold.</span></div>${missShown.map(missRow)}${miss.length > missShown.length ? html`<button class="dt-more" data-click="moreMissing">Show all ${miss.length}</button>` : ''}` : ''}`);
   };
   const stripHtml = () => {
@@ -2273,7 +2273,7 @@ function loadScript(src) {
       const s = document.createElement('script');
       s.src = src; s.async = true;
       s.onload = resolve;
-      s.onerror = () => { scriptLoads.delete(src); s.remove(); reject(new ApiError('Could not load the report tools. Check the internet connection and try again.')); };
+      s.onerror = () => { scriptLoads.delete(src); s.remove(); reject(new ApiError('Could not load. Check the internet and try again.')); };
       document.head.appendChild(s);
     }));
   }
@@ -2778,7 +2778,7 @@ async function pageReports({ token, query }) {
     </div>
     <div id="periodInputs">${periodInputs()}</div>
     <div class="field"><span class="label">Format</span>${segmented({ name: 'format', value: state.format, label: 'Format', options: FORMATS, fill: true })}
-      <span class="hint" id="fmtHint">${state.format === 'pdf' ? 'A4 document with summary, colour-coded tables and page numbers. Ready to share or print.' : 'Spreadsheet with one sheet per table (Summary, Audits, Units, Open fixes, Licences) and filters on every column.'}</span></div>
+      <span class="hint" id="fmtHint">${state.format === 'pdf' ? 'Ready to share or print.' : 'Spreadsheet with filters.'}</span></div>
     <div><button class="btn primary lg" data-click="generate" id="genBtn">${genLabel()}</button></div>
   </section>`;
   const sync = (run) => {
@@ -2789,9 +2789,9 @@ async function pageReports({ token, query }) {
   mount({
     title: 'Reports',
     body: html`
-      ${pageHeader({ title: 'Reports', sub: 'Choose what to include and the format, then generate. The file downloads to this device.' })}
+      ${pageHeader({ title: 'Reports', sub: 'Pick what you need and download.' })}
       <div class="stack-lg"><div id="repForm">${formHtml()}</div>
-        <div id="report">${query.get('run') ? preview(build()) : html`<div class="card no-print">${emptyState({ iconName: 'summarize', title: 'No report generated yet', text: 'Pick a report type, unit, period and format above, then generate. A preview appears here as well.' })}</div>`}</div></div>`,
+        <div id="report">${query.get('run') ? preview(build()) : html`<div class="card no-print">${emptyState({ iconName: 'summarize', title: 'No report generated yet', text: 'Pick options above, then generate.' })}</div>`}</div></div>`,
   });
   const press = (name, el) => $$(`[data-click="${name}"]`, view).forEach((b) => b.setAttribute('aria-pressed', String(b === el)));
   on.click = {
@@ -2800,7 +2800,7 @@ async function pageReports({ token, query }) {
     format: (el) => {
       state.format = el.dataset.v; press('format', el);
       $('#genBtn').innerHTML = part(genLabel());
-      $('#fmtHint').textContent = state.format === 'pdf' ? 'A4 document with summary, colour-coded tables and page numbers. Ready to share or print.' : 'Spreadsheet with one sheet per table (Summary, Audits, Units, Open fixes, Licences) and filters on every column.';
+      $('#fmtHint').textContent = state.format === 'pdf' ? 'Ready to share or print.' : 'Spreadsheet with filters.';
     },
     generate: async (btn) => {
       const r = build();
@@ -3014,25 +3014,25 @@ async function pageSettings({ token }) {
   const teamSection = () => {
     if (!me.accountsReady) return '';
     if (me.firstAdminSetup && me.canManageUsers) {
-      return html`<section class="card stack"><div class="section-head" style="margin:0"><h2>Team members</h2><span class="sub">Personal accounts: each person signs in with their own username and password.</span></div>
-        <div class="banner info">${icon('shield_person')}<span class="b-body">There is no Compliance Head account yet. Create it first; the Compliance Head then adds a Unit Manager for each unit. The team access code keeps working.</span></div>
+      return html`<section class="card stack"><div class="section-head" style="margin:0"><h2>Team members</h2><span class="sub">Each person has their own login.</span></div>
+        <div class="banner info">${icon('shield_person')}<span class="b-body">First create the Compliance Head account.</span></div>
         <div><button class="btn primary" data-click="firstAdmin">${icon('person_add')}Create the Compliance Head</button></div></section>`;
     }
     if (!manage) {
       return html`<section class="card stack"><div class="section-head" style="margin:0"><h2>Team members</h2></div>
-        <p class="small muted">Only the Compliance Head can add people or change accounts.</p></section>`;
+        <p class="small muted">Only the Compliance Head can change accounts.</p></section>`;
     }
     // closed until clicked, like the audit log; the count shows how many people are inside
     return collapse({ id: 'teamMembers', open: !!settingsOpen.teamMembers, flush: true, iconName: 'group', title: `Team members (${people.users.length})`,
-      sub: 'Add people, edit accounts and set passwords. Click to open.',
-      body: html`<div class="team-intro"><span class="small muted">Compliance Head: full access. Unit Manager: their own unit only. Each person signs in with their own username and password.</span>
+      sub: 'Add or edit people.',
+      body: html`<div class="team-intro"><span class="small muted">Compliance Head: everything. Unit Manager: own unit only.</span>
           <button class="btn primary sm" data-click="addPerson">${icon('person_add')}Add person</button></div>
         <div class="list">${people.users.map(personRow)}</div>` });
   };
   mount({
     title: 'Settings',
     body: html`
-      ${pageHeader({ title: 'Settings', sub: 'Your account, team members, this device and the compliance rules.' })}
+      ${pageHeader({ title: 'Settings', sub: 'Account, team and preferences.' })}
       <div class="stack" style="max-width:860px">
         <section class="card stack">
           <div class="section-head" style="margin:0"><h2>Account</h2></div>
@@ -3051,7 +3051,7 @@ async function pageSettings({ token }) {
           ${toggle('theme', dark, 'Dark mode', 'remembered on this device.')}
         </section>
         <section class="card stack">
-          <div class="section-head" style="margin:0"><h2>Audit draft on this device</h2><span class="sub">Audits in progress are saved on the phone or computer they were started on.</span></div>
+          <div class="section-head" style="margin:0"><h2>Audit draft on this device</h2><span class="sub">Saved only on this device.</span></div>
           ${draft && draftUnit && draft.domain ? html`<div class="row"><span style="flex:1">${R.DOMAINS[draft.domain].label} audit for <b>${unitName(draftUnit)}</b> · ${R.plural(Object.values(draft.answers || {}).filter((a) => a.result).length, 'rating')}</span>
             <a class="btn primary" href="#/audits/new">Continue</a><button class="btn danger" data-click="discard">Discard</button></div>`
             : html`<p class="small muted">No unfinished audit on this device.</p>`}
@@ -3068,7 +3068,7 @@ async function pageSettings({ token }) {
   on.click = {
     signout: () => signOut(),
     changePw: () => openPasswordDialog(),
-    firstAdmin: () => openPersonDialog(null, { firstAdmin: true, onDone: () => { toast('Compliance Head created. Sign out, then sign in with that username to add unit managers.', { success: true, ms: 9000 }); rerender(); } }),
+    firstAdmin: () => openPersonDialog(null, { firstAdmin: true, onDone: () => { toast('Compliance Head created. Sign in with it to add managers.', { success: true, ms: 9000 }); rerender(); } }),
     addPerson: () => openPersonDialog(null, { units: sites.units, onDone: () => rerender() }),
     editPerson: (el) => openPersonDialog(person(el), { units: sites.units, onDone: () => rerender() }),
     resetPerson: (el) => openResetDialog(person(el), () => rerender()),
@@ -3095,7 +3095,7 @@ async function pageSettings({ token }) {
       finally { el.disabled = false; }
     },
     discard: async () => {
-      const ok = await confirmDialog({ title: 'Discard this draft?', text: 'All ratings, remarks and photos for this audit are removed from this device.', ok: 'Discard', danger: true });
+      const ok = await confirmDialog({ title: 'Discard this draft?', text: 'All ratings and photos for this audit will be deleted.', ok: 'Discard', danger: true });
       if (!ok) return;
       dropLocalPhotos(Object.values(loadDraft()?.answers || {})); clearDraft(); toast('Draft discarded', { success: true }); rerender();
     },
@@ -3111,11 +3111,11 @@ async function pageFramework({ token }) {
   mount({
     title: 'Framework',
     body: html`
-      ${pageHeader({ title: 'Framework & rules', crumb: { href: '#/settings', label: 'Settings' }, sub: 'Goal: every unit at 80% or more, and every problem fixed with proof.' })}
+      ${pageHeader({ title: 'Framework & rules', crumb: { href: '#/settings', label: 'Settings' }, sub: 'Goal: every unit at 80%+.' })}
       <div class="stack-lg">
         <section class="stack"><h2 style="font-size:18px">Grades</h2>
           <div class="def-grid four">${bands.map(([k, pct, txt]) => html`<div class="card stack" style="gap:6px">${statusBadge(k)}<b>${pct}</b><span class="small muted">${txt}</span></div>`)}</div>
-          <p class="small muted">Each unit gets a food safety grade and a maintenance grade. The lower one is its overall grade.</p></section>
+          <p class="small muted">Overall grade = the lower of food safety and maintenance.</p></section>
 
         <section class="stack"><h2 style="font-size:18px">How the score works</h2>
           <div class="card prose small"><ul>
