@@ -3007,8 +3007,10 @@ async function pageSettings({ token }) {
         </section>
         ${teamSection()}
         ${seeLog ? logSection() : ''}
-        <section class="card toggle-card" aria-label="Preferences">
+        <section class="card toggle-card" aria-label="Notifications">
           ${toggle('notify', notifyOn(), 'Notifications', 'alert count and overdue popups on this device.')}
+        </section>
+        <section class="card toggle-card" aria-label="Dark mode">
           ${toggle('theme', dark, 'Dark mode', 'remembered on this device.')}
         </section>
         <section class="card stack">
