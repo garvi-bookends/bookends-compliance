@@ -837,9 +837,10 @@ function alertsBody(list, { undo = null, done = 0 } = {}) {
         ${xs.length > 5 ? html`<a class="list-row alert-more" href="${all}">See all ${xs.length} ${label.toLowerCase()}${icon('arrow_forward')}</a>` : ''}</div></section>`;
   })}${doneNote}</div>`;
 }
+const notifyOn = () => localStorageGet('bk-notify') !== 'off'; // Settings → Notifications switch, per device
 function showAlertCount(list) {
   const el = $('#alertCount');
-  el.hidden = !list.length;
+  el.hidden = !list.length || !notifyOn();
   el.textContent = list.length > 99 ? '99+' : String(list.length);
   $('#alertBtn').setAttribute('aria-label', list.length ? `Alerts: ${list.length}` : 'Alerts');
 }
@@ -886,7 +887,7 @@ async function refreshAlerts() {
   if (!list) return;
   showAlertCount(list);
   const key = `bk-alerts-shown:${app.me.username || app.me.name}`;
-  if (list.some((a) => a.overdue || a.group === 'critical') && localStorageGet(key) !== app.today && !dlg.open && !cdlg.open && !sdlg.open && !app.me.mustChange) {
+  if (notifyOn() && list.some((a) => a.overdue || a.group === 'critical') && localStorageGet(key) !== app.today && !dlg.open && !cdlg.open && !sdlg.open && !app.me.mustChange) {
     localStorageSet(key, app.today);
     openAlerts();
   }
@@ -2849,7 +2850,10 @@ function openResetDialog(u, onDone) {
   });
 }
 
+/** Which Settings boxes are open. Every visit starts with them closed; a refresh after a change (rerender) keeps them as they were. */
+let settingsOpen = {};
 async function pageSettings({ token }) {
+  if (!keepScrollOnce) settingsOpen = {};
   const me = app.me = await api('/api/me');
   const manage = me.canManageUsers && !me.firstAdminSetup;
   const seeLog = !isManager();
@@ -2857,7 +2861,9 @@ async function pageSettings({ token }) {
   if (stale(token)) return;
   const draft = loadDraft();
   const draftUnit = draft && sites.units.find((u) => u.id === draft.site_id);
-  const theme = document.documentElement.dataset.theme || 'system';
+  const dark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  const toggle = (id, on, title, sub) => html`<div class="row toggle-row"><span style="flex:1;min-width:0"><b>${title}</b><br><span class="small muted">${sub}</span></span>
+    <button type="button" class="switch" role="switch" aria-checked="${String(on)}" aria-label="${title}" data-click="${id}"><span></span></button></div>`;
   const personRow = (u) => html`<div class="list-row person">
     <span class="avatar">${(u.name || '?').trim()[0]}</span>
     <span class="lr-body"><span class="lr-title">${u.name}${u.username === me.username ? html` <span class="muted small">(you)</span>` : ''}</span>
@@ -2935,7 +2941,7 @@ async function pageSettings({ token }) {
     return html`<div class="list">${rs.slice(0, logState.shown).map(logEntry)}</div>${rs.length > logState.shown ? html`<button class="dt-more" data-click="logMore">Show more (${rs.length - logState.shown} older)</button>` : ''}`;
   };
   // closed until clicked, so Settings stays short; the count shows how much is inside
-  const logSection = () => collapse({ id: 'auditLog', flush: true, iconName: 'history', title: `Audit log (${log.activity.length}${log.activity.length >= 300 ? '+' : ''})`,
+  const logSection = () => collapse({ id: 'auditLog', open: !!settingsOpen.auditLog, flush: true, iconName: 'history', title: `Audit log (${log.activity.length}${log.activity.length >= 300 ? '+' : ''})`,
     sub: 'Who did what, and when. Click to open.',
     body: html`<p class="small muted log-intro">Audits, fix updates and reviews, licences, units and people. Only the Compliance Head sees this. Newest first${log.activity.length >= 300 ? ', last 300 entries' : ''}.</p>
     <div class="filterbar log-filters">${searchBar({ name: 'logQ', placeholder: 'Search the log: person, unit, fix…' })}${selectFilter({ name: 'logType', value: '', label: 'Type', options: LOG_TYPES })}</div>
@@ -2951,10 +2957,12 @@ async function pageSettings({ token }) {
       return html`<section class="card stack"><div class="section-head" style="margin:0"><h2>Team members</h2></div>
         <p class="small muted">Only the Compliance Head can add people or change accounts.</p></section>`;
     }
-    return html`<section class="card flush"><div class="section-head"><h2>Team members</h2><span class="count">${people.users.length}</span><span class="spacer"></span>
-        <button class="btn primary sm" data-click="addPerson">${icon('person_add')}Add person</button>
-        <span class="sub">Compliance Head: full access. Unit Manager: their own unit only. Each person signs in with their own username and password.</span></div>
-      <div class="list">${people.users.map(personRow)}</div></section>`;
+    // closed until clicked, like the audit log; the count shows how many people are inside
+    return collapse({ id: 'teamMembers', open: !!settingsOpen.teamMembers, flush: true, iconName: 'group', title: `Team members (${people.users.length})`,
+      sub: 'Add people, edit accounts and set passwords. Click to open.',
+      body: html`<div class="team-intro"><span class="small muted">Compliance Head: full access. Unit Manager: their own unit only. Each person signs in with their own username and password.</span>
+          <button class="btn primary sm" data-click="addPerson">${icon('person_add')}Add person</button></div>
+        <div class="list">${people.users.map(personRow)}</div>` });
   };
   mount({
     title: 'Settings',
@@ -2972,8 +2980,9 @@ async function pageSettings({ token }) {
         ${teamSection()}
         ${seeLog ? logSection() : ''}
         <section class="card stack">
-          <div class="section-head" style="margin:0"><h2>Appearance</h2><span class="sub">Saved on this device.</span></div>
-          ${segmented({ name: 'theme', value: theme, label: 'Theme', options: [['system', 'Match device'], ['light', 'Light'], ['dark', 'Dark']] })}
+          <div class="section-head" style="margin:0"><h2>Preferences</h2><span class="sub">Saved on this device.</span></div>
+          ${toggle('notify', notifyOn(), 'Notifications', 'Alert count on the bell, and the alerts popup when something is overdue.')}
+          ${toggle('theme', dark, 'Dark mode', 'Dark colours for the whole app.')}
         </section>
         <section class="card stack">
           <div class="section-head" style="margin:0"><h2>Audit draft on this device</h2><span class="sub">Audits in progress are saved on the phone or computer they were started on.</span></div>
@@ -2985,13 +2994,13 @@ async function pageSettings({ token }) {
           <div class="section-head" style="margin:0"><h2>Framework &amp; rules</h2><span class="sub">How compliance is measured: grade bands, marking, priorities, roles, escalation and the checklists.</span></div>
           <div><a class="btn" href="#/framework">${icon('menu_book')}Open framework</a></div>
         </section>
-        ${me.role === 'head' && me.username ? html`<section class="card stack danger-zone" aria-labelledby="wipeTitle">
-          <div class="section-head" style="margin:0"><h2 id="wipeTitle">Wipe all data</h2><span class="sub">Start again from a clean slate. This cannot be undone.</span></div>
-          <p class="small">Deletes every audit, fix, licence, photo and scan, the audit log and alert history, for every unit. Units, checklists and all accounts are kept.</p>
-          <div><button class="btn danger-solid" data-click="wipe">${icon('delete_forever')}Wipe all data</button></div>
+        ${me.role === 'head' && me.username ? html`<section class="card danger-zone" aria-labelledby="wipeTitle">
+          <div style="flex:1;min-width:0"><h2 id="wipeTitle">Wipe all data</h2><span class="small muted">Deletes all audits, fixes, licences and files. Units, checklists and accounts stay.</span></div>
+          <button class="btn danger-solid" data-click="wipe">${icon('delete_forever')}Wipe</button>
         </section>` : ''}
       </div>`,
   });
+  for (const el of $$('details.collapse[id]', view)) el.addEventListener('toggle', () => { settingsOpen[el.id] = el.open; });
   const person = (el) => people.users.find((u) => u.id === +el.dataset.id);
   on.click = {
     signout: () => signOut(),
@@ -3004,9 +3013,16 @@ async function pageSettings({ token }) {
     logOpen: (el) => { const e = log.activity.find((x) => x.id === +el.dataset.id); if (e) openLogEntry(e); },
     logMore: () => { logState.shown += 50; $('#logList').innerHTML = part(logList()); },
     theme: (el) => {
-      const t = el.dataset.v;
-      if (t === 'system') { delete document.documentElement.dataset.theme; localStorageDel('bk-theme'); } else { document.documentElement.dataset.theme = t; localStorageSet('bk-theme', t); }
-      $$('[data-click="theme"]', view).forEach((b) => b.setAttribute('aria-pressed', String(b === el)));
+      const t = el.getAttribute('aria-checked') === 'true' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = t; localStorageSet('bk-theme', t);
+      el.setAttribute('aria-checked', String(t === 'dark'));
+    },
+    notify: (el) => {
+      const on = el.getAttribute('aria-checked') !== 'true';
+      if (on) localStorageDel('bk-notify'); else localStorageSet('bk-notify', 'off');
+      el.setAttribute('aria-checked', String(on));
+      if (alertsCache) showAlertCount(alertsCache.list);
+      toast(on ? 'Notifications on' : 'Notifications off', { success: true });
     },
     discard: async () => {
       const ok = await confirmDialog({ title: 'Discard this draft?', text: 'All ratings, remarks and photos for this audit are removed from this device.', ok: 'Discard', danger: true });
