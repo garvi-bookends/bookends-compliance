@@ -769,9 +769,9 @@ body.has-bottom-bar .snackbar { bottom: calc(90px + env(safe-area-inset-bottom))
 @media (max-width: 599px) { .dl-bar .dl-actions { width: 100%; } .dl-bar .dl-actions .btn { flex: 1 1 140px; } }
 
 /* "More filters" on the Fix Plan */
-.more-filters { display: contents; }
-.more-btn .count { background: var(--primary-fill); color: var(--on-primary-fill); border-radius: 999px; padding: 0 7px; font-size: 12px; line-height: 18px; }
-@media (max-width: 599px) { .filterbar > .more-btn { grid-column: 1 / -1; } }
+.extra-chip { align-self: center; gap: 6px; background: var(--primary-soft); color: var(--on-primary-soft); border-color: transparent; }
+.extra-chip .ms { font-size: 16px; }
+#extraChip:empty { display: none; }
 
 /* phones: compact header and progress on task screens, so the first question is in view */
 @media (max-width: 599px) {

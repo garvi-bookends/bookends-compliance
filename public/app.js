@@ -1919,20 +1919,17 @@ async function pageFixes({ token, query }) {
       ${statCard({ label: 'Overdue', value: html`${un.filter((f) => f.due_date < today).length}`, tone: un.some((f) => f.due_date < today) ? 'bad' : '', click: 'strip', v: 'overdue:', pressed: is('overdue', '') })}
       ${R.PRIORITY_ORDER.map((p) => statCard({ label: R.PRIORITY[p].label, value: html`${un.filter((f) => f.priority === p).length}`, click: 'strip', v: `open:${p}`, pressed: is('open', p) }))}`;
   };
-  const extraFilters = () => [state.due, state.kind, state.domain].filter(Boolean).length;
-  let showMore = extraFilters() > 0;
-  const moreLabel = () => html`${icon('tune')}${showMore ? 'Fewer filters' : 'More filters'}${extraFilters() ? html` <span class="count">${extraFilters()}</span>` : ''}`;
+  // Due date, kind and audit have no controls on the page; a link can still set them, so show them as one clearable chip.
+  const extraChip = () => {
+    const on = [state.due && DUE_FILTERS.find(([k]) => k === state.due)?.[1], state.kind && (state.kind === 'paperwork' ? 'Paperwork only' : 'On-site only'), state.domain && R.DOMAINS[state.domain]?.label].filter(Boolean);
+    return on.length ? html`<button type="button" class="btn sm extra-chip" data-click="clearExtra" title="Clear these filters">${on.join(' · ')}${icon('close')}</button>` : '';
+  };
   const filtersHtml = () => html`
     ${searchBar({ value: state.q, placeholder: 'Search fixes, owners, codes' })}
     ${selectFilter({ name: 'unit', value: state.unit, label: 'Unit', options: [['', 'All units'], ...sites.units.map((s) => [s.id, unitName(s)])] })}
     ${selectFilter({ name: 'priority', value: state.priority, label: 'Priority', options: [['', 'Any priority'], ...R.PRIORITY_ORDER.map((p) => [p, R.PRIORITY[p].label])] })}
     ${selectFilter({ name: 'status', value: state.status, label: 'Status', options: STATUS_FILTERS.map(([k, l]) => [k, l]) })}
-    <button type="button" class="btn more-btn" id="moreBtn" data-click="moreFilters" aria-expanded="${showMore}" aria-controls="moreFilters">${moreLabel()}</button>
-    <div class="more-filters" id="moreFilters" ${showMore ? '' : 'hidden'}>
-      ${selectFilter({ name: 'due', value: state.due, label: 'Due date', options: DUE_FILTERS.map(([k, l]) => [k, l]) })}
-      ${selectFilter({ name: 'kind', value: state.kind, label: 'Kind', options: [['', 'Paperwork & on-site'], ['paperwork', 'Paperwork only'], ['physical', 'On-site only']] })}
-      ${selectFilter({ name: 'domain', value: state.domain, label: 'Audit', options: [['', 'Food & maintenance'], ...R.AUDIT_DOMAINS.map((x) => [x, R.DOMAINS[x].label])] })}
-    </div>`;
+    <span id="extraChip">${extraChip()}</span>`;
   const summaryHtml = () => {
     const rs = rows();
     return html`<b>${R.plural(rs.length, 'fix', 'fixes')}</b> · ${R.PRIORITY_ORDER.map((p) => `${rs.filter((f) => f.priority === p).length} ${R.PRIORITY[p].short}`).join(' · ')} · ${rs.filter((f) => f.kind === 'paperwork').length} paperwork · ${R.fmtNum(R.round1(rs.reduce((s, f) => s + (f.domain === 'food' ? f.marks : 0), 0)))} food safety marks to win back`;
@@ -1945,7 +1942,7 @@ async function pageFixes({ token, query }) {
     $('#viewSeg').innerHTML = part(segmented({ name: 'view', value: state.view, label: 'View', options: [['priority', 'By priority'], ['problem', 'By problem']] }));
     $('#fixSummary').innerHTML = part(summaryHtml());
     $('#fixList').innerHTML = part(listHtml());
-    $('#moreBtn').innerHTML = part(moreLabel());
+    $('#extraChip').innerHTML = part(extraChip());
   };
   mount({
     title: 'Dashboard',
@@ -1966,12 +1963,7 @@ async function pageFixes({ token, query }) {
     view: (el) => { state.view = el.dataset.v; sync({ filters: false }); },
     more: (el) => { expanded.add(el.dataset.p); $('#fixList').innerHTML = part(listHtml()); },
     clear: () => { location.hash = '#/'; },
-    moreFilters: (el) => {
-      showMore = !showMore;
-      $('#moreFilters').hidden = !showMore;
-      el.setAttribute('aria-expanded', String(showMore));
-      el.innerHTML = part(moreLabel());
-    },
+    clearExtra: () => { state.due = ''; state.kind = ''; state.domain = ''; sync(); },
   };
   on.change = Object.fromEntries(['priority', 'kind', 'domain', 'unit', 'status', 'due'].map((k) => [k, (el) => { state[k] = el.value; sync({ filters: false }); }]));
   on.input = { q: (el) => { state.q = el.value; sync({ filters: false }); } };
