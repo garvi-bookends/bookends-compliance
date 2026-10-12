@@ -261,6 +261,7 @@ function openDialog({ title, body, actions, onSubmit, on = {}, locked = false },
     catch (err) { if (!(err instanceof SignInNeeded)) toast(friendly(err), { error: true }); }
     finally { if (btn) btn.disabled = false; }
   });
+  addPasswordEyes(el);
   el.showModal();
   const first = $('input:not([type=hidden]), select, textarea', el);
   if (first && window.matchMedia('(min-width: 600px)').matches) first.focus();
@@ -638,10 +639,36 @@ async function router() {
 }
 const stale = (token) => token !== navToken;
 function rerender() { keepScrollOnce = true; return router(); }
+/** Puts a show/hide eye on every password box in root that does not have one yet (sign-in has its own). */
+function addPasswordEyes(root) {
+  for (const input of root.querySelectorAll('input[type="password"]:not([data-eye])')) {
+    if (input.closest('.input-icon')) continue;
+    input.dataset.eye = '1';
+    const wrap = document.createElement('span');
+    wrap.className = 'pw-wrap';
+    input.replaceWith(wrap);
+    wrap.append(input);
+    wrap.insertAdjacentHTML('beforeend', part(html`<button type="button" class="pw-eye" aria-label="Show password" title="Show password">${icon('visibility')}</button>`));
+  }
+}
+// One handler for every eye, wherever the box is (page, dialog or confirm dialog).
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.pw-eye');
+  if (!btn) return;
+  e.preventDefault();
+  const input = btn.parentElement.querySelector('input');
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.innerHTML = part(icon(show ? 'visibility_off' : 'visibility'));
+  btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  btn.title = show ? 'Hide password' : 'Show password';
+  input.focus();
+});
 function mount({ title, body }) {
   $('#topTitle').textContent = title;
   document.title = `${title} · Bookends Compliance`;
   view.innerHTML = part(body);
+  addPasswordEyes(view);
   document.body.classList.toggle('has-bottom-bar', !!$('.bottom-bar', view));
   if (!keepScrollOnce) window.scrollTo(0, 0);
   keepScrollOnce = false;
