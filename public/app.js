@@ -3056,10 +3056,7 @@ async function pageSettings({ token }) {
             <a class="btn primary" href="#/audits/new">Continue</a><button class="btn danger" data-click="discard">Discard</button></div>`
             : html`<p class="small muted">No unfinished audit on this device.</p>`}
         </section>
-        <section class="card stack">
-          <div class="section-head" style="margin:0"><h2>Framework &amp; rules</h2><span class="sub">Grades, scoring, fix deadlines and who does what.</span></div>
-          <div><a class="btn" href="#/framework">${icon('menu_book')}Open framework</a></div>
-        </section>
+        <a class="card link-card" href="#/framework">${icon('menu_book')}<span class="lc-body"><b>Framework &amp; rules</b><span class="small muted">Grades, scoring, fix deadlines and who does what.</span></span>${icon('chevron_right')}</a>
         ${me.role === 'head' && me.username ? html`<section class="card danger-zone" aria-labelledby="wipeTitle">
           <div style="flex:1;min-width:0"><h2 id="wipeTitle">Wipe all data</h2><span class="small muted">Deletes all audits, fixes, licences and files. Units, checklists and accounts stay.</span></div>
           <button class="btn danger-solid" data-click="wipe">${icon('delete_forever')}Wipe</button>
