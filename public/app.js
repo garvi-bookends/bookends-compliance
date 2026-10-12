@@ -3119,12 +3119,7 @@ async function pageFramework({ token }) {
       ${secs.map((s) => html`<h3 style="font-size:14px;margin:16px 0 4px">${s}</h3><div class="list">${t.items.filter((i) => i.section === s).map((i) => html`<div class="list-row" style="padding-left:0;padding-right:0;min-height:0;align-items:flex-start">
         <span class="small muted num" style="width:44px;flex:none">${i.code}</span><span class="lr-body"><span class="small">${i.text}</span>${i.area && i.area !== s ? html`<span class="lr-meta">${i.area}${i.applies !== 'Both' ? ` · ${i.applies} only` : ''}</span>` : ''}</span>${star(i.critical)}${i.criticality ? html`<span class="small muted">${i.criticality}</span>` : html`<span class="small muted num">${i.weight}</span>`}</div>`)}</div>`)}`;
   };
-  const steps = [
-    ['Audit', 'Check every line at the unit. Add a photo for every problem.'],
-    ['Fix', 'Each problem becomes a fix with a due date. The unit fixes it and uploads proof.'],
-    ['Check', 'The Compliance Head checks the proof and closes the fix.'],
-    ['Re-audit', 'Next visit within 30 days to see the score go up.'],
-  ];
+  const steps = ['Audit', 'Fix', 'Check', 'Re-audit'];
   const bands = [['exemplar', '90% and above', 'Best'], ['satisfactory', '80–89%', 'Target for every unit'], ['improve', '50–79%', 'Has gaps to fix'], ['noncompliance', 'Below 50%', 'Re-audit within 3 weeks']];
   const prio = { critical: 'Serious risk', major: 'Important', minor: 'Small gap' };
   mount({
@@ -3149,7 +3144,7 @@ async function pageFramework({ token }) {
           <p class="small muted">Do paperwork fixes first. They are quick to close.</p></section>
 
         <section class="stack"><h2 style="font-size:18px">Steps</h2>
-          <div class="steps">${steps.map(([t, x], i) => html`<div class="step"><b>${i + 1}. ${t}</b><span>${x}</span></div>`)}</div></section>
+          <div class="steps short">${steps.map((t, i) => html`<div class="step"><b>${i + 1}. ${t}</b></div>`)}</div></section>
 
         <section class="stack"><h2 style="font-size:18px">Who does what</h2>
           <div class="card prose small"><ul>
