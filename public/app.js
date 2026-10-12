@@ -2934,12 +2934,12 @@ async function pageSettings({ token }) {
     if (!rs.length) return emptyState({ compact: true, iconName: 'history', title: log.activity.length ? 'Nothing matches' : 'Nothing recorded yet', text: log.activity.length ? 'Try other words, or Everything.' : 'Audits, fix updates, licence and unit changes and new people appear here.' });
     return html`<div class="list">${rs.slice(0, logState.shown).map(logEntry)}</div>${rs.length > logState.shown ? html`<button class="dt-more" data-click="logMore">Show more (${rs.length - logState.shown} older)</button>` : ''}`;
   };
-  const logSection = () => html`<section class="card flush" id="auditLog">
-    <div class="section-head"><h2>Audit log</h2><span class="count">${log.activity.length}</span>
-      <span class="sub">Who did what, and when: audits, fix updates and reviews, licences, units and people. Only the Compliance Head sees this. Newest first${log.activity.length >= 300 ? ', last 300 entries' : ''}.</span></div>
+  // closed until clicked, so Settings stays short; the count shows how much is inside
+  const logSection = () => collapse({ id: 'auditLog', flush: true, iconName: 'history', title: `Audit log (${log.activity.length}${log.activity.length >= 300 ? '+' : ''})`,
+    sub: 'Who did what, and when. Click to open.',
+    body: html`<p class="small muted log-intro">Audits, fix updates and reviews, licences, units and people. Only the Compliance Head sees this. Newest first${log.activity.length >= 300 ? ', last 300 entries' : ''}.</p>
     <div class="filterbar log-filters">${searchBar({ name: 'logQ', placeholder: 'Search the log: person, unit, fix…' })}${selectFilter({ name: 'logType', value: '', label: 'Type', options: LOG_TYPES })}</div>
-    <div id="logList">${logList()}</div>
-  </section>`;
+    <div id="logList">${logList()}</div>` });
   const teamSection = () => {
     if (!me.accountsReady) return '';
     if (me.firstAdminSetup && me.canManageUsers) {

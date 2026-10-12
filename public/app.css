@@ -808,7 +808,8 @@ body.has-bottom-bar .snackbar { bottom: calc(90px + env(safe-area-inset-bottom))
 
 /* settings: audit log */
 .log-filters { padding: 12px 18px 14px; border-bottom: 1px solid var(--border); }
-@media (min-width: 1024px) { .log-filters { padding: 12px 24px 14px; } }
+.log-intro { padding: 14px 18px 0; }
+@media (min-width: 1024px) { .log-filters { padding: 12px 24px 14px; } .log-intro { padding: 16px 24px 0; } }
 .log-row .lr-meta .ms { font-size: 15px; vertical-align: -3px; }
 button.log-row { width: 100%; background: none; border: 0; border-top: 1px solid var(--border); font: inherit; text-align: left; cursor: pointer; }
 .list > button.log-row:first-child { border-top: 0; }
