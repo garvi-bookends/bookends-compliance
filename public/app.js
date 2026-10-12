@@ -3109,16 +3109,6 @@ async function pageSettings({ token }) {
 
 // =================================================================== page: framework
 async function pageFramework({ token }) {
-  const templates = await getTemplates();
-  if (stale(token)) return;
-  let active = templates.find((t) => t.scheme === 'fssai2')?.id;
-  const checklist = () => {
-    const t = templates.find((x) => x.id === active);
-    const secs = [...new Set(t.items.map((i) => i.section))];
-    return html`<p class="small muted" style="margin-bottom:12px">${t.name}: ${R.plural(t.items.length, 'line')}, ${t.items.filter((i) => i.critical).length} ★ critical. ${t.description || ''}</p>
-      ${secs.map((s) => html`<h3 style="font-size:14px;margin:16px 0 4px">${s}</h3><div class="list">${t.items.filter((i) => i.section === s).map((i) => html`<div class="list-row" style="padding-left:0;padding-right:0;min-height:0;align-items:flex-start">
-        <span class="small muted num" style="width:44px;flex:none">${i.code}</span><span class="lr-body"><span class="small">${i.text}</span>${i.area && i.area !== s ? html`<span class="lr-meta">${i.area}${i.applies !== 'Both' ? ` · ${i.applies} only` : ''}</span>` : ''}</span>${star(i.critical)}${i.criticality ? html`<span class="small muted">${i.criticality}</span>` : html`<span class="small muted num">${i.weight}</span>`}</div>`)}</div>`)}`;
-  };
   const steps = ['Audit', 'Fix', 'Check', 'Re-audit'];
   const bands = [['exemplar', '90% and above', 'Best'], ['satisfactory', '80–89%', 'Target for every unit'], ['improve', '50–79%', 'Has gaps to fix'], ['noncompliance', 'Below 50%', 'Re-audit within 3 weeks']];
   const prio = { critical: 'Serious risk', major: 'Important', minor: 'Small gap' };
@@ -3161,13 +3151,8 @@ async function pageFramework({ token }) {
             <li>Unit below 80% → next audit within 30 days.</li>
           </ul></div></section>
 
-        <details class="card"><summary><b>See the full checklists</b></summary>
-          <div style="margin:12px 0">${segmented({ name: 'tab', value: active, label: 'Checklist', options: templates.map((t) => [t.id, t.scheme === 'fssai2' ? 'Food safety' : t.scheme === 'docket' ? 'Maintenance' : 'Food (Aug)']) })}</div>
-          <div id="checklist">${checklist()}</div>
-        </details>
       </div>`,
   });
-  on.click = { tab: (el) => { active = +el.dataset.v; $$('[data-click="tab"]', view).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.v === active))); $('#checklist').innerHTML = part(checklist()); } };
 }
 
 // =================================================================== boot
