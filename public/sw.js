@@ -46,3 +46,21 @@ self.addEventListener('fetch', (e) => {
   }
   if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') e.respondWith(networkFirst(req, FONTS));
 });
+
+// Phone and computer notifications for alerts (sent once a day by the server; see cronAlerts in src/api.js).
+self.addEventListener('push', (e) => {
+  let m = {};
+  try { m = e.data ? e.data.json() : {}; } catch { m = { body: e.data?.text() }; }
+  e.waitUntil(self.registration.showNotification(m.title || 'Bookends Compliance', {
+    body: m.body || '', icon: '/icon.svg', badge: '/icon.svg', tag: m.tag, data: { url: m.url || '#/' },
+  }));
+});
+// Tapping one opens the fix or licence: in an open tab of the app if there is one, otherwise in a new one.
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = new URL(`/${e.notification.data?.url || '#/'}`, self.location.origin).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((tabs) => {
+    const tab = tabs.find((t) => new URL(t.url).origin === self.location.origin);
+    return tab ? tab.navigate(url).then((t) => (t || tab).focus()) : self.clients.openWindow(url);
+  }));
+});

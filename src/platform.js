@@ -26,6 +26,11 @@ export function appEnv(e = process.env) {
   const pool = createPool(url);
   cached = {
     ACCESS_CODE: e.ACCESS_CODE,
+    // phone and computer notifications (Web Push): the key pair, a contact for the push services, and the secret Vercel Cron sends
+    VAPID_PUBLIC_KEY: e.VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY: e.VAPID_PRIVATE_KEY,
+    VAPID_SUBJECT: e.VAPID_SUBJECT,
+    CRON_SECRET: e.CRON_SECRET,
     TZ_OFFSET_MINUTES: e.TZ_OFFSET_MINUTES || '330', // business-day boundary; 330 = IST (UTC+5:30)
     DB: openDb(pool),
     FILES: filesFromEnv(e),

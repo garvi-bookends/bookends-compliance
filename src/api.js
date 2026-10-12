@@ -1,3 +1,4 @@
+import webpush from 'web-push';
 import * as R from '../public/rules.js';
 
 // ================================================================= plumbing
@@ -606,6 +607,11 @@ function licenceInput(body) {
 }
 /** Alerts for the signed-in person: P1/P2 fixes they can see; licences only for the Compliance Head. */
 async function listAlerts({ env, session }) {
+  const { today, all, alerts } = await alertsOf(env, session);
+  return json({ today, alerts, done: all.length - alerts.length });
+}
+/** This person's alerts: what their role lets them see, less the ones they marked done. */
+async function alertsOf(env, session) {
   const scope = scopeOf(session);
   const [fx, li] = await env.DB.batch([
     env.DB.prepare(`SELECT f.id, f.priority, f.status, f.due_date, f.title, s.name AS site_name FROM findings f JOIN sites s ON s.id = f.site_id
@@ -616,8 +622,7 @@ async function listAlerts({ env, session }) {
   const all = R.alertsFor({ findings: fx.results, licences: scope == null ? li.results : null, today });
   const done = await env.DB.prepare('SELECT alert_key FROM alert_dismissals WHERE user_key = ?').bind(alertUser(session)).all();
   const hidden = new Set(done.results.map((r) => r.alert_key));
-  const alerts = all.filter((a) => !hidden.has(a.key));
-  return json({ today, alerts, done: all.length - alerts.length });
+  return { today, all, alerts: all.filter((a) => !hidden.has(a.key)) };
 }
 /** Whose "done" list this is: the account, or the name for a team-code session. */
 const alertUser = (session) => (session.user ? `u:${session.user.id}` : `n:${session.name || ''}`);
@@ -839,6 +844,86 @@ async function wipeData({ env, request, actor, session }) {
   try { await env.FILES.remove([...keys]); } catch (e) { filesLeft = keys.size; console.error('wipe: could not remove files', e); }
   return json({ ok: true, audits: Number(counts.audits), fixes: Number(counts.fixes), licences: Number(counts.licences), files: keys.size - filesLeft, filesLeft });
 }
+// ================================================================= phone and computer notifications (Web Push)
+// Settings → Notifications on: the browser subscribes and the subscription is kept against the person signed in.
+// Once a day (Vercel Cron → /api/cron/alerts) each person's new alerts are sent to every browser they switched on.
+const pushReady = (env) => !!(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY);
+const noPushTables = (e) => /push_(subscriptions|sent)/.test(e.message || '');
+async function pushKey({ env }) {
+  return json({ key: pushReady(env) ? env.VAPID_PUBLIC_KEY : null });
+}
+async function pushSubscribe({ env, request, session }) {
+  if (!session.user) bad('Sign in with your own account to get notifications');
+  if (!pushReady(env)) throw new HttpError(503, 'Notifications are not set up on the server yet');
+  const b = await readJson(request);
+  const endpoint = typeof b.endpoint === 'string' && b.endpoint.startsWith('https://') ? b.endpoint.slice(0, 1000) : null;
+  const p256dh = str(b.keys?.p256dh, 200), auth = str(b.keys?.auth, 100);
+  if (!endpoint || !p256dh || !auth) bad('This browser sent an incomplete subscription');
+  try {
+    await env.DB.prepare(`INSERT INTO push_subscriptions (endpoint, user_id, p256dh, auth) VALUES (?, ?, ?, ?)
+      ON CONFLICT (endpoint) DO UPDATE SET user_id = excluded.user_id, p256dh = excluded.p256dh, auth = excluded.auth`).bind(endpoint, session.user.id, p256dh, auth).run();
+  } catch (e) { if (noPushTables(e)) throw new HttpError(503, 'Notifications are not set up on the server yet'); throw e; }
+  // a first one straight away, so the person sees it works on this device
+  if (b.welcome) {
+    await sendPush(env, { endpoint, keys: { p256dh, auth } }, { title: 'Notifications are on', body: 'Alerts for fixes due and licences expiring will pop up here.', url: '#/' }).catch(() => {});
+  }
+  return json({ ok: true });
+}
+async function pushUnsubscribe({ env, request, session }) {
+  const b = await readJson(request);
+  if (typeof b.endpoint === 'string' && session.user) {
+    await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint = ? AND user_id = ?').bind(b.endpoint, session.user.id).run().catch((e) => { if (!noPushTables(e)) throw e; });
+  }
+  return json({ ok: true });
+}
+/** Sends one notification. Returns false when the browser has gone (unsubscribed, app removed), so it can be forgotten. */
+async function sendPush(env, sub, msg) {
+  webpush.setVapidDetails(env.VAPID_SUBJECT || 'mailto:compliance@bookends.invalid', env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
+  try {
+    await webpush.sendNotification(sub, JSON.stringify(msg), { TTL: 24 * 3600, urgency: 'high' });
+    return true;
+  } catch (e) {
+    if (e.statusCode === 404 || e.statusCode === 410) return false;
+    throw e;
+  }
+}
+const ALERT_HEAD = { critical: 'Priority 1 fix', major: 'Priority 2 fix', licence: 'Licence' };
+/** The daily send. Vercel Cron calls it with "Authorization: Bearer <CRON_SECRET>". Every alert pops up once
+ *  (and once more if it becomes overdue); more than MAX new ones for a person are summed up in one more message. */
+async function cronAlerts({ env, request }) {
+  if (!env.CRON_SECRET || request.headers.get('authorization') !== `Bearer ${env.CRON_SECRET}`) throw new HttpError(401, 'Not allowed');
+  if (!pushReady(env)) return json({ ok: false, reason: 'VAPID keys not set' });
+  const MAX = 5;
+  const subs = (await env.DB.prepare(`SELECT p.endpoint, p.p256dh, p.auth, u.id AS user_id, u.role, u.site_id FROM push_subscriptions p
+    JOIN users u ON u.id = p.user_id WHERE u.active = 1`).all()).results;
+  const people = new Map();
+  for (const x of subs) {
+    if (!people.has(x.user_id)) people.set(x.user_id, { user: { id: x.user_id, role: x.role, site_id: x.site_id }, subs: [] });
+    people.get(x.user_id).subs.push(x);
+  }
+  let sent = 0, gone = 0;
+  for (const { user, subs: mine } of people.values()) {
+    const { alerts } = await alertsOf(env, { user });
+    const had = new Set((await env.DB.prepare('SELECT alert_key FROM push_sent WHERE user_id = ?').bind(user.id).all()).results.map((r) => r.alert_key));
+    const fresh = alerts.filter((a) => !had.has(a.key));
+    if (!fresh.length) continue;
+    const msgs = fresh.slice(0, MAX).map((a) => ({ title: `${ALERT_HEAD[a.group] || 'Alert'}${a.overdue ? (a.kind === 'licence' ? ' expired' : ' overdue') : ''}`, body: `${a.title}\n${a.sub}`,
+      url: `#/${a.kind === 'fix' ? 'fixes' : 'licences'}/${a.id}`, tag: a.key }));
+    if (fresh.length > MAX) msgs.push({ title: R.plural(fresh.length - MAX, 'more alert'), body: 'Open the app to see them all.', url: '#/', tag: 'more' });
+    let reached = false;
+    for (const sub of mine) {
+      for (const m of msgs) {
+        try {
+          if (await sendPush(env, { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, m)) { sent += 1; reached = true; }
+          else { gone += 1; await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint = ?').bind(sub.endpoint).run(); break; }
+        } catch (e) { console.error('push failed', e.statusCode || e.message); }
+      }
+    }
+    if (reached) await env.DB.batch(fresh.map((a) => env.DB.prepare('INSERT INTO push_sent (user_id, alert_key) VALUES (?, ?) ON CONFLICT DO NOTHING').bind(user.id, a.key)));
+  }
+  await env.DB.prepare("DELETE FROM push_sent WHERE sent_at < now() - interval '90 days'").run();
+  return json({ ok: true, people: people.size, sent, gone });
+}
 /** The audit log: who did what, when, newest first. Compliance Head only. */
 async function listActivity({ env, url }) {
   const site = url.searchParams.get('site');
@@ -855,6 +940,7 @@ const PUBLIC = [
   ['POST', /^\/api\/auth\/login$/, login],
   ['POST', /^\/api\/auth\/logout$/, logout],
   ['GET', /^\/api\/auth\/options$/, authOptions],
+  ['GET', /^\/api\/cron\/alerts$/, cronAlerts], // checks CRON_SECRET itself
 ];
 const routes = [
   ['GET', /^\/api\/me$/, me, 'all'],
@@ -885,6 +971,9 @@ const routes = [
   ['GET', /^\/api\/files\/(.+)$/, getFile, 'all'],
   ['GET', /^\/api\/activity$/, listActivity, 'head'],
   ['POST', /^\/api\/admin\/wipe$/, wipeData, 'head'],
+  ['GET', /^\/api\/push\/key$/, pushKey, 'all'],
+  ['POST', /^\/api\/push\/subscribe$/, pushSubscribe, 'all'],
+  ['POST', /^\/api\/push\/unsubscribe$/, pushUnsubscribe, 'all'],
 ];
 
 /**

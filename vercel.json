@@ -6,6 +6,9 @@
   "functions": {
     "api/index.js": { "maxDuration": 30 }
   },
+  "crons": [
+    { "path": "/api/cron/alerts", "schedule": "30 3 * * *" }
+  ],
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api?__path=:path*" }
   ],
