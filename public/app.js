@@ -2959,7 +2959,7 @@ async function pageSettings({ token }) {
   mount({
     title: 'Settings',
     body: html`
-      ${pageHeader({ title: 'Settings', sub: 'Your account, team members, this device, units and the compliance rules.' })}
+      ${pageHeader({ title: 'Settings', sub: 'Your account, team members, this device and the compliance rules.' })}
       <div class="stack" style="max-width:860px">
         <section class="card stack">
           <div class="section-head" style="margin:0"><h2>Account</h2></div>
@@ -2982,10 +2982,6 @@ async function pageSettings({ token }) {
             : html`<p class="small muted">No unfinished audit on this device.</p>`}
         </section>
         <section class="card stack">
-          <div class="section-head" style="margin:0"><h2>Units</h2><span class="sub">${R.plural(sites.units.length, 'active unit')}. Edit or archive a unit from its page.</span></div>
-          <div class="row">${isManager() ? html`<a class="btn" href="#/units">${icon('storefront')}Open my unit</a>` : html`<a class="btn" href="#/units">${icon('storefront')}Manage units</a><button class="btn" data-click="addUnit">${icon('add')}Add unit</button>`}</div>
-        </section>
-        <section class="card stack">
           <div class="section-head" style="margin:0"><h2>Framework &amp; rules</h2><span class="sub">How compliance is measured: grade bands, marking, priorities, roles, escalation and the checklists.</span></div>
           <div><a class="btn" href="#/framework">${icon('menu_book')}Open framework</a></div>
         </section>
@@ -3004,7 +3000,6 @@ async function pageSettings({ token }) {
     addPerson: () => openPersonDialog(null, { units: sites.units, onDone: () => rerender() }),
     editPerson: (el) => openPersonDialog(person(el), { units: sites.units, onDone: () => rerender() }),
     resetPerson: (el) => openResetDialog(person(el), () => rerender()),
-    addUnit: () => openUnitDialog(),
     wipe: () => openWipeDialog(),
     logOpen: (el) => { const e = log.activity.find((x) => x.id === +el.dataset.id); if (e) openLogEntry(e); },
     logMore: () => { logState.shown += 50; $('#logList').innerHTML = part(logList()); },
