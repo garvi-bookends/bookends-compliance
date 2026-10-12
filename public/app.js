@@ -702,6 +702,7 @@ async function signOut({ ask = true } = {}) {
     const ok = await confirmDialog({ title: 'Sign out?', text: `Signed in as ${app.me?.name || ''}. Any audit draft stays saved on this device.${waiting ? ` ${R.plural(waiting, 'audit')} not sent yet ${waiting === 1 ? 'stays' : 'stay'} on this phone and ${waiting === 1 ? 'is' : 'are'} sent the next time you sign in here with network.` : ''}`, ok: 'Sign out' });
     if (!ok) return;
   }
+  await pushOff().catch(() => {}); // this person's alerts stop popping up on this device
   await fetch('/api/auth/logout', { method: 'POST' }).catch(() => null);
   if (window.caches) caches.delete('bk-api-v1').catch(() => {}); // the copies kept for working offline are this person's data
   app.me = null;
@@ -865,6 +866,42 @@ function alertsBody(list, { undo = null, done = 0 } = {}) {
   })}${doneNote}</div>`;
 }
 const notifyOn = () => localStorageGet('bk-notify') !== 'off'; // Settings → Notifications switch, per device
+// ---- phone and computer pop-ups for alerts (Web Push). The server sends each person's new alerts once a day (cronAlerts in src/api.js).
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const b64ToBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (s.length % 4)) % 4)), (c) => c.charCodeAt(0));
+/** Signs this browser up for the signed-in person's alerts. ask: may show the browser's permission prompt.
+ *  Returns null when done, or a sentence for people saying why it could not. */
+async function pushOn({ ask = false, welcome = false } = {}) {
+  if (!pushSupported()) {
+    return /iPhone|iPad/.test(navigator.userAgent) ? 'On iPhone: tap Share → Add to Home Screen, open the app from the Home Screen, then switch Notifications on there.' : 'This browser cannot show notifications.';
+  }
+  if (Notification.permission === 'denied') return 'Notifications are blocked for this site: allow them in the browser’s site settings, then switch this on again.';
+  if (Notification.permission !== 'granted') {
+    if (!ask) return 'Not allowed yet.';
+    if ((await Notification.requestPermission()) !== 'granted') return 'Notifications were not allowed on this device.';
+  }
+  const { key } = await api('/api/push/key');
+  if (!key) return 'Pop-ups are not set up on the server yet.';
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) {
+    try { sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(key) }); }
+    catch { // an old sign-up made with another server key: replace it
+      await (await reg.pushManager.getSubscription())?.unsubscribe();
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(key) });
+    }
+  }
+  await api('/api/push/subscribe', { method: 'POST', body: { ...sub.toJSON(), welcome } });
+  return null;
+}
+/** Stops pop-ups on this browser (switch off, or signing out so the next person does not get these alerts). */
+async function pushOff() {
+  if (!pushSupported()) return;
+  const sub = await (await navigator.serviceWorker.getRegistration())?.pushManager.getSubscription().catch(() => null);
+  if (!sub) return;
+  await api('/api/push/unsubscribe', { method: 'POST', body: { endpoint: sub.endpoint } }).catch(() => {});
+  await sub.unsubscribe().catch(() => {});
+}
 function showAlertCount(list) {
   const el = $('#alertCount');
   el.hidden = !list.length || !notifyOn();
@@ -3008,7 +3045,7 @@ async function pageSettings({ token }) {
         ${teamSection()}
         ${seeLog ? logSection() : ''}
         <section class="card toggle-card" aria-label="Notifications">
-          ${toggle('notify', notifyOn(), 'Notifications', 'alert count and overdue popups on this device.')}
+          ${toggle('notify', notifyOn(), 'Notifications', 'alerts pop up on this phone or computer, plus the alert count.')}
         </section>
         <section class="card toggle-card" aria-label="Dark mode">
           ${toggle('theme', dark, 'Dark mode', 'remembered on this device.')}
@@ -3020,7 +3057,7 @@ async function pageSettings({ token }) {
             : html`<p class="small muted">No unfinished audit on this device.</p>`}
         </section>
         <section class="card stack">
-          <div class="section-head" style="margin:0"><h2>Framework &amp; rules</h2><span class="sub">How compliance is measured: grade bands, marking, priorities, roles, escalation and the checklists.</span></div>
+          <div class="section-head" style="margin:0"><h2>Framework &amp; rules</h2><span class="sub">Grades, scoring, fix deadlines and who does what.</span></div>
           <div><a class="btn" href="#/framework">${icon('menu_book')}Open framework</a></div>
         </section>
         ${me.role === 'head' && me.username ? html`<section class="card danger-zone" aria-labelledby="wipeTitle">
@@ -3046,12 +3083,19 @@ async function pageSettings({ token }) {
       document.documentElement.dataset.theme = t; localStorageSet('bk-theme', t);
       setSwitch(el, t === 'dark');
     },
-    notify: (el) => {
+    notify: async (el) => {
       const on = el.getAttribute('aria-checked') !== 'true';
       if (on) localStorageDel('bk-notify'); else localStorageSet('bk-notify', 'off');
       setSwitch(el, on);
       if (alertsCache) showAlertCount(alertsCache.list);
-      toast(on ? 'Notifications on' : 'Notifications off', { success: true });
+      if (!on) { pushOff(); toast('Notifications off', { success: true }); return; }
+      el.disabled = true;
+      try {
+        const why = await pushOn({ ask: true, welcome: true });
+        if (why) toast(`Notifications on in the app, but no pop-ups on this device yet. ${why}`, { ms: 10000 });
+        else toast('Notifications on: alerts will pop up on this device.', { success: true });
+      } catch (e) { if (!(e instanceof SignInNeeded)) toast(`Notifications on in the app, but pop-ups could not be set up: ${friendly(e)}`, { error: true, ms: 10000 }); }
+      finally { el.disabled = false; }
     },
     discard: async () => {
       const ok = await confirmDialog({ title: 'Discard this draft?', text: 'All ratings, remarks and photos for this audit are removed from this device.', ok: 'Discard', danger: true });
@@ -3076,54 +3120,56 @@ async function pageFramework({ token }) {
         <span class="small muted num" style="width:44px;flex:none">${i.code}</span><span class="lr-body"><span class="small">${i.text}</span>${i.area && i.area !== s ? html`<span class="lr-meta">${i.area}${i.applies !== 'Both' ? ` · ${i.applies} only` : ''}</span>` : ''}</span>${star(i.critical)}${i.criticality ? html`<span class="small muted">${i.criticality}</span>` : html`<span class="small muted num">${i.weight}</span>`}</div>`)}</div>`)}`;
   };
   const steps = [
-    ['Audit', 'Walk the unit on a phone. Rate every line; a remark and a photo for every gap.'],
-    ['Score', 'Marks earned ÷ marks possible. N/A lines are left out. ★ critical lines count double.'],
-    ['Prioritise', 'Every gap becomes a fix: Priority 1, 2 or 3, with a due date and the marks it wins back.'],
-    ['Fix', 'The unit closes paperwork first, then on-site fixes, and uploads proof.'],
-    ['Verify', 'The Compliance Head checks and closes, or sends back.'],
-    ['Re-audit', 'Next visit within 30 days. Compare visit to visit; repeat gaps are flagged.'],
+    ['Audit', 'Check every line at the unit. Add a photo for every problem.'],
+    ['Fix', 'Each problem becomes a fix with a due date. The unit fixes it and uploads proof.'],
+    ['Check', 'The Compliance Head checks the proof and closes the fix.'],
+    ['Re-audit', 'Next visit within 30 days to see the score go up.'],
   ];
-  const bandText = { exemplar: '90% or more. Where the best units go next.', satisfactory: '80–89%. Where every unit has to be: the target.',
-    improve: '50–79%. Working, but with gaps a regulator would write up.', noncompliance: 'Below 50%. Re-audit within 3 weeks of the fixes being closed.' };
+  const bands = [['exemplar', '90% and above', 'Best'], ['satisfactory', '80–89%', 'Target for every unit'], ['improve', '50–79%', 'Has gaps to fix'], ['noncompliance', 'Below 50%', 'Re-audit within 3 weeks']];
+  const prio = { critical: 'Serious risk', major: 'Important', minor: 'Small gap' };
   mount({
     title: 'Framework',
     body: html`
-      ${pageHeader({ title: 'Framework & rules', crumb: { href: '#/settings', label: 'Settings' }, sub: 'Every unit at 80% (Satisfactory), then 90% (Exemplar). Every gap fixed with proof.' })}
+      ${pageHeader({ title: 'Framework & rules', crumb: { href: '#/settings', label: 'Settings' }, sub: 'Goal: every unit at 80% or more, and every problem fixed with proof.' })}
       <div class="stack-lg">
-        <p class="muted">These are the marking rules and grade bands used in Vishal Patel’s audit reports. The dashboard scores with the same code this page is built from.</p>
-        <section class="stack"><h2 style="font-size:18px">1 · The grade bands</h2>
-          <div class="band-demo" role="img" aria-label="Below 50 Non-Compliance, 50 to 79 Needs Improvement, 80 to 89 Satisfactory, 90 and above Exemplar">
-            <div class="badge tone-bad" style="border-radius:0;height:auto">Below 50%: Non-Compliance</div><div class="badge tone-warn" style="border-radius:0;height:auto">50–79%: Needs Improvement</div><div class="badge tone-good" style="border-radius:0;height:auto">80–89%</div><div class="badge tone-good" style="border-radius:0;height:auto;filter:saturate(1.4)">90%+</div></div>
-          <div class="def-grid four">${['exemplar', 'satisfactory', 'improve', 'noncompliance'].map((k) => html`<div class="card stack" style="gap:8px">${statusBadge(k)}<p class="small">${bandText[k]}</p></div>`)}</div>
-          <p class="small muted">A unit gets a band for food safety and for maintenance. Its overall status is the lower of the two, always shown with the reason.</p></section>
+        <section class="stack"><h2 style="font-size:18px">Grades</h2>
+          <div class="def-grid four">${bands.map(([k, pct, txt]) => html`<div class="card stack" style="gap:6px">${statusBadge(k)}<b>${pct}</b><span class="small muted">${txt}</span></div>`)}</div>
+          <p class="small muted">Each unit gets a food safety grade and a maintenance grade. The lower one is its overall grade.</p></section>
 
-        <section class="stack"><h2 style="font-size:18px">2 · Marking</h2>
-          <div class="def-grid three">${['fssai2', 'docket', 'fssai1'].map((k) => html`<div class="card stack" style="gap:8px"><b>${R.SCHEMES[k].name}</b><div class="row">${['pass', 'partial', 'fail', 'na'].map((r) => ratingChip(k, r))}</div><p class="small muted">${R.SCHEMES[k].marking}</p>${k === 'fssai1' ? html`<p class="small muted">Used for the first visits in Aug 2026.</p>` : ''}</div>`)}</div></section>
-
-        <section class="stack"><h2 style="font-size:18px">3 · Priorities for fixing</h2>
-          <div class="card flush"><div class="table-wrap"><table class="table"><thead><tr><th>Priority</th><th>What it is</th><th>Fix within</th></tr></thead>
-            <tbody>${R.PRIORITY_ORDER.map((p) => html`<tr><td class="nowrap">${prioBadge(p)} ${R.PRIORITY[p].label}</td><td>${R.PRIORITY[p].meaning}</td><td class="nowrap">${R.plural(R.PRIORITY[p].fixDays, 'day')}</td></tr>`)}</tbody></table></div></div>
-          <p class="small muted">Within a priority: <b>paperwork first</b> (records, certificates, logs: the work is often done but not written down, so it closes in a week or two), then the fixes that win back the most marks.</p></section>
-
-        <section class="stack"><h2 style="font-size:18px">4 · From audit to 80%</h2>
-          <div class="steps">${steps.map(([t, s]) => html`<div class="step"><b>${t}</b><span>${s}</span></div>`)}</div>
+        <section class="stack"><h2 style="font-size:18px">How the score works</h2>
           <div class="card prose small"><ul>
-            <li><b>Route to 80%:</b> for each unit, the shortest ordered list of fixes that lifts the score to ${R.TARGET}%, Priority 1 first.</li>
-            <li><b>Fix once:</b> a gap open at three or more units (pest-control records, water reports, FoSTaC) is solved centrally, not outlet by outlet.</li>
-            <li>Rating a line Compliant at the next visit closes its fix automatically; still failing marks it a <b>repeat</b>.</li>
-            <li>Every change (status, due date, owner, proof) is recorded with who and when.</li>
+            <li><b>Compliant</b> = full marks · <b>Partial</b> = half · <b>Not compliant</b> = 0.</li>
+            <li><b>N/A</b> lines are not counted.</li>
+            <li><b>★ Critical</b> lines count double.</li>
+            <li>Score = marks got ÷ marks possible.</li>
           </ul></div></section>
 
-        <section class="stack"><h2 style="font-size:18px">5 · Who does what</h2>
-          <div class="def-grid">${R.ROLES.map((r) => html`<div class="card stack" style="gap:6px"><b>${r.role}</b><span class="small muted">${r.who}</span><p class="small">${r.owns}</p></div>`)}</div></section>
-        <section class="stack"><h2 style="font-size:18px">6 · Escalation</h2>
-          <div class="card prose"><ol>${R.ESCALATION.map((e) => html`<li>${e}</li>`)}</ol></div></section>
+        <section class="stack"><h2 style="font-size:18px">Fix deadlines</h2>
+          <div class="card flush"><div class="table-wrap"><table class="table"><tbody>${R.PRIORITY_ORDER.map((p) => html`<tr><td class="nowrap">${prioBadge(p)} ${R.PRIORITY[p].label}</td><td>${prio[p] || ''}</td><td class="nowrap"><b>${R.PRIORITY[p].fixDays === 2 ? '48 hours' : R.plural(R.PRIORITY[p].fixDays, 'day')}</b></td></tr>`)}</tbody></table></div></div>
+          <p class="small muted">Do paperwork fixes first. They are quick to close.</p></section>
 
-        <section class="stack"><h2 style="font-size:18px">7 · The checklists</h2>
-          <div class="card">
-            <div style="margin-bottom:12px">${segmented({ name: 'tab', value: active, label: 'Checklist', options: templates.map((t) => [t.id, t.scheme === 'fssai2' ? 'Food safety' : t.scheme === 'docket' ? 'Maintenance' : 'Food (Aug)']) })}</div>
-            <div id="checklist">${checklist()}</div>
-          </div></section>
+        <section class="stack"><h2 style="font-size:18px">Steps</h2>
+          <div class="steps">${steps.map(([t, x], i) => html`<div class="step"><b>${i + 1}. ${t}</b><span>${x}</span></div>`)}</div></section>
+
+        <section class="stack"><h2 style="font-size:18px">Who does what</h2>
+          <div class="card prose small"><ul>
+            <li><b>Compliance Head:</b> runs audits, checks proof, closes fixes, keeps licences.</li>
+            <li><b>Unit manager:</b> fixes problems at the unit and uploads proof on time.</li>
+            <li><b>Maintenance / vendors:</b> fix maintenance points.</li>
+            <li><b>Founders:</b> monthly review, help with problems that repeat.</li>
+          </ul></div></section>
+
+        <section class="stack"><h2 style="font-size:18px">If things go wrong</h2>
+          <div class="card prose small"><ul>
+            <li>Priority 1 open more than 48 hours → Compliance Head calls the manager and tells the founders.</li>
+            <li>Same problem at 3+ units → fixed once for all units.</li>
+            <li>Unit below 80% → next audit within 30 days.</li>
+          </ul></div></section>
+
+        <details class="card"><summary><b>See the full checklists</b></summary>
+          <div style="margin:12px 0">${segmented({ name: 'tab', value: active, label: 'Checklist', options: templates.map((t) => [t.id, t.scheme === 'fssai2' ? 'Food safety' : t.scheme === 'docket' ? 'Maintenance' : 'Food (Aug)']) })}</div>
+          <div id="checklist">${checklist()}</div>
+        </details>
       </div>`,
   });
   on.click = { tab: (el) => { active = +el.dataset.v; $$('[data-click="tab"]', view).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.v === active))); $('#checklist').innerHTML = part(checklist()); } };
@@ -3147,6 +3193,7 @@ async function boot() {
     $('#app').hidden = false;
     router();
     syncOutbox();
+    if (notifyOn() && !app.me.mustChange) pushOn().catch(() => {});
     // keep the checklist and the unit list on the phone, so an audit can be started with no network
     if (!isManager()) Promise.all([getTemplates(), api('/api/sites')]).catch(() => {});
   } catch (e) {

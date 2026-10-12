@@ -925,3 +925,6 @@ button.log-row:hover { background: var(--surface-2); }
 .pw-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
 .pw-eye:hover { background: var(--surface-2); color: var(--text); }
 .pw-eye .ms { font-size: 20px; }
+
+/* Framework: full checklists open on click */
+details.card > summary { cursor: pointer; list-style-position: inside; }
