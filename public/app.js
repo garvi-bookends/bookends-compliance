@@ -3109,7 +3109,6 @@ async function pageSettings({ token }) {
 
 // =================================================================== page: framework
 async function pageFramework({ token }) {
-  const steps = ['Audit', 'Fix', 'Check', 'Re-audit'];
   const bands = [['exemplar', '90% and above', 'Best'], ['satisfactory', '80–89%', 'Target for every unit'], ['improve', '50–79%', 'Has gaps to fix'], ['noncompliance', 'Below 50%', 'Re-audit within 3 weeks']];
   const prio = { critical: 'Serious risk', major: 'Important', minor: 'Small gap' };
   mount({
@@ -3132,9 +3131,6 @@ async function pageFramework({ token }) {
         <section class="stack"><h2 style="font-size:18px">Fix deadlines</h2>
           <div class="card flush"><div class="table-wrap"><table class="table"><tbody>${R.PRIORITY_ORDER.map((p) => html`<tr><td class="nowrap">${prioBadge(p)} ${R.PRIORITY[p].label}</td><td>${prio[p] || ''}</td><td class="nowrap"><b>${R.PRIORITY[p].fixDays === 2 ? '48 hours' : R.plural(R.PRIORITY[p].fixDays, 'day')}</b></td></tr>`)}</tbody></table></div></div>
           <p class="small muted">Do paperwork fixes first. They are quick to close.</p></section>
-
-        <section class="stack"><h2 style="font-size:18px">Steps</h2>
-          <div class="steps short">${steps.map((t, i) => html`<div class="step"><b>${i + 1}. ${t}</b></div>`)}</div></section>
 
         <section class="stack"><h2 style="font-size:18px">Who does what</h2>
           <div class="card prose small"><ul>
