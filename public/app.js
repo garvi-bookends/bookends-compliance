@@ -2862,7 +2862,8 @@ async function pageSettings({ token }) {
   const draft = loadDraft();
   const draftUnit = draft && sites.units.find((u) => u.id === draft.site_id);
   const dark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
-  const toggle = (id, on, title, sub) => html`<div class="row toggle-row"><span style="flex:1;min-width:0"><b>${title}</b><br><span class="small muted">${sub}</span></span>
+  const setSwitch = (el, on) => { el.setAttribute('aria-checked', String(on)); const t = el.parentElement.querySelector('[data-sub]'); t.textContent = `${on ? 'On' : 'Off'} — ${t.dataset.sub}`; };
+  const toggle = (id, on, title, sub) => html`<div class="toggle-row"><span style="flex:1;min-width:0"><b class="tr-title">${title}</b><span class="small muted" data-sub="${sub}">${on ? 'On' : 'Off'} — ${sub}</span></span>
     <button type="button" class="switch" role="switch" aria-checked="${String(on)}" aria-label="${title}" data-click="${id}"><span></span></button></div>`;
   const personRow = (u) => html`<div class="list-row person">
     <span class="avatar">${(u.name || '?').trim()[0]}</span>
@@ -2979,10 +2980,9 @@ async function pageSettings({ token }) {
         </section>
         ${teamSection()}
         ${seeLog ? logSection() : ''}
-        <section class="card stack">
-          <div class="section-head" style="margin:0"><h2>Preferences</h2><span class="sub">Saved on this device.</span></div>
-          ${toggle('notify', notifyOn(), 'Notifications', 'Alert count on the bell, and the alerts popup when something is overdue.')}
-          ${toggle('theme', dark, 'Dark mode', 'Dark colours for the whole app.')}
+        <section class="card toggle-card" aria-label="Preferences">
+          ${toggle('notify', notifyOn(), 'Notifications', 'alert count and overdue popups on this device.')}
+          ${toggle('theme', dark, 'Dark mode', 'remembered on this device.')}
         </section>
         <section class="card stack">
           <div class="section-head" style="margin:0"><h2>Audit draft on this device</h2><span class="sub">Audits in progress are saved on the phone or computer they were started on.</span></div>
@@ -3015,12 +3015,12 @@ async function pageSettings({ token }) {
     theme: (el) => {
       const t = el.getAttribute('aria-checked') === 'true' ? 'light' : 'dark';
       document.documentElement.dataset.theme = t; localStorageSet('bk-theme', t);
-      el.setAttribute('aria-checked', String(t === 'dark'));
+      setSwitch(el, t === 'dark');
     },
     notify: (el) => {
       const on = el.getAttribute('aria-checked') !== 'true';
       if (on) localStorageDel('bk-notify'); else localStorageSet('bk-notify', 'off');
-      el.setAttribute('aria-checked', String(on));
+      setSwitch(el, on);
       if (alertsCache) showAlertCount(alertsCache.list);
       toast(on ? 'Notifications on' : 'Notifications off', { success: true });
     },
