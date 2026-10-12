@@ -686,6 +686,34 @@ async function signOut({ ask = true } = {}) {
 const ROLE_LABEL = { head: 'Compliance Head', manager: 'Unit Manager', team: 'Team access' };
 /** Unit Managers see and work on their own unit only. The server enforces it; the screens just leave out what they cannot use. */
 const isManager = () => app.me?.role === 'manager';
+/** Settings → Wipe all data: deletes every audit record (see wipeData in src/api.js). Needs the person's own password and WIPE typed. */
+function openWipeDialog() {
+  openDialog({
+    title: 'Wipe all data?',
+    body: html`<div class="form">
+      <div class="banner bad">${icon('warning')}<span class="b-body"><b>This permanently deletes, for every unit:</b> all audits and their ratings, all fixes, all licences, every photo, proof and scan, the audit log and alert history. It cannot be undone.</span></div>
+      <p class="small muted">Kept: units, the checklists and every account, so audits can start again straight away. Download any reports you need first.</p>
+      <div class="field"><label for="wipePw">Your password</label><input class="input" id="wipePw" name="password" type="password" autocomplete="current-password" required></div>
+      <div class="field"><label for="wipeWord">Type <b>WIPE</b> to confirm</label><input class="input" id="wipeWord" name="confirm" autocomplete="off" autocapitalize="characters" spellcheck="false" required></div>
+      <span class="error-text" id="wipeErr" hidden></span>
+    </div>`,
+    actions: html`<button class="btn" type="button" data-click="close">Cancel</button><button class="btn danger-solid" value="wipe">${icon('delete_forever')}Wipe all data</button>`,
+    onSubmit: async (fd) => {
+      const err = $('#wipeErr', dlg);
+      const show = (m) => { err.hidden = false; err.textContent = m; };
+      if (String(fd.get('confirm') || '').trim().toUpperCase() !== 'WIPE') { $('#wipeWord', dlg).classList.add('invalid'); show('Type WIPE to confirm.'); return; }
+      if (!fd.get('password')) { $('#wipePw', dlg).classList.add('invalid'); show('Enter your password.'); return; }
+      try {
+        const r = await api('/api/admin/wipe', { method: 'POST', body: { password: fd.get('password'), confirm: fd.get('confirm') } });
+        searchData = null; alertsCache = null;
+        if (window.caches) caches.delete('bk-api-v1').catch(() => {}); // the copies kept for working offline are now out of date
+        closeDialog();
+        toast(`All data wiped: ${R.plural(r.audits, 'audit')}, ${R.plural(r.fixes, 'fix', 'fixes')}, ${R.plural(r.licences, 'licence')} and ${R.plural(r.files, 'file')} deleted.`, { success: true, ms: 9000 });
+        rerender();
+      } catch (e) { if (!(e instanceof SignInNeeded)) show(friendly(e)); }
+    },
+  });
+}
 /** Change your own password. forced: signed in with a temporary password, so it cannot be skipped (only sign out). */
 function openPasswordDialog({ forced = false } = {}) {
   openDialog({
@@ -2961,6 +2989,11 @@ async function pageSettings({ token }) {
           <div class="section-head" style="margin:0"><h2>Framework &amp; rules</h2><span class="sub">How compliance is measured: grade bands, marking, priorities, roles, escalation and the checklists.</span></div>
           <div><a class="btn" href="#/framework">${icon('menu_book')}Open framework</a></div>
         </section>
+        ${me.role === 'head' && me.username ? html`<section class="card stack danger-zone" aria-labelledby="wipeTitle">
+          <div class="section-head" style="margin:0"><h2 id="wipeTitle">Wipe all data</h2><span class="sub">Start again from a clean slate. This cannot be undone.</span></div>
+          <p class="small">Deletes every audit, fix, licence, photo and scan, the audit log and alert history, for every unit. Units, checklists and all accounts are kept.</p>
+          <div><button class="btn danger-solid" data-click="wipe">${icon('delete_forever')}Wipe all data</button></div>
+        </section>` : ''}
       </div>`,
   });
   const person = (el) => people.users.find((u) => u.id === +el.dataset.id);
@@ -2972,6 +3005,7 @@ async function pageSettings({ token }) {
     editPerson: (el) => openPersonDialog(person(el), { units: sites.units, onDone: () => rerender() }),
     resetPerson: (el) => openResetDialog(person(el), () => rerender()),
     addUnit: () => openUnitDialog(),
+    wipe: () => openWipeDialog(),
     logOpen: (el) => { const e = log.activity.find((x) => x.id === +el.dataset.id); if (e) openLogEntry(e); },
     logMore: () => { logState.shown += 50; $('#logList').innerHTML = part(logList()); },
     theme: (el) => {

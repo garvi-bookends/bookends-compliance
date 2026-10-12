@@ -803,6 +803,42 @@ async function changeOwnPassword({ env, request, actor, session }) {
   ]);
   return json({ ok: true });
 }
+/** "Wipe all data" (Settings): deletes every audit, fix, licence, uploaded photo or scan, the audit log and alert history.
+ *  Keeps units, checklists and accounts, so audits can start again straight away. Compliance Head only, with their own
+ *  password and the word WIPE typed, because it cannot be undone. */
+async function wipeData({ env, request, actor, session }) {
+  if (session.user?.role !== 'head') throw new HttpError(403, 'Only a Compliance Head signed in with their own account can wipe the data');
+  const body = await readJson(request);
+  if (String(body.confirm || '').trim().toUpperCase() !== 'WIPE') bad('Type WIPE to confirm');
+  const u = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(session.user.id).first();
+  if (!(await checkPassword(String(body.password || ''), u.password_hash))) { await slowDown(); throw new HttpError(400, 'Your password is not right'); }
+
+  // every uploaded file the records point to, collected before the records go
+  const [resp, fnd, lic] = await env.DB.batch([
+    env.DB.prepare('SELECT photos FROM audit_responses WHERE photos IS NOT NULL'),
+    env.DB.prepare('SELECT photos, evidence_key FROM findings WHERE photos IS NOT NULL OR evidence_key IS NOT NULL'),
+    env.DB.prepare('SELECT file_key FROM licences WHERE file_key IS NOT NULL'),
+  ]);
+  const keys = new Set([...resp.results.flatMap((r) => parseList(r.photos)), ...fnd.results.flatMap((r) => [...parseList(r.photos), r.evidence_key]), ...lic.results.map((r) => r.file_key)]
+    .filter((k) => typeof k === 'string' && k && !k.includes('..')));
+  const counts = await env.DB.prepare(`SELECT (SELECT count(*) FROM audits) AS audits, (SELECT count(*) FROM findings) AS fixes, (SELECT count(*) FROM licences) AS licences`).first();
+
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM findings'),
+    env.DB.prepare('DELETE FROM audit_responses'),
+    env.DB.prepare('DELETE FROM audits'),
+    env.DB.prepare('DELETE FROM licences'),
+    env.DB.prepare('DELETE FROM alert_dismissals'),
+    env.DB.prepare('DELETE FROM activity'),
+    // the one entry the fresh audit log starts with
+    log(env, { actor, entity: 'user', entity_id: u.id, action: 'wiped all data',
+      detail: `All audit data wiped: ${R.plural(Number(counts.audits), 'audit')}, ${R.plural(Number(counts.fixes), 'fix', 'fixes')}, ${R.plural(Number(counts.licences), 'licence')}, ${R.plural(keys.size, 'file')}. Units, checklists and accounts kept.` }),
+  ]);
+  // files last: if this step fails the records are already gone, and the leftover files are unreachable from the app
+  let filesLeft = 0;
+  try { await env.FILES.remove([...keys]); } catch (e) { filesLeft = keys.size; console.error('wipe: could not remove files', e); }
+  return json({ ok: true, audits: Number(counts.audits), fixes: Number(counts.fixes), licences: Number(counts.licences), files: keys.size - filesLeft, filesLeft });
+}
 /** The audit log: who did what, when, newest first. Compliance Head only. */
 async function listActivity({ env, url }) {
   const site = url.searchParams.get('site');
@@ -848,6 +884,7 @@ const routes = [
   ['POST', /^\/api\/uploads$/, upload, 'all'],
   ['GET', /^\/api\/files\/(.+)$/, getFile, 'all'],
   ['GET', /^\/api\/activity$/, listActivity, 'head'],
+  ['POST', /^\/api\/admin\/wipe$/, wipeData, 'head'],
 ];
 
 /**

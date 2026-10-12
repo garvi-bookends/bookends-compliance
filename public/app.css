@@ -305,7 +305,9 @@ a.stat:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
 .stat .stat-label { font-size: 13px; color: var(--muted); font-weight: 500; display: flex; align-items: center; gap: 6px; }
 .stat .stat-value { font-size: 30px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .stat .stat-value small { font-size: 15px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
-.stat .stat-sub { font-size: 13px; color: var(--muted); margin-top: auto; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.stat .stat-sub { font-size: 13px; color: var(--muted); margin-top: auto; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; min-width: 0; }
+/* a long grade ("Needs Improvement") in a narrow card on a small phone wraps instead of sticking out of the card */
+.stat .stat-sub .badge { max-width: 100%; white-space: normal; height: auto; min-height: 24px; padding-block: 4px; line-height: 1.2; }
 .stat.tone-bad .stat-value { color: var(--bad); }
 .stat.tone-warn .stat-value { color: var(--warn); }
 .stat.tone-good .stat-value { color: var(--good); }
@@ -896,3 +898,7 @@ button.log-row:hover { background: var(--surface-2); }
 .ms.spin { animation: bk-spin 1s linear infinite; }
 @keyframes bk-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .ms.spin { animation: none; } }
+
+/* Settings → Wipe all data */
+.danger-zone { border-color: color-mix(in srgb, var(--bad) 45%, var(--border)); }
+.danger-zone h2 { color: var(--bad); }

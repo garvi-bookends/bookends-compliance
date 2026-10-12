@@ -1,9 +1,9 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { get, put } from '@vercel/blob';
+import { del, get, put } from '@vercel/blob';
 
-// Audit photos, proof of fixes and licence scans. Two stores with the same two calls:
-//   put(key, bytes, contentType)   and   get(key) → { body, type } | null
+// Audit photos, proof of fixes and licence scans. Two stores with the same three calls:
+//   put(key, bytes, contentType),   get(key) → { body, type } | null   and   remove(keys) (used by "Wipe all data")
 // Vercel Blob (private) when BLOB_READ_WRITE_TOKEN is set (production); otherwise a folder on disk (local development).
 
 const TYPE_OF = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', pdf: 'application/pdf' };
@@ -17,6 +17,9 @@ export function blobFiles(token) {
       const r = await get(key, { access: 'private', token });
       if (!r || !r.stream) return null;
       return { body: r.stream, type: r.blob.contentType };
+    },
+    async remove(keys) {
+      for (let i = 0; i < keys.length; i += 500) await del(keys.slice(i, i + 500), { token });
     },
   };
 }
@@ -35,6 +38,9 @@ export function diskFiles(root) {
         if (e.code === 'ENOENT') return null;
         throw e;
       }
+    },
+    async remove(keys) {
+      for (const key of keys) await unlink(join(root, key)).catch((e) => { if (e.code !== 'ENOENT') throw e; });
     },
   };
 }
