@@ -674,7 +674,7 @@ function mount({ title, body }) {
   keepScrollOnce = false;
   drawOutbox();
 }
-window.addEventListener('hashchange', () => router());
+window.addEventListener('hashchange', () => { const m = /^#\/set-password\/([A-Za-z0-9_.-]+)$/.exec(location.hash); return m ? showSetPassword(m[1]) : router(); });
 window.addEventListener('scroll', () => $('.topbar').classList.toggle('scrolled', window.scrollY > 4), { passive: true });
 
 // sidebar: drawer on phones and tablets, collapsible rail on desktop
@@ -2811,9 +2811,9 @@ async function pageReports({ token, query }) {
 /** A username suggested from a name: "Ravi Shah" → "ravi.shah". */
 const suggestUsername = (name) => name.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '.').replace(/^\.+|\.+$/g, '').slice(0, 40);
 const USERNAME_OK = /^[a-z0-9._-]{3,40}$/;
-const passwordFields = (id, label = 'Password') => html`
-  <div class="field"><label for="${id}">${label}</label><input class="input" id="${id}" name="password" type="password" autocomplete="new-password" minlength="8" required><span class="hint">At least 8 characters.</span></div>
-  <div class="field"><label for="${id}2">Confirm password</label><input class="input" id="${id}2" name="again" type="password" autocomplete="new-password" required></div>
+const passwordFields = (id, label = 'Password', optional = false) => html`
+  <div class="field"><label for="${id}">${label}${optional ? html` <span class="muted">(optional)</span>` : ''}</label><input class="input" id="${id}" name="password" type="password" autocomplete="new-password" minlength="8" ${optional ? '' : 'required'}><span class="hint">${optional ? 'Leave empty to send them a link instead: they choose their own password.' : 'At least 8 characters.'}</span></div>
+  <div class="field"><label for="${id}2">Confirm password</label><input class="input" id="${id}2" name="again" type="password" autocomplete="new-password" ${optional ? '' : 'required'}></div>
   <label class="check"><input type="checkbox" data-change="showPw"> Show passwords</label>`;
 const showPw = (el) => { $$('input[name="password"], input[name="again"]', dlg).forEach((i) => { i.type = el.checked ? 'text' : 'password'; }); };
 /** Checks a new password and its confirmation; returns an error message, or null when they are fine. */
@@ -2845,7 +2845,7 @@ function openPersonDialog(u = null, { firstAdmin = false, onDone, units = [], pr
           <option value="head" ${role0 === 'head' ? 'selected' : ''}>Compliance Head: full access</option></select></div>
         <div class="field" id="peUnitWrap" ${role0 === 'manager' ? '' : 'hidden'}><label for="peUnit">Unit</label><select class="input" id="peUnit" name="site_id">
           <option value="">Choose the unit…</option>${units.map((x) => html`<option value="${x.id}" ${String(x.id) === String(site0) ? 'selected' : ''}>${unitName(x)}</option>`)}</select></div>`}
-      ${u ? html`<label class="check"><input type="checkbox" name="active" ${u.active ? 'checked' : ''}> Can sign in <span class="muted small">(untick to disable this account)</span></label>` : passwordFields('pePass')}
+      ${u ? html`<label class="check"><input type="checkbox" name="active" ${u.active ? 'checked' : ''}> Can sign in <span class="muted small">(untick to disable this account)</span></label>` : passwordFields('pePass', 'Password', true)}
       <div class="error-text" id="peErr" hidden></div>
     </div>`,
     actions: html`<button class="btn" type="button" data-click="close">Cancel</button><button class="btn primary" value="save">${u ? 'Save changes' : 'Create'}</button>`,
@@ -2872,14 +2872,41 @@ function openPersonDialog(u = null, { firstAdmin = false, onDone, units = [], pr
         }
         const username = (fd.get('username') || '').trim().toLowerCase();
         if (!USERNAME_OK.test(username)) return show('Usernames need 3–40 letters or numbers (dots, _ and - are fine, no spaces).');
-        const bad = passwordProblem(fd);
+        const withLink = !fd.get('password') && !fd.get('again');
+        const bad = withLink ? null : passwordProblem(fd);
         if (bad) return show(bad);
-        await api('/api/users', { method: 'POST', body: { name, username, role, site_id: siteId, password: fd.get('password') } });
+        const r = await api('/api/users', { method: 'POST', body: { name, username, role, site_id: siteId, password: withLink ? null : fd.get('password') } });
         closeDialog();
-        toast(`${name} created. They sign in with username “${username}” and the password you set.`, { success: true, ms: 8000 });
         onDone?.();
+        if (withLink) openLinkDialog({ id: r.id, name, username });
+        else toast(`${name} created. They sign in with username “${username}” and the password you set.`, { success: true, ms: 8000 });
       } catch (e) { if (!(e instanceof SignInNeeded)) show(friendly(e)); }
     },
+  });
+}
+/** A one-time sign-in link for one person: they open it, choose their own password and are signed in. */
+async function openLinkDialog(u) {
+  let r;
+  try { r = await api(`/api/users/${u.id}/link`, { method: 'POST', body: {} }); }
+  catch (e) { if (!(e instanceof SignInNeeded)) toast(friendly(e), { error: true }); return; }
+  const msg = `Hi ${u.name}, open this link to set your password for Bookends Compliance (username: ${r.username}). It works once, for ${r.days} days: ${r.link}`;
+  openDialog({
+    title: `Sign-in link for ${u.name}`,
+    body: html`<div class="form">
+      <p class="muted small">Send this link to <b>${u.name}</b> only. They open it, choose their own password and are signed in. It works <b>once</b> and expires in <b>${r.days} days</b>.</p>
+      <div class="field"><label for="lkUrl">Link</label><input class="input mono" id="lkUrl" readonly value="${r.link}"></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button class="btn primary" type="button" data-click="copyLink">${icon('content_copy')}Copy link</button>
+        <a class="btn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${icon('chat')}Send on WhatsApp</a>
+      </div>
+      <p class="small muted">Making a new link does not cancel this one; whichever is used first sets the password, and the other stops working.</p>
+    </div>`,
+    actions: html`<button class="btn" type="button" data-click="close">Done</button>`,
+    on: { click: { copyLink: async () => {
+      const f = $('#lkUrl', dlg);
+      try { await navigator.clipboard.writeText(r.link); } catch { f.select(); document.execCommand?.('copy'); }
+      toast('Link copied. Send it to that person only.', { success: true });
+    } } },
   });
 }
 function openResetDialog(u, onDone) {
@@ -2922,7 +2949,7 @@ async function pageSettings({ token }) {
       <span class="lr-meta"><span class="mono">${u.username}</span>${toneBadge(u.role === 'head' ? 'info' : 'neutral', ROLE_LABEL[u.role])}${u.role === 'manager' ? html`<span>${icon('storefront')} ${u.site_name ? unitName({ name: u.site_name, city: u.site_city, kind: u.site_kind }) : 'No unit set'}</span>` : ''}
         ${!u.active ? toneBadge('neutral', 'Disabled', 'block') : u.must_change ? toneBadge('warn', 'Temporary password') : ''}
         <span>${u.last_login_at ? `Last signed in ${ago(u.last_login_at)}` : 'Never signed in'}</span></span></span>
-    <span class="lr-trail"><button class="btn sm" data-click="editPerson" data-id="${u.id}">${icon('edit')}Edit</button><button class="btn sm" data-click="resetPerson" data-id="${u.id}">${icon('key')}New password</button></span>
+    <span class="lr-trail"><button class="btn sm" data-click="editPerson" data-id="${u.id}">${icon('edit')}Edit</button><button class="btn sm" data-click="resetPerson" data-id="${u.id}">${icon('key')}New password</button>${u.active ? html`<button class="btn sm" data-click="linkPerson" data-id="${u.id}">${icon('link')}Get link</button>` : ''}</span>
   </div>`;
   // ---- audit log: who did what, when
   const LOG_TYPES = [['', 'Everything'], ['finding', 'Fixes'], ['audit', 'Audits'], ['licence', 'Licences'], ['site', 'Units'], ['user', 'People']];
@@ -3059,6 +3086,7 @@ async function pageSettings({ token }) {
     addPerson: () => openPersonDialog(null, { units: sites.units, onDone: () => rerender() }),
     editPerson: (el) => openPersonDialog(person(el), { units: sites.units, onDone: () => rerender() }),
     resetPerson: (el) => openResetDialog(person(el), () => rerender()),
+    linkPerson: (el) => openLinkDialog(person(el)),
     wipe: () => openWipeDialog(),
     logOpen: (el) => { const e = log.activity.find((x) => x.id === +el.dataset.id); if (e) openLogEntry(e); },
     logMore: () => { logState.shown += 50; $('#logList').innerHTML = part(logList()); },
@@ -3136,7 +3164,59 @@ async function pageFramework({ token }) {
 }
 
 // =================================================================== boot
+/** Opened from a sign-in link (#/set-password/<token>): the person chooses their password and is signed in. */
+async function showSetPassword(token) {
+  $('#app').hidden = true;
+  const box = $('#signin');
+  box.hidden = false;
+  const post = async (path, body) => {
+    let res;
+    try { res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); }
+    catch { throw new Error('Could not reach the server. Check the connection and try again.'); }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Something went wrong');
+    return data;
+  };
+  const card = (inner) => html`<div class="signin"><div class="signin-bg" aria-hidden="true"><span class="glow g1"></span><span class="glow g2"></span><span class="glow g3"></span></div>
+    <form class="signin-card" id="setPwForm" novalidate><span class="brand"><span class="brand-mark" aria-hidden="true">B</span><span class="brand-text"><b>BOOKENDS</b><small>Compliance</small></span></span>${inner}</form>
+    <p class="signin-foot">Bookends Hospitality · Food safety · Maintenance · Licences</p></div>`;
+  const toSignin = () => { history.replaceState(null, '', '#/'); showSignin(); };
+  let who;
+  try { who = await post('/api/auth/link/check', { token }); }
+  catch (e) {
+    box.innerHTML = part(card(html`<div><h1>Link not valid</h1><p class="muted small" style="margin-top:4px">${e.message}</p></div>
+      <button class="btn primary lg block" type="button" id="toSignin">${icon('login')}Go to sign in</button>`));
+    $('#toSignin', box).addEventListener('click', toSignin);
+    return;
+  }
+  box.innerHTML = part(card(html`<div><h1>Set your password</h1><p class="muted small" style="margin-top:4px">Hi <b>${who.name}</b>. Your username is <b class="mono">${who.username}</b>. Choose a password to sign in with.</p></div>
+    <div class="field"><label for="spNew">New password</label><input class="input" id="spNew" name="password" type="password" autocomplete="new-password" minlength="8" required><span class="hint">At least 8 characters.</span></div>
+    <div class="field"><label for="spAgain">Confirm password</label><input class="input" id="spAgain" name="again" type="password" autocomplete="new-password" required></div>
+    <input type="text" name="username" value="${who.username}" autocomplete="username" hidden>
+    <div class="error-text" id="spErr" role="alert" hidden></div>
+    <button class="btn primary lg block" type="submit">${icon('check')}Save and sign in</button>`));
+  addPasswordEyes(box);
+  $('#spNew', box).focus();
+  $('#setPwForm', box).addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const err = $('#spErr', box);
+    const bad = passwordProblem(fd);
+    if (bad) { err.hidden = false; err.textContent = bad; return; }
+    const btn = $('button[type=submit]', box);
+    btn.disabled = true;
+    try {
+      await post('/api/auth/link', { token, password: fd.get('password') });
+      localStorageSet('bk-username', who.username);
+      history.replaceState(null, '', '#/');
+      box.hidden = true; box.innerHTML = '';
+      boot();
+    } catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false; }
+  });
+}
 async function boot() {
+  const link = /^#\/set-password\/([A-Za-z0-9_.-]+)$/.exec(location.hash);
+  if (link) { showSetPassword(link[1]); return; }
   try {
     app.me = await api('/api/me');
     app.today = app.me.today;

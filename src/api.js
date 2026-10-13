@@ -752,7 +752,8 @@ async function createUser({ env, request, actor, session }) {
   if (!name) bad('Enter the person’s name');
   if (!username || !USERNAME.test(username)) bad('Usernames need 3–40 letters or numbers (dots, _ and - are fine, no spaces)');
   const site = await unitFor(env, role, body.site_id);
-  const hash = await hashPassword(checkNewPassword(body.password));
+  // No password given: the account gets an unusable random one, and the Compliance Head sends a sign-in link instead.
+  const hash = await hashPassword(body.password ? checkNewPassword(body.password) : b64url(crypto.getRandomValues(new Uint8Array(32))));
   if (await env.DB.prepare('SELECT 1 AS x FROM users WHERE lower(username) = ?').bind(username).first()) throw new HttpError(409, 'That username is taken. Choose another.');
   const row = await env.DB.prepare('INSERT INTO users (username, name, role, site_id, password_hash, must_change, created_by) VALUES (?, ?, ?, ?, ?, 0, ?) RETURNING id')
     .bind(username, name, role, site?.id ?? null, hash, actor).first();
@@ -794,6 +795,56 @@ async function resetUserPassword({ env, request, actor, session, params: [id] })
     log(env, { actor, entity: 'user', entity_id: u.id, action: 'password reset', detail: `New password set for ${u.name} (${u.username})` }),
   ]);
   return json({ ok: true });
+}
+// ---- sign-in links: the Compliance Head sends one person a link; they open it and choose their own password.
+// The link is signed with ACCESS_CODE and carries the account id, an expiry and the tail of the current password hash,
+// so it stops working once a password is set (by the link or otherwise) or after LINK_DAYS. Nothing is stored.
+const LINK_DAYS = 7;
+async function makeLinkToken(env, u) {
+  const payload = b64url(enc.encode(JSON.stringify({ u: u.id, e: Date.now() + LINK_DAYS * 864e5, h: String(u.password_hash).slice(-12) })));
+  return `${payload}.${await hmac(env.ACCESS_CODE, `pwlink:${payload}`)}`;
+}
+/** The account a link belongs to, or null if the link is forged, expired, already used or the account is disabled. */
+async function accountForLink(env, token) {
+  const [payload, sig] = String(token || '').split('.');
+  if (!payload || !sig || !(await sameSecret(sig, await hmac(env.ACCESS_CODE, `pwlink:${payload}`)))) return null;
+  let c;
+  try { c = JSON.parse(new TextDecoder().decode(fromB64url(payload))); } catch { return null; }
+  if (!(c.e > Date.now())) return null;
+  const u = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(c.u).first();
+  return u && u.active && String(u.password_hash).slice(-12) === c.h ? u : null;
+}
+const LINK_GONE = 'This link has expired or was already used. Ask the Compliance Head for a new one.';
+async function createSignInLink({ env, request, url, actor, session, params: [id] }) {
+  if (session.user?.role !== 'head') throw new HttpError(403, 'Only the Compliance Head can create sign-in links');
+  const u = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+  if (!u) notFound('Person');
+  if (!u.active) bad('This account is disabled. Enable it first.');
+  const link = `${url.origin}/#/set-password/${await makeLinkToken(env, u)}`;
+  await log(env, { actor, entity: 'user', entity_id: u.id, action: 'link created', detail: `Sign-in link created for ${u.name} (${u.username}), valid ${LINK_DAYS} days` }).run();
+  return json({ link, days: LINK_DAYS, name: u.name, username: u.username });
+}
+/** Public: whose link this is, so the page can greet them. */
+async function checkSignInLink({ env, request }) {
+  const u = await accountForLink(env, (await readJson(request)).token);
+  if (!u) throw new HttpError(410, LINK_GONE);
+  return json({ name: u.name, username: u.username });
+}
+/** Public: set a password from a link, then sign straight in. */
+async function useSignInLink({ env, request }) {
+  if (env.LOGIN_LIMIT) {
+    const ip = (request.headers.get('x-forwarded-for') || '').split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown';
+    if (!(await env.LOGIN_LIMIT.limit({ key: ip })).success) throw new HttpError(429, 'Too many attempts. Wait a minute, then try again.');
+  }
+  const body = await readJson(request);
+  const u = await accountForLink(env, body.token);
+  if (!u) { await slowDown(); throw new HttpError(410, LINK_GONE); }
+  const hash = await hashPassword(checkNewPassword(body.password));
+  await env.DB.batch([
+    env.DB.prepare('UPDATE users SET password_hash = ?, must_change = 0, last_login_at = utc_now() WHERE id = ?').bind(hash, u.id),
+    log(env, { actor: u.name, entity: 'user', entity_id: u.id, action: 'password set', detail: 'Chose their password from a sign-in link' }),
+  ]);
+  return sessionResponse(env, request, { name: u.name, uid: u.id }, { name: u.name, role: u.role, username: u.username });
 }
 async function changeOwnPassword({ env, request, actor, session }) {
   if (!session.user) bad('You signed in with the team code, which has no password to change');
@@ -940,6 +991,8 @@ const PUBLIC = [
   ['POST', /^\/api\/auth\/login$/, login],
   ['POST', /^\/api\/auth\/logout$/, logout],
   ['GET', /^\/api\/auth\/options$/, authOptions],
+  ['POST', /^\/api\/auth\/link\/check$/, checkSignInLink],
+  ['POST', /^\/api\/auth\/link$/, useSignInLink],
   ['GET', /^\/api\/cron\/alerts$/, cronAlerts], // checks CRON_SECRET itself
 ];
 const routes = [
@@ -949,6 +1002,7 @@ const routes = [
   ['POST', /^\/api\/users$/, createUser, 'head'],
   ['PUT', /^\/api\/users\/(\d+)$/, updateUser, 'head'],
   ['POST', /^\/api\/users\/(\d+)\/password$/, resetUserPassword, 'head'],
+  ['POST', /^\/api\/users\/(\d+)\/link$/, createSignInLink, 'head'],
   ['GET', /^\/api\/overview$/, overview, 'all'],
   ['GET', /^\/api\/sites$/, listSites, 'all'],
   ['POST', /^\/api\/sites$/, createSite, 'head'],
