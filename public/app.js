@@ -3198,10 +3198,8 @@ async function pageSettings({ token }) {
         <div class="banner info">${icon('shield_person')}<span class="b-body">First create the Compliance Head account.</span></div>
         <div><button class="btn primary" data-click="firstAdmin">${icon('person_add')}Create the Compliance Head</button></div></section>`;
     }
-    if (!manage) {
-      return html`<section class="card stack"><div class="section-head" style="margin:0"><h2>Team members</h2></div>
-        <p class="small muted">Only the Compliance Head can change accounts.</p></section>`;
-    }
+    // a Unit Manager cannot add or change people, so the section is not shown at all
+    if (!manage) return '';
     // closed until clicked, like the audit log; the count shows how many people are inside
     return collapse({ id: 'teamMembers', open: !!settingsOpen.teamMembers, flush: true, iconName: 'group', title: `Team members (${people.users.length})`,
       sub: 'Add or edit people.',
