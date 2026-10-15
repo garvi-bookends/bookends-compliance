@@ -311,6 +311,33 @@ async function downscale(file, max = 1280) {
     return await new Promise((res) => c.toBlob((b) => res(b || file), 'image/jpeg', 0.78));
   } catch { return file; } finally { d?.done?.(); d?.img?.close?.(); }
 }
+// Photos are shrunk in a background worker (public/photo-worker.js) so the screen stays smooth while a large phone photo
+// is opened; without worker support (older phones) it falls back to downscale() above on the main thread.
+let photoWorker = null;
+const photoJobs = new Map(); // job id -> { resolve }
+function shrinkInWorker(file) {
+  if (typeof Worker === 'undefined' || typeof OffscreenCanvas === 'undefined' || typeof createImageBitmap === 'undefined') return null;
+  try {
+    if (!photoWorker) {
+      photoWorker = new Worker('/photo-worker.js');
+      photoWorker.onmessage = (e) => { const job = photoJobs.get(e.data.id); if (job) { photoJobs.delete(e.data.id); job.resolve(e.data.blob || null); } };
+      photoWorker.onerror = () => { for (const job of photoJobs.values()) job.resolve(null); photoJobs.clear(); photoWorker = null; };
+    }
+    const id = newId();
+    return new Promise((resolve) => {
+      photoJobs.set(id, { resolve });
+      setTimeout(() => { if (photoJobs.has(id)) { photoJobs.delete(id); resolve(null); } }, 20000); // never wait for ever
+      photoWorker.postMessage({ id, file, max: 1280, quality: 0.78 });
+    });
+  } catch { return null; }
+}
+/** A small JPEG (1280 px, ~200 KB) from a phone photo: in the background worker when it can, otherwise on the page. */
+async function shrinkPhoto(file) {
+  if (!file.type.startsWith('image/')) return file;
+  if (file.type === 'image/jpeg' && file.size < 400e3) return file;
+  const small = await shrinkInWorker(file);
+  return small && small.size < file.size ? small : downscale(file);
+}
 function pickAndUpload({ accept = 'image/*' } = {}) {
   const input = $('#filePicker');
   input.accept = accept;
@@ -321,7 +348,7 @@ function pickAndUpload({ accept = 'image/*' } = {}) {
       if (!file) return resolve(null);
       try {
         toast('Uploading…', { ms: 30000 });
-        const blob = file.type.startsWith('image/') ? await downscale(file) : file;
+        const blob = await shrinkPhoto(file);
         const r = await api('/api/uploads', { method: 'POST', file: blob });
         toast('Photo attached', { success: true });
         resolve(r.key);
@@ -340,7 +367,8 @@ function pickAndUpload({ accept = 'image/*' } = {}) {
 const newId = () => crypto.randomUUID?.() || [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('');
 const isLocalPhoto = (k) => typeof k === 'string' && k.startsWith('local:');
 const localThumbs = new Map(); // local key -> object URL for the thumbnail
-const photoSrc = (k) => (isLocalPhoto(k) ? localThumbs.get(k) || '' : fileUrl(k));
+const BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const photoSrc = (k) => (isLocalPhoto(k) ? localThumbs.get(k) || BLANK_IMG : fileUrl(k)); // blank while a photo is still being shrunk
 const idb = (() => {
   let dbp;
   const open = () => (dbp ||= new Promise((res, rej) => {
@@ -363,8 +391,13 @@ async function loadLocalThumbs(answers) {
     if (blob) localThumbs.set(k, URL.createObjectURL(blob));
   }
 }
+// Photos still being shrunk: phone key -> promise of the small photo. Ones removed meanwhile are not kept.
+const processingPhotos = new Map();
+const removedPhotos = new Set();
+/** Waits until every photo still being shrunk is saved on the phone (Submit and Save call this first). */
+const photosReady = () => Promise.all([...processingPhotos.values()]);
 function dropLocalPhotos(answers) {
-  for (const a of answers) for (const k of a?.photos || []) if (isLocalPhoto(k)) { idb.del(k).catch(() => {}); localThumbs.delete(k); }
+  for (const a of answers) for (const k of a?.photos || []) if (isLocalPhoto(k)) { removedPhotos.add(k); idb.del(k).catch(() => {}); localThumbs.delete(k); }
 }
 /** Uploads the photos of these answers that are still only on the phone, swapping in the server key one by one
  *  (so a dropped connection halfway never uploads a photo twice). Throws the upload error, e.g. still offline. */
@@ -382,6 +415,7 @@ async function uploadLocalPhotos(answers, save) {
     for (let n = 0; n < a.photos.length; n += 1) {
       const k = a.photos[n];
       if (!isLocalPhoto(k)) continue;
+      if (processingPhotos.has(k)) await processingPhotos.get(k);
       // already sent in the background (or still being sent): use that, do not send it twice
       const done = uploadedPhotos.get(k) || (uploadingPhotos.has(k) ? await uploadingPhotos.get(k) : null);
       if (done) { a.photos[n] = done; save(); idb.del(k).catch(() => {}); continue; }
@@ -402,17 +436,22 @@ function pickAuditPhoto() {
     input.onchange = async () => {
       const file = input.files[0];
       if (!file) return resolve(null);
-      const blob = file.type.startsWith('image/') ? await downscale(file) : file;
-      // Kept on the phone at once (the auditor carries on straight away), then sent in the background.
-      // With no network it simply waits; Submit sends whatever is still on the phone.
-      try {
-        const key = `local:${newId()}`;
+      // The photo is on the line at once and the auditor carries on. In the background it is shrunk (~200 KB),
+      // saved on the phone and sent; with no network it waits, and Submit sends whatever is still on the phone.
+      const key = `local:${newId()}`;
+      const job = shrinkPhoto(file).then(async (blob) => {
+        if (removedPhotos.has(key)) return null;
         await idb.put(key, blob);
-        localThumbs.set(key, URL.createObjectURL(blob));
+        const url = URL.createObjectURL(blob);
+        localThumbs.set(key, url);
+        document.querySelectorAll('img[data-photo]').forEach((img) => { if (img.dataset.photo === key) { img.src = url; img.classList.remove('is-processing'); } });
         if (navigator.onLine) uploadInBackground(key, blob);
         else toast('No network. Photo saved; it uploads when the network is back.', { ms: 6000 });
-        resolve(key);
-      } catch { toast('Could not keep the photo on this phone. Try again.', { error: true }); resolve(null); }
+        return blob;
+      }).catch(() => { toast('Could not keep that photo on this phone. Try again.', { error: true }); return null; })
+        .finally(() => processingPhotos.delete(key));
+      processingPhotos.set(key, job);
+      resolve(key);
     };
     input.oncancel = () => resolve(null);
     input.click();
@@ -1660,7 +1699,7 @@ async function pageNewAudit({ token, query, editId = null }) {
         <label class="sr-only" for="note-${i.id}">Remark</label>
         <textarea class="input" id="note-${i.id}" data-input="note" data-id="${i.id}" rows="2" placeholder="${U('remark', 'Remark (required): what exactly did you see?')}">${a.note || ''}</textarea>
         <div class="photo-row">
-          ${(a.photos || []).map((p, n) => html`<span class="photo-wrap"><img class="thumb" src="${photoSrc(p)}" alt="Photo ${n + 1} for ${i.code}${isLocalPhoto(p) ? ' (on this phone, not uploaded yet)' : ''}">${isLocalPhoto(p) && !uploadedPhotos.has(p) && !uploadingPhotos.has(p) ? html`<span class="ph-local" title="Saved on this phone; uploads when the network is back">${icon('cloud_off')}</span>` : ''}<button type="button" class="rm" data-click="rmPhoto" data-id="${i.id}" data-n="${n}" aria-label="Remove photo">${icon('close')}</button></span>`)}
+          ${(a.photos || []).map((p, n) => html`<span class="photo-wrap"><img class="thumb${processingPhotos.has(p) ? ' is-processing' : ''}" data-photo="${p}" src="${photoSrc(p)}" alt="Photo ${n + 1} for ${i.code}${isLocalPhoto(p) ? ' (on this phone, not uploaded yet)' : ''}">${isLocalPhoto(p) && !uploadedPhotos.has(p) && !uploadingPhotos.has(p) ? html`<span class="ph-local" title="Saved on this phone; uploads when the network is back">${icon('cloud_off')}</span>` : ''}<button type="button" class="rm" data-click="rmPhoto" data-id="${i.id}" data-n="${n}" aria-label="Remove photo">${icon('close')}</button></span>`)}
           ${(a.photos || []).length < 4 ? html`<button type="button" class="btn" data-click="photo" data-id="${i.id}">${icon('photo_camera')}${(a.photos || []).length ? U('another', 'Add another') : U('photo', 'Take or add photo')}</button>` : ''}
           <span class="small muted row" style="gap:6px">${prioBadge(prio)} ${U('prio', null)?.[prio] || R.PRIORITY[prio].response}</span>
         </div>
@@ -1864,6 +1903,7 @@ async function pageNewAudit({ token, query, editId = null }) {
         return;
       }
       btn.disabled = true;
+      if (processingPhotos.size) { toast('Finishing photos…', { ms: 4000 }); await photosReady(); }
       const body = {
         site_id: draft.site_id, domain: draft.domain, audit_date: draft.audit_date, auditor: draft.auditor, audit_type: draft.audit_type, summary: draft.summary, started_at: draft.started_at || null,
         finished_at: new Date().toISOString(), client_id: draft.client_id,

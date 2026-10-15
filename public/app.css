@@ -947,3 +947,8 @@ button.log-row:hover { background: var(--surface-2); }
 .lang-switch button { border: 0; background: transparent; color: var(--text-2); font: inherit; font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 8px; cursor: pointer; min-height: 32px; }
 .lang-switch button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(18, 22, 43, .12); }
 @media (max-width: 599px) { .stepper-head .sh-line:first-child { flex-wrap: wrap; } .stepper-head .lang-switch { order: 5; width: 100%; } .stepper-head .lang-switch button { flex: 1; } }
+
+/* a photo being shrunk in the background: a soft shimmer until the small copy is ready */
+.thumb.is-processing { background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2)); background-size: 200% 100%; animation: thumb-shimmer 1.2s linear infinite; }
+@keyframes thumb-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .thumb.is-processing { animation: none; } }

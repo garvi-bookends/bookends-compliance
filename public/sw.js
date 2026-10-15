@@ -4,7 +4,7 @@
 const SHELL = 'bk-shell-v1';
 const API = 'bk-api-v1'; // signed-in data; app.js deletes it on sign-out
 const FONTS = 'bk-fonts-v1';
-const SHELL_FILES = ['/', '/app.js', '/app.css', '/rules.js', '/icon.svg', '/manifest.webmanifest'];
+const SHELL_FILES = ['/', '/app.js', '/app.css', '/rules.js', '/photo-worker.js', '/icon.svg', '/manifest.webmanifest'];
 const SLOW_MS = 3500; // on a weak signal, fall back to the saved copy after this long (the network copy still refreshes it)
 
 self.addEventListener('install', (e) => {
