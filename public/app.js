@@ -2069,8 +2069,8 @@ async function pageFixes({ token, query }) {
     ${selectFilter({ name: 'status', value: state.status, label: 'Status', options: STATUS_FILTERS.map(([k, l]) => [k, l]) })}
     <span id="extraChip">${extraChip()}</span>`;
   const viewPick = () => [['priority', 'By priority', 'format_list_numbered', 'P1 first, then P2, P3'], ['problem', 'By problem', 'category', 'Same gap across units']]
-    .map(([v, label, ic, sub]) => html`<button type="button" class="vp-btn" data-click="view" data-v="${v}" aria-expanded="${state.view === v}" aria-controls="fixList">
-      ${icon(ic)}<span class="vp-text"><b>${label}</b><small>${sub}</small></span>${icon(state.view === v ? 'expand_less' : 'expand_more')}</button>`).join('');
+    .map(([v, label, ic, sub]) => html`<button type="button" class="vp-btn" data-click="view" data-v="${v}" aria-expanded="${String(state.view === v)}" aria-controls="fixList">
+      ${icon(ic)}<span class="vp-text"><b>${label}</b><small>${sub}</small></span>${icon(state.view === v ? 'expand_less' : 'expand_more')}</button>`);
   const sync = ({ filters = true } = {}) => {
     const q = new URLSearchParams(Object.entries(state).filter(([k, v]) => v && !(k === 'status' && v === 'open')));
     history.replaceState(null, '', `#/${q.toString() ? `?${q}` : ''}`);
