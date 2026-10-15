@@ -5,7 +5,7 @@ const SHELL = 'bk-shell-v1';
 const API = 'bk-api-v1'; // signed-in data; app.js deletes it on sign-out
 const FONTS = 'bk-fonts-v1';
 const SHELL_FILES = ['/', '/app.js', '/app.css', '/rules.js', '/icon.svg', '/manifest.webmanifest'];
-const SLOW_MS = 6000; // on a weak signal, fall back to the saved copy after this long (the network copy still refreshes it)
+const SLOW_MS = 3500; // on a weak signal, fall back to the saved copy after this long (the network copy still refreshes it)
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll(SHELL_FILES)).catch(() => {}).then(() => self.skipWaiting()));
@@ -28,6 +28,14 @@ function networkFirst(req, cacheName, key = req) {
   });
 }
 
+/** Fonts never change once published: the copy on the phone is used straight away, the network only the first time. */
+function cacheFirst(req, cacheName) {
+  return caches.open(cacheName).then(async (cache) => (await cache.match(req)) || fetch(req).then((res) => {
+    if (res.ok || res.type === 'opaque') cache.put(req, res.clone()).catch(() => {});
+    return res;
+  }));
+}
+
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -44,7 +52,7 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(networkFirst(req, SHELL, url.pathname));
     return;
   }
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') e.respondWith(networkFirst(req, FONTS));
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') e.respondWith(cacheFirst(req, FONTS));
 });
 
 // Phone and computer notifications for alerts (sent once a day by the server; see cronAlerts in src/api.js).

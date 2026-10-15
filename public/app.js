@@ -286,16 +286,30 @@ function confirmDialog({ title, text, ok = 'Confirm', danger = false, tone = nul
     cdlg.addEventListener('close', () => finish(null), { once: true });
   });
 }
-async function downscale(file, max = 1600) {
+/** Opens a photo as something a canvas can draw, the photo turned the right way up. Falls back step by step, because
+ *  older iPhone Safari rejects createImageBitmap's options (and some versions createImageBitmap on files entirely). */
+async function decodePhoto(file) {
+  try { return { img: await createImageBitmap(file, { imageOrientation: 'from-image' }) }; } catch { /* try the next way */ }
+  try { return { img: await createImageBitmap(file) }; } catch { /* try the next way */ }
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.src = url;
+  await img.decode(); // an <img> applies the photo's rotation by itself
+  return { img, done: () => URL.revokeObjectURL(url) };
+}
+/** Phone photos are 3–5 MB; this makes them about 200–300 KB (1280 px JPEG) so they upload quickly on mobile data. */
+async function downscale(file, max = 1280) {
+  let d;
   try {
-    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
-    const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
-    if (k === 1 && file.type === 'image/jpeg' && file.size < 1.5e6) return file;
+    d = await decodePhoto(file);
+    const w = d.img.naturalWidth || d.img.width, h = d.img.naturalHeight || d.img.height;
+    const k = Math.min(1, max / Math.max(w, h));
+    if (k === 1 && file.type === 'image/jpeg' && file.size < 600e3) return file;
     const c = document.createElement('canvas');
-    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
-    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-    return await new Promise((res) => c.toBlob((b) => res(b || file), 'image/jpeg', 0.82));
-  } catch { return file; }
+    c.width = Math.round(w * k); c.height = Math.round(h * k);
+    c.getContext('2d').drawImage(d.img, 0, 0, c.width, c.height);
+    return await new Promise((res) => c.toBlob((b) => res(b || file), 'image/jpeg', 0.78));
+  } catch { return file; } finally { d?.done?.(); d?.img?.close?.(); }
 }
 function pickAndUpload({ accept = 'image/*' } = {}) {
   const input = $('#filePicker');
@@ -354,12 +368,23 @@ function dropLocalPhotos(answers) {
 }
 /** Uploads the photos of these answers that are still only on the phone, swapping in the server key one by one
  *  (so a dropped connection halfway never uploads a photo twice). Throws the upload error, e.g. still offline. */
+// Photos uploaded in the background while the audit goes on: phone key -> server key (and the upload still running).
+const uploadedPhotos = new Map();
+const uploadingPhotos = new Map();
+function uploadInBackground(key, blob) {
+  const job = api('/api/uploads', { method: 'POST', file: blob }).then((r) => { uploadedPhotos.set(key, r.key); return r.key; }).catch(() => null)
+    .finally(() => uploadingPhotos.delete(key));
+  uploadingPhotos.set(key, job);
+}
 async function uploadLocalPhotos(answers, save) {
   for (const a of answers) {
     if (!(a.photos || []).some(isLocalPhoto)) continue;
     for (let n = 0; n < a.photos.length; n += 1) {
       const k = a.photos[n];
       if (!isLocalPhoto(k)) continue;
+      // already sent in the background (or still being sent): use that, do not send it twice
+      const done = uploadedPhotos.get(k) || (uploadingPhotos.has(k) ? await uploadingPhotos.get(k) : null);
+      if (done) { a.photos[n] = done; save(); idb.del(k).catch(() => {}); continue; }
       const blob = await idb.get(k).catch(() => null);
       if (!blob) { a.photos.splice(n, 1); n -= 1; save(); continue; } // lost from the phone (storage cleared): nothing to send
       const r = await api('/api/uploads', { method: 'POST', file: blob });
@@ -378,22 +403,14 @@ function pickAuditPhoto() {
       const file = input.files[0];
       if (!file) return resolve(null);
       const blob = file.type.startsWith('image/') ? await downscale(file) : file;
-      if (navigator.onLine) {
-        try {
-          toast('Uploading…', { ms: 30000 });
-          const r = await api('/api/uploads', { method: 'POST', file: blob });
-          toast('Photo attached', { success: true });
-          return resolve(r.key);
-        } catch (e) {
-          if (e instanceof SignInNeeded) return resolve(null);
-          if (!e.offline) { toast(friendly(e), { error: true }); return resolve(null); }
-        }
-      }
+      // Kept on the phone at once (the auditor carries on straight away), then sent in the background.
+      // With no network it simply waits; Submit sends whatever is still on the phone.
       try {
         const key = `local:${newId()}`;
         await idb.put(key, blob);
         localThumbs.set(key, URL.createObjectURL(blob));
-        toast('No network. Photo saved; it uploads when the network is back.', { ms: 6000 });
+        if (navigator.onLine) uploadInBackground(key, blob);
+        else toast('No network. Photo saved; it uploads when the network is back.', { ms: 6000 });
         resolve(key);
       } catch { toast('Could not keep the photo on this phone. Try again.', { error: true }); resolve(null); }
     };
@@ -1599,7 +1616,7 @@ async function pageNewAudit({ token, query, editId = null }) {
         <label class="sr-only" for="note-${i.id}">Remark</label>
         <textarea class="input" id="note-${i.id}" data-input="note" data-id="${i.id}" rows="2" placeholder="Remark (required): what exactly did you see?">${a.note || ''}</textarea>
         <div class="photo-row">
-          ${(a.photos || []).map((p, n) => html`<span class="photo-wrap"><img class="thumb" src="${photoSrc(p)}" alt="Photo ${n + 1} for ${i.code}${isLocalPhoto(p) ? ' (on this phone, not uploaded yet)' : ''}">${isLocalPhoto(p) ? html`<span class="ph-local" title="Saved on this phone; uploads when the network is back">${icon('cloud_off')}</span>` : ''}<button type="button" class="rm" data-click="rmPhoto" data-id="${i.id}" data-n="${n}" aria-label="Remove photo">${icon('close')}</button></span>`)}
+          ${(a.photos || []).map((p, n) => html`<span class="photo-wrap"><img class="thumb" src="${photoSrc(p)}" alt="Photo ${n + 1} for ${i.code}${isLocalPhoto(p) ? ' (on this phone, not uploaded yet)' : ''}">${isLocalPhoto(p) && !uploadedPhotos.has(p) && !uploadingPhotos.has(p) ? html`<span class="ph-local" title="Saved on this phone; uploads when the network is back">${icon('cloud_off')}</span>` : ''}<button type="button" class="rm" data-click="rmPhoto" data-id="${i.id}" data-n="${n}" aria-label="Remove photo">${icon('close')}</button></span>`)}
           ${(a.photos || []).length < 4 ? html`<button type="button" class="btn" data-click="photo" data-id="${i.id}">${icon('photo_camera')}${(a.photos || []).length ? 'Add another' : 'Take or add photo'}</button>` : ''}
           <span class="small muted row" style="gap:6px">${prioBadge(prio)} ${R.PRIORITY[prio].response}</span>
         </div>
