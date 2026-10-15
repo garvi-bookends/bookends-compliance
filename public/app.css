@@ -952,3 +952,16 @@ button.log-row:hover { background: var(--surface-2); }
 .thumb.is-processing { background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2)); background-size: 200% 100%; animation: thumb-shimmer 1.2s linear infinite; }
 @keyframes thumb-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .thumb.is-processing { animation: none; } }
+
+/* Dashboard: By priority / By problem as two half-width buttons; the list opens under the one tapped */
+.view-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.vp-btn { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer; box-shadow: var(--shadow-sm); }
+.vp-btn:hover { border-color: var(--border-strong); }
+.vp-btn > .ms { color: var(--muted); flex: none; }
+.vp-btn .vp-text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.vp-btn .vp-text b { font-size: 15px; }
+.vp-btn .vp-text small { font-size: 12.5px; color: var(--muted); }
+.vp-btn[aria-expanded="true"] { border-color: var(--primary); background: var(--primary-soft); box-shadow: inset 0 0 0 1px var(--primary); }
+.vp-btn[aria-expanded="true"] > .ms { color: var(--primary); }
+.vp-btn .vp-text b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 420px) { .vp-btn { padding: 12px; gap: 6px; } .vp-btn .vp-text small, .vp-btn > .ms:first-child { display: none; } }

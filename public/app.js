@@ -1985,7 +1985,8 @@ async function pageFixes({ token, query }) {
   app.today = d.today;
   const today = d.today;
   const state = {
-    view: query.get('view') === 'problem' ? 'problem' : 'priority',
+    // the list stays closed until By priority or By problem is tapped; a link that already filters opens By priority
+    view: ['priority', 'problem'].includes(query.get('view')) ? query.get('view') : ['status', 'priority', 'unit', 'domain', 'kind', 'due', 'q'].some((k) => query.get(k)) ? 'priority' : '',
     status: STATUS_FILTERS.some(([k]) => k === query.get('status')) ? query.get('status') : 'open',
     priority: query.get('priority') || '', unit: query.get('unit') || '', domain: query.get('domain') || '', kind: query.get('kind') || '',
     due: DUE_FILTERS.some(([k]) => k === query.get('due')) ? query.get('due') : '', q: query.get('q') || '',
@@ -2067,12 +2068,16 @@ async function pageFixes({ token, query }) {
     ${selectFilter({ name: 'priority', value: state.priority, label: 'Priority', options: [['', 'Any priority'], ...R.PRIORITY_ORDER.map((p) => [p, R.PRIORITY[p].label])] })}
     ${selectFilter({ name: 'status', value: state.status, label: 'Status', options: STATUS_FILTERS.map(([k, l]) => [k, l]) })}
     <span id="extraChip">${extraChip()}</span>`;
+  const viewPick = () => [['priority', 'By priority', 'format_list_numbered', 'P1 first, then P2, P3'], ['problem', 'By problem', 'category', 'Same gap across units']]
+    .map(([v, label, ic, sub]) => html`<button type="button" class="vp-btn" data-click="view" data-v="${v}" aria-expanded="${state.view === v}" aria-controls="fixList">
+      ${icon(ic)}<span class="vp-text"><b>${label}</b><small>${sub}</small></span>${icon(state.view === v ? 'expand_less' : 'expand_more')}</button>`).join('');
   const sync = ({ filters = true } = {}) => {
-    const q = new URLSearchParams(Object.entries(state).filter(([k, v]) => v && !(k === 'status' && v === 'open') && !(k === 'view' && v === 'priority')));
+    const q = new URLSearchParams(Object.entries(state).filter(([k, v]) => v && !(k === 'status' && v === 'open')));
     history.replaceState(null, '', `#/${q.toString() ? `?${q}` : ''}`);
     $('#fixStrip').innerHTML = part(stripHtml());
     if (filters) $$('select[data-change]', $('#fixFilters')).forEach((s) => { s.value = state[s.dataset.change]; });
-    $('#viewSeg').innerHTML = part(segmented({ name: 'view', value: state.view, label: 'View', options: [['priority', 'By priority'], ['problem', 'By problem']] }));
+    $('#viewSeg').innerHTML = part(viewPick());
+    $('#fixList').hidden = !state.view;
     $('#fixList').innerHTML = part(listHtml());
     $('#extraChip').innerHTML = part(extraChip());
   };
@@ -2085,14 +2090,14 @@ async function pageFixes({ token, query }) {
       <div class="stack">
         <section class="strip swipe" id="fixStrip" aria-label="Summary">${stripHtml()}</section>
         <div class="filterbar" id="fixFilters">${filtersHtml()}</div>
-        <div class="row"><span id="viewSeg">${segmented({ name: 'view', value: state.view, label: 'View', options: [['priority', 'By priority'], ['problem', 'By problem']] })}</span></div>
-        <section class="card flush" id="fixList">${listHtml()}</section>
+        <div class="view-pick" id="viewSeg">${viewPick()}</div>
+        <section class="card flush" id="fixList" ${state.view ? '' : 'hidden'}>${listHtml()}</section>
         <p class="small muted">Priority 1: 48 hours · Priority 2: 7 days · Priority 3: 30 days. Paperwork first.</p>
       </div>`,
   });
   on.click = {
-    strip: (el) => { const [st, p] = el.dataset.v.split(':'); state.status = st; state.priority = p || ''; state.due = ''; sync(); },
-    view: (el) => { state.view = el.dataset.v; sync({ filters: false }); },
+    strip: (el) => { const [st, p] = el.dataset.v.split(':'); state.status = st; state.priority = p || ''; state.due = ''; state.view ||= 'priority'; sync(); },
+    view: (el) => { state.view = state.view === el.dataset.v ? '' : el.dataset.v; sync({ filters: false }); },
     more: (el) => { expanded.add(el.dataset.p); $('#fixList').innerHTML = part(listHtml()); },
     clear: () => { location.hash = '#/'; },
     clearExtra: () => { state.due = ''; state.kind = ''; state.domain = ''; sync(); },
