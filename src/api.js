@@ -922,6 +922,8 @@ async function createSignInLink({ env, request, url, actor, session, params: [id
   const u = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
   if (!u) notFound('Person');
   if (!u.active) bad('This account is disabled. Enable it first.');
+  // A Unit Manager's link opens their restaurant only, so they must have one: otherwise the link would open an empty account.
+  if (u.role === 'manager' && !u.site_id) bad(`${u.name} has no restaurant set. Click Edit, choose their unit, then get the link.`);
   const body = await readJson(request).catch(() => ({}));
   await ensureLinkTable(env);
   let row = await env.DB.prepare('SELECT version FROM signin_links WHERE user_id = ?').bind(u.id).first();
