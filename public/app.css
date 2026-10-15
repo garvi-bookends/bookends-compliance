@@ -976,3 +976,13 @@ button.log-row:hover { background: var(--surface-2); }
   .stepper-head #jump { flex: 1; max-width: none !important; }
 }
 @media (max-width: 599px) { .stepper-head #jump { width: 100%; max-width: none !important; order: 6; } }
+
+/* Date boxes: iPhone Safari (and some Android browsers) give a date input its own fixed width and height, so in a
+   two-column row it spills into the box beside it and sits a few pixels off. Make it behave like every other box. */
+.form-2 > * { min-width: 0; }
+.input { box-sizing: border-box; height: 46px; line-height: 22px; font: inherit; font-size: 16px; }
+textarea.input { height: auto; }
+select.input { height: 46px; }
+input[type="date"].input, input[type="time"].input { -webkit-appearance: none; appearance: none; display: block; min-width: 0; max-width: 100%; text-align: left; }
+input[type="date"].input::-webkit-date-and-time-value { text-align: left; margin: 0; }
+input[type="date"].input::-webkit-calendar-picker-indicator { margin: 0; cursor: pointer; }
