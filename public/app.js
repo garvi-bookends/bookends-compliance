@@ -734,7 +734,12 @@ function mount({ title, body }) {
   keepScrollOnce = false;
   drawOutbox();
 }
-window.addEventListener('hashchange', () => { const m = /^#\/set-password\/([A-Za-z0-9_.-]+)$/.exec(location.hash); return m ? showSetPassword(m[1]) : router(); });
+window.addEventListener('hashchange', () => {
+  const go = /^#\/go\/(\d+\.[A-Za-z0-9_-]+)$/.exec(location.hash);
+  if (go) return signInWithLink(go[1]);
+  const m = /^#\/set-password\/([A-Za-z0-9_.-]+)$/.exec(location.hash);
+  return m ? showSetPassword(m[1]) : router();
+});
 window.addEventListener('scroll', () => $('.topbar').classList.toggle('scrolled', window.scrollY > 4), { passive: true });
 
 // sidebar: drawer on phones and tablets, collapsible rail on desktop
@@ -2962,7 +2967,7 @@ async function pageReports({ token, query }) {
 const suggestUsername = (name) => name.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '.').replace(/^\.+|\.+$/g, '').slice(0, 40);
 const USERNAME_OK = /^[a-z0-9._-]{3,40}$/;
 const passwordFields = (id, label = 'Password', optional = false) => html`
-  <div class="field"><label for="${id}">${label}${optional ? html` <span class="muted">(optional)</span>` : ''}</label><input class="input" id="${id}" name="password" type="password" autocomplete="new-password" minlength="8" ${optional ? '' : 'required'}><span class="hint">${optional ? 'Leave empty to send them a link instead: they choose their own password.' : 'At least 8 characters.'}</span></div>
+  <div class="field"><label for="${id}">${label}${optional ? html` <span class="muted">(optional)</span>` : ''}</label><input class="input" id="${id}" name="password" type="password" autocomplete="new-password" minlength="8" ${optional ? '' : 'required'}><span class="hint">${optional ? 'Leave empty to send them a sign-in link instead: it opens their account with no password.' : 'At least 8 characters.'}</span></div>
   <div class="field"><label for="${id}2">Confirm password</label><input class="input" id="${id}2" name="again" type="password" autocomplete="new-password" ${optional ? '' : 'required'}></div>
   <label class="check"><input type="checkbox" data-change="showPw"> Show passwords</label>`;
 const showPw = (el) => { $$('input[name="password"], input[name="again"]', dlg).forEach((i) => { i.type = el.checked ? 'text' : 'password'; }); };
@@ -3034,30 +3039,41 @@ function openPersonDialog(u = null, { firstAdmin = false, onDone, units = [], pr
     },
   });
 }
-/** A one-time sign-in link for one person: they open it, choose their own password and are signed in. */
+/** A person's own sign-in link: opening it signs them straight in (a Unit Manager sees only their unit). */
 async function openLinkDialog(u) {
   let r;
   try { r = await api(`/api/users/${u.id}/link`, { method: 'POST', body: {} }); }
   catch (e) { if (!(e instanceof SignInNeeded)) toast(friendly(e), { error: true }); return; }
-  const msg = `Hi ${u.name}, open this link to set your password for Bookends Compliance (username: ${r.username}). It works once, for ${r.days} days: ${r.link}`;
-  openDialog({
-    title: `Sign-in link for ${u.name}`,
-    body: html`<div class="form">
-      <p class="muted small">Send this link to <b>${u.name}</b> only. They open it, choose their own password and are signed in. It works <b>once</b> and expires in <b>${r.days} days</b>.</p>
-      <div class="field"><label for="lkUrl">Link</label><input class="input mono" id="lkUrl" readonly value="${r.link}"></div>
-      <div class="row" style="gap:8px;flex-wrap:wrap">
-        <button class="btn primary" type="button" data-click="copyLink">${icon('content_copy')}Copy link</button>
-        <a class="btn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${icon('chat')}Send on WhatsApp</a>
-      </div>
-      <p class="small muted">Making a new link does not cancel this one; whichever is used first sets the password, and the other stops working.</p>
-    </div>`,
-    actions: html`<button class="btn" type="button" data-click="close">Done</button>`,
-    on: { click: { copyLink: async () => {
-      const f = $('#lkUrl', dlg);
-      try { await navigator.clipboard.writeText(r.link); } catch { f.select(); document.execCommand?.('copy'); }
-      toast('Link copied. Send it to that person only.', { success: true });
-    } } },
-  });
+  const draw = () => {
+    const msg = `Hi ${u.name}, open this link to go straight into Bookends Compliance (no password needed). Keep it private: ${r.link}`;
+    openDialog({
+      title: `Sign-in link for ${u.name}`,
+      body: html`<div class="form">
+        <p class="muted small">Opening this link signs <b>${u.name}</b> straight in, with no username or password${r.role === 'manager' ? ' — they see only their own unit' : ' — with full Compliance Head access'}. It keeps working until you make a new link or disable the account. <b>Send it to ${u.name} only.</b></p>
+        <div class="field"><label for="lkUrl">Link</label><input class="input mono" id="lkUrl" readonly value="${r.link}"></div>
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <button class="btn primary" type="button" data-click="copyLink">${icon('content_copy')}Copy link</button>
+          <a class="btn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${icon('chat')}Send on WhatsApp</a>
+        </div>
+        <p class="small muted">Sent to the wrong person, or a phone was lost? Make a new link: the old one stops working at once.</p>
+      </div>`,
+      actions: html`<button class="btn danger" type="button" data-click="renewLink">${icon('autorenew')}New link</button><span class="spacer"></span><button class="btn" type="button" data-click="close">Done</button>`,
+      on: { click: {
+        copyLink: async () => {
+          const f = $('#lkUrl', dlg);
+          try { await navigator.clipboard.writeText(r.link); } catch { f.select(); document.execCommand?.('copy'); }
+          toast('Link copied. Send it to that person only.', { success: true });
+        },
+        renewLink: async () => {
+          const ok = await confirmDialog({ title: `New link for ${u.name}?`, text: 'The link you sent before stops working at once. Send them the new one.', ok: 'Make new link', danger: true });
+          if (!ok) return;
+          try { r = await api(`/api/users/${u.id}/link`, { method: 'POST', body: { renew: true } }); draw(); toast('New link made. The old one no longer works.', { success: true }); }
+          catch (e) { if (!(e instanceof SignInNeeded)) toast(friendly(e), { error: true }); }
+        },
+      } },
+    });
+  };
+  draw();
 }
 function openResetDialog(u, onDone) {
   openDialog({
@@ -3364,7 +3380,22 @@ async function showSetPassword(token) {
     } catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false; }
   });
 }
+/** Opened from a personal sign-in link (#/go/<id>.<signature>): signs straight in, then opens the app. */
+async function signInWithLink(token) {
+  $('#app').hidden = true;
+  let res;
+  try { res = await fetch('/api/auth/magic', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token }) }); }
+  catch { toast('Could not reach the server. Check the connection and open the link again.', { error: true, ms: 9000 }); showSignin(); return; }
+  const data = await res.json().catch(() => ({}));
+  history.replaceState(null, '', '#/');
+  if (!res.ok) { showSignin(); toast(data.error || 'That link did not work. Sign in with your username and password.', { error: true, ms: 9000 }); return; }
+  if (data.username) localStorageSet('bk-username', data.username);
+  alertsCache = null;
+  boot();
+}
 async function boot() {
+  const go = /^#\/go\/(\d+\.[A-Za-z0-9_-]+)$/.exec(location.hash);
+  if (go) { signInWithLink(go[1]); return; }
   const link = /^#\/set-password\/([A-Za-z0-9_.-]+)$/.exec(location.hash);
   if (link) { showSetPassword(link[1]); return; }
   try {

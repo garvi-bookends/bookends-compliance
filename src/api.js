@@ -902,14 +902,61 @@ async function accountForLink(env, token) {
   return u && u.active && String(u.password_hash).slice(-12) === c.h ? u : null;
 }
 const LINK_GONE = 'This link has expired or was already used. Ask the Compliance Head for a new one.';
+// ---- personal sign-in links: opening one signs that person straight in (no username or password).
+// A Unit Manager's link opens only their own unit, like their password does. The link is the account id plus an HMAC
+// (keyed with ACCESS_CODE) of a random "version" kept per person in signin_links, so the same link can be shown again,
+// and "New link" (a new version) cancels the old one. Disabling the account stops it too. The table is created on first
+// use, so no manual migration is needed (also in migrations-pg/0007_signin_links.sql).
+let linkTableReady = false;
+async function ensureLinkTable(env) {
+  if (linkTableReady) return;
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS signin_links (
+    user_id integer PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, version text NOT NULL,
+    created_at text NOT NULL DEFAULT utc_now(), created_by text)`).run();
+  linkTableReady = true;
+}
+const magicSig = (env, uid, version) => hmac(env.ACCESS_CODE, `magic:${uid}:${version}`);
+/** POST { renew: true } makes a new link and cancels the old one; otherwise the person's current link (made if none). */
 async function createSignInLink({ env, request, url, actor, session, params: [id] }) {
   if (session.user?.role !== 'head') throw new HttpError(403, 'Only the Compliance Head can create sign-in links');
   const u = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
   if (!u) notFound('Person');
   if (!u.active) bad('This account is disabled. Enable it first.');
-  const link = `${url.origin}/#/set-password/${await makeLinkToken(env, u)}`;
-  await log(env, { actor, entity: 'user', entity_id: u.id, action: 'link created', detail: `Sign-in link created for ${u.name} (${u.username}), valid ${LINK_DAYS} days` }).run();
-  return json({ link, days: LINK_DAYS, name: u.name, username: u.username });
+  const body = await readJson(request).catch(() => ({}));
+  await ensureLinkTable(env);
+  let row = await env.DB.prepare('SELECT version FROM signin_links WHERE user_id = ?').bind(u.id).first();
+  if (!row || body.renew === true) {
+    const version = b64url(crypto.getRandomValues(new Uint8Array(18)));
+    await env.DB.batch([
+      env.DB.prepare('INSERT INTO signin_links (user_id, version, created_by) VALUES (?, ?, ?) ON CONFLICT (user_id) DO UPDATE SET version = excluded.version, created_at = utc_now(), created_by = excluded.created_by')
+        .bind(u.id, version, actor),
+      log(env, { actor, entity: 'user', entity_id: u.id, action: row ? 'link renewed' : 'link created', detail: `${row ? 'New sign-in link (the old one no longer works)' : 'Sign-in link created'} for ${u.name} (${u.username})` }),
+    ]);
+    row = { version };
+  }
+  const link = `${url.origin}/#/go/${u.id}.${await magicSig(env, u.id, row.version)}`;
+  return json({ link, name: u.name, username: u.username, role: u.role });
+}
+/** Public: sign in with a personal link. */
+async function useMagicLink({ env, request }) {
+  if (env.LOGIN_LIMIT) {
+    const ip = (request.headers.get('x-forwarded-for') || '').split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown';
+    if (!(await env.LOGIN_LIMIT.limit({ key: ip })).success) throw new HttpError(429, 'Too many attempts. Wait a minute, then try again.');
+  }
+  const [uid, sig] = String((await readJson(request)).token || '').split('.');
+  const gone = async () => { await slowDown(); throw new HttpError(410, 'This sign-in link no longer works. Ask the Compliance Head for a new one.'); };
+  if (!/^\d+$/.test(uid || '') || !sig) return gone();
+  await ensureLinkTable(env);
+  const [row, u] = await Promise.all([
+    env.DB.prepare('SELECT version FROM signin_links WHERE user_id = ?').bind(+uid).first(),
+    env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(+uid).first(),
+  ]);
+  if (!row || !u || !u.active || !(await sameSecret(sig, await magicSig(env, u.id, row.version)))) return gone();
+  await env.DB.batch([
+    env.DB.prepare('UPDATE users SET last_login_at = utc_now() WHERE id = ?').bind(u.id),
+    log(env, { actor: u.name, entity: 'user', entity_id: u.id, action: 'signed in', detail: 'Signed in with their sign-in link' }),
+  ]);
+  return sessionResponse(env, request, { name: u.name, uid: u.id }, { name: u.name, role: u.role, username: u.username });
 }
 /** Public: whose link this is, so the page can greet them. */
 async function checkSignInLink({ env, request }) {
@@ -1080,6 +1127,7 @@ const PUBLIC = [
   ['GET', /^\/api\/auth\/options$/, authOptions],
   ['POST', /^\/api\/auth\/link\/check$/, checkSignInLink],
   ['POST', /^\/api\/auth\/link$/, useSignInLink],
+  ['POST', /^\/api\/auth\/magic$/, useMagicLink],
   ['GET', /^\/api\/cron\/alerts$/, cronAlerts], // checks CRON_SECRET itself
 ];
 const routes = [
