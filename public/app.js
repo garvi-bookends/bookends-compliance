@@ -341,6 +341,7 @@ async function shrinkPhoto(file) {
 function pickAndUpload({ accept = 'image/*' } = {}) {
   const input = $('#filePicker');
   input.accept = accept;
+  input.removeAttribute('capture');
   input.value = '';
   return new Promise((resolve, reject) => {
     input.onchange = async () => {
@@ -427,10 +428,12 @@ async function uploadLocalPhotos(answers, save) {
     }
   }
 }
-/** Photo for an audit line: uploaded straight away when there is network, otherwise kept on the phone for later. */
-function pickAuditPhoto() {
+/** Photo for an audit line: uploaded straight away when there is network, otherwise kept on the phone for later.
+ *  camera: open the phone's back camera directly; otherwise the phone offers its gallery (and camera). */
+function pickAuditPhoto({ camera = false } = {}) {
   const input = $('#filePicker');
   input.accept = 'image/*';
+  if (camera) input.setAttribute('capture', 'environment'); else input.removeAttribute('capture');
   input.value = '';
   return new Promise((resolve) => {
     input.onchange = async () => {
@@ -1601,7 +1604,7 @@ const AUDIT_LANGS = [['en', 'English'], ['gu', 'ગુજરાતી'], ['hi', 
 const AUDIT_UI = {
   gu: {
     rated: 'ચકાસ્યા', liveScore: 'હાલનો સ્કોર', critical: 'ક્રિટિકલ', marks: 'માર્ક', pt: 'પોઇન્ટ', step: 'સ્ટેપ',
-    remark: 'નોંધ (જરૂરી): તમે બરાબર શું જોયું?', photo: 'ફોટો લો અથવા ઉમેરો', another: 'બીજો ફોટો',
+    remark: 'નોંધ (જરૂરી): તમે બરાબર શું જોયું?', photo: 'ફોટો લો અથવા ઉમેરો', another: 'બીજો ફોટો', camera: 'કેમેરા', gallery: 'ગેલેરી',
     nextUnrated: 'બાકી લાઈન', previous: 'પાછળ', next: 'આગળ', save: 'ડ્રાફ્ટ સાચવો', submit: 'ઓડિટ સબમિટ કરો', saveChanges: 'ફેરફાર સાચવો',
     basic: 'મૂળ વિગતો', review: 'તપાસો અને સબમિટ કરો', reviewEdit: 'તપાસો અને સાચવો', language: 'ચેકલિસ્ટની ભાષા',
     ratings: { fssai2: { pass: 'પાલન', partial: 'નાની ખામી', fail: 'મોટી ખામી', na: 'લાગુ નથી' }, fssai1: { pass: 'પાલન', partial: 'અધૂરું', fail: 'પાલન નથી', na: 'લાગુ નથી' }, docket: { pass: 'બરાબર', partial: 'ધ્યાન આપો', fail: 'ખામી', na: 'લાગુ નથી' } },
@@ -1609,7 +1612,7 @@ const AUDIT_UI = {
   },
   hi: {
     rated: 'जाँचे', liveScore: 'अभी का स्कोर', critical: 'क्रिटिकल', marks: 'मार्क', pt: 'पॉइंट', step: 'स्टेप',
-    remark: 'नोट (ज़रूरी): आपने ठीक क्या देखा?', photo: 'फ़ोटो लें या जोड़ें', another: 'एक और फ़ोटो',
+    remark: 'नोट (ज़रूरी): आपने ठीक क्या देखा?', photo: 'फ़ोटो लें या जोड़ें', another: 'एक और फ़ोटो', camera: 'कैमरा', gallery: 'गैलरी',
     nextUnrated: 'बाकी लाइन', previous: 'पीछे', next: 'आगे', save: 'ड्राफ़्ट सेव करें', submit: 'ऑडिट सबमिट करें', saveChanges: 'बदलाव सेव करें',
     basic: 'बुनियादी जानकारी', review: 'जाँचें और सबमिट करें', reviewEdit: 'जाँचें और सेव करें', language: 'चेकलिस्ट की भाषा',
     ratings: { fssai2: { pass: 'पालन', partial: 'छोटी कमी', fail: 'बड़ी कमी', na: 'लागू नहीं' }, fssai1: { pass: 'पालन', partial: 'अधूरा', fail: 'पालन नहीं', na: 'लागू नहीं' }, docket: { pass: 'ठीक', partial: 'ध्यान दें', fail: 'कमी', na: 'लागू नहीं' } },
@@ -1700,7 +1703,7 @@ async function pageNewAudit({ token, query, editId = null }) {
         <textarea class="input" id="note-${i.id}" data-input="note" data-id="${i.id}" rows="2" placeholder="${U('remark', 'Remark (required): what exactly did you see?')}">${a.note || ''}</textarea>
         <div class="photo-row">
           ${(a.photos || []).map((p, n) => html`<span class="photo-wrap"><img class="thumb${processingPhotos.has(p) ? ' is-processing' : ''}" data-photo="${p}" src="${photoSrc(p)}" alt="Photo ${n + 1} for ${i.code}${isLocalPhoto(p) ? ' (on this phone, not uploaded yet)' : ''}">${isLocalPhoto(p) && !uploadedPhotos.has(p) && !uploadingPhotos.has(p) ? html`<span class="ph-local" title="Saved on this phone; uploads when the network is back">${icon('cloud_off')}</span>` : ''}<button type="button" class="rm" data-click="rmPhoto" data-id="${i.id}" data-n="${n}" aria-label="Remove photo">${icon('close')}</button></span>`)}
-          ${(a.photos || []).length < 4 ? html`<button type="button" class="btn" data-click="photo" data-id="${i.id}">${icon('photo_camera')}${(a.photos || []).length ? U('another', 'Add another') : U('photo', 'Take or add photo')}</button>` : ''}
+          ${(a.photos || []).length < 4 ? html`<button type="button" class="btn" data-click="photo" data-cam="1" data-id="${i.id}">${icon('photo_camera')}${U('camera', 'Camera')}</button><button type="button" class="btn" data-click="photo" data-id="${i.id}">${icon('photo_library')}${U('gallery', 'Gallery')}</button>` : ''}
           <span class="small muted row" style="gap:6px">${prioBadge(prio)} ${U('prio', null)?.[prio] || R.PRIORITY[prio].response}</span>
         </div>
       </div>` : ''}
@@ -1854,7 +1857,7 @@ async function pageNewAudit({ token, query, editId = null }) {
     },
     photo: async (el) => {
       const i = lines().find((x) => x.id === +el.dataset.id);
-      const key = await pickAuditPhoto();
+      const key = await pickAuditPhoto({ camera: el.dataset.cam === '1' });
       if (!key) return;
       const a = draft.answers[i.id];
       a.photos = [...(a.photos || []), key].slice(0, 4);
