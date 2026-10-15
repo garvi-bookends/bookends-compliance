@@ -517,6 +517,93 @@ async function createAudit({ env, request, actor }) {
   return json({ id: audit.id, score: scored.score, band: scored.band, created, repeats, autoClosed }, 201);
 }
 
+/**
+ * Edit a submitted audit (Compliance Head): ratings, remarks, photos, conclusion, date, auditor, type.
+ * The same lines are kept (the checklist the audit was done on). The score is recalculated and the audit's own fixes follow:
+ * a new gap gets a fix; a changed gap updates its fix (priority, remark, due date); a gap now Compliant or N/A closes its fix
+ * with a note (nothing is deleted, so any work or proof on it stays on record). Start and finish times are kept.
+ */
+async function updateAudit({ env, request, actor, params: [id] }) {
+  const today = todayFor(env);
+  const audit = await env.DB.prepare('SELECT a.*, t.scheme FROM audits a JOIN templates t ON t.id = a.template_id WHERE a.id = ?').bind(id).first();
+  if (!audit) notFound('Audit');
+  const body = await readJson(request);
+  const auditDate = body.audit_date === undefined ? audit.audit_date : body.audit_date;
+  if (!isDate(auditDate)) bad('Audit date is required');
+  if (auditDate > today) bad('Audit date cannot be in the future');
+  const site = await env.DB.prepare('SELECT * FROM sites WHERE id = ?').bind(audit.site_id).first();
+  const labels = R.SCHEMES[audit.scheme].ratings;
+  const [itemsR, respR, fixR] = await env.DB.batch([
+    env.DB.prepare('SELECT * FROM template_items WHERE template_id = ? ORDER BY sort').bind(audit.template_id),
+    env.DB.prepare('SELECT item_id FROM audit_responses WHERE audit_id = ?').bind(audit.id),
+    env.DB.prepare('SELECT * FROM findings WHERE audit_id = ?').bind(audit.id),
+  ]);
+  const used = new Set(respR.results.map((r) => r.item_id));
+  const lines = itemsR.results.filter((i) => used.has(i.id));
+  const answers = {}, notes = {}, photos = {};
+  for (const a of Array.isArray(body.answers) ? body.answers : []) {
+    if (!R.RESULTS.includes(a.result) || !used.has(Number(a.item_id))) continue;
+    answers[a.item_id] = a.result;
+    notes[a.item_id] = str(a.note, 1000);
+    photos[a.item_id] = (Array.isArray(a.photos) ? a.photos : []).filter((k) => typeof k === 'string' && k.startsWith('evidence/')).slice(0, 4);
+  }
+  const missing = lines.filter((i) => !answers[i.id]);
+  if (missing.length) bad(`${R.plural(missing.length, 'line')} not rated (first: ${missing[0].code})`);
+  const noRemark = lines.filter((i) => (answers[i.id] === 'fail' || answers[i.id] === 'partial') && !notes[i.id]);
+  if (noRemark.length) bad(`Every ${labels.partial} or ${labels.fail} needs a remark (first: ${noRemark[0].code})`);
+
+  const scored = R.scoreAudit(lines, answers);
+  const fixByItem = new Map(fixR.results.filter((f) => f.item_id != null).map((f) => [f.item_id, f]));
+  const EDIT_CLOSE = 'Removed: line re-rated when the audit was edited';
+  const stmts = [
+    env.DB.prepare('UPDATE audits SET audit_date = ?, auditor = ?, audit_type = ?, summary = ?, score = ?, earned = ?, possible = ?, band = ? WHERE id = ?')
+      .bind(auditDate, str(body.auditor, 120) || audit.auditor, str(body.audit_type, 60) || audit.audit_type, body.summary === undefined ? audit.summary : str(body.summary, 4000),
+        scored.score, scored.earned, scored.possible, scored.band, audit.id),
+    env.DB.prepare('DELETE FROM audit_responses WHERE audit_id = ?').bind(audit.id),
+  ];
+  let added = 0, changed = 0, closed = 0;
+  for (const item of lines) {
+    const result = answers[item.id];
+    const pts = result === 'na' ? null : item.weight * R.POINTS[result];
+    const ph = photos[item.id].length ? JSON.stringify(photos[item.id]) : null;
+    stmts.push(env.DB.prepare('INSERT INTO audit_responses (audit_id, item_id, result, points, note, photos) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(audit.id, item.id, result, pts, notes[item.id], ph));
+    const fix = fixByItem.get(item.id);
+    const priority = R.priorityFor(item, result);
+    if (!priority) {
+      if (fix && fix.status !== 'closed') {
+        closed += 1;
+        stmts.push(env.DB.prepare("UPDATE findings SET status = 'closed', closed_at = utc_now(), closed_by = ?, close_note = ?, updated_at = utc_now() WHERE id = ?")
+          .bind(actor, `${EDIT_CLOSE} (${labels[result]})`, fix.id));
+      }
+      continue;
+    }
+    const due = R.addDays(auditDate, R.PRIORITY[priority].fixDays);
+    if (!fix) {
+      added += 1;
+      stmts.push(env.DB.prepare(
+        `INSERT INTO findings (site_id, audit_id, item_id, domain, title, detail, priority, rating, marks, kind, due_date, owner, photos, is_repeat)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)`,
+      ).bind(audit.site_id, audit.id, item.id, audit.domain, item.text, notes[item.id], priority, result, item.weight - pts, item.kind, due, site?.manager || null, ph));
+      continue;
+    }
+    // A fix closed only because of an earlier edit comes back; one verified or closed for real stays closed.
+    const reopen = fix.status === 'closed' && String(fix.close_note || '').startsWith(EDIT_CLOSE);
+    const live = reopen || R.UNRESOLVED.includes(fix.status);
+    const moveDue = live && (fix.priority !== priority || auditDate !== audit.audit_date || reopen);
+    if (reopen || fix.priority !== priority || fix.rating !== result || (fix.detail || null) !== notes[item.id] || (fix.photos || null) !== ph || moveDue) changed += 1;
+    stmts.push(env.DB.prepare(`UPDATE findings SET priority = ?, rating = ?, marks = ?, detail = ?, photos = ?, due_date = ?,
+        status = ?, closed_at = ?, closed_by = ?, close_note = ?, updated_at = utc_now() WHERE id = ?`)
+      .bind(priority, result, item.weight - pts, notes[item.id], ph, moveDue ? due : fix.due_date,
+        reopen ? 'open' : fix.status, reopen ? null : fix.closed_at, reopen ? null : fix.closed_by, reopen ? null : fix.close_note, fix.id));
+  }
+  const scoreNote = audit.score === scored.score ? `score ${R.fmtPct(scored.score)}` : `score ${R.fmtPct(audit.score)} → ${R.fmtPct(scored.score)}`;
+  stmts.push(log(env, { actor, site_id: audit.site_id, entity: 'audit', entity_id: audit.id, action: 'edited',
+    detail: `${R.DOMAINS[audit.domain].label} audit edited: ${scoreNote}, ${R.bandLabel(scored.band)}; fixes: ${added} added, ${changed} changed, ${closed} closed` }));
+  await env.DB.batch(stmts);
+  return json({ id: audit.id, score: scored.score, band: scored.band, added, changed, closed });
+}
+
 // ================================================================= findings (fix plan)
 const FINDING_SELECT = `SELECT f.*, s.name AS site_name, s.city AS site_city, s.kind AS site_kind, i.code AS item_code, i.area AS item_area,
   i.guidance, i.critical AS item_critical, i.criticality, a.audit_date FROM findings f JOIN sites s ON s.id = f.site_id
@@ -1012,6 +1099,7 @@ const routes = [
   ['GET', /^\/api\/audits$/, listAudits, 'all'],
   ['POST', /^\/api\/audits$/, createAudit, 'head'],
   ['GET', /^\/api\/audits\/(\d+)$/, getAudit, 'all'],
+  ['PUT', /^\/api\/audits\/(\d+)$/, updateAudit, 'head'],
   ['GET', /^\/api\/findings$/, listFindings, 'all'],
   ['GET', /^\/api\/findings\/(\d+)$/, getFinding, 'all'],
   ['PATCH', /^\/api\/findings\/(\d+)$/, updateFinding, 'all'],

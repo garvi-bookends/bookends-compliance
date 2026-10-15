@@ -588,6 +588,7 @@ const routes = [
   [/^\/audits$/, pageAudits, 'audits'],
   [/^\/audits\/new$/, pageNewAudit, 'audits'],
   [/^\/audits\/(\d+)$/, pageAudit, 'audits'],
+  [/^\/audits\/(\d+)\/edit$/, ({ token, params: [id] }) => pageNewAudit({ token, query: new URLSearchParams(), editId: +id }), 'audits'],
   [/^\/fixes$/, pageFixes, 'dashboard'],  // older links to the fix plan open the dashboard
   [/^\/fixes\/(\d+)$/, pageFix, 'dashboard'],
   [/^\/licences$/, pageLicences, 'licences'],
@@ -1376,7 +1377,7 @@ async function pageAudit({ token, params: [id] }) {
     body: html`
       ${pageHeader({ title: unitName(a), crumb: { href: '#/audits', label: 'Audits' },
         sub: html`<span>${R.DOMAINS[a.domain].label} audit</span><span>·</span><span>Visit ${a.visit} of ${a.visits}</span><span>·</span><span>${fmt(a.audit_date, true)}</span>${R.auditTimeRange(a) ? html`<span>·</span><span>${R.auditTimeRange(a)}</span>` : ''}${statusBadge(a.band)}`,
-        actions: html`<a class="btn" href="#/units/${a.site_id}">${icon('storefront')}View unit</a>${findings.some((f) => f.status !== 'closed') ? html`<a class="btn primary" href="#/fixes?unit=${a.site_id}&domain=${a.domain}">${icon('construction')}View fixes</a>` : ''}` })}
+        actions: html`${isManager() ? '' : html`<a class="btn" href="#/audits/${a.id}/edit">${icon('edit')}Edit audit</a>`}<a class="btn" href="#/units/${a.site_id}">${icon('storefront')}View unit</a>${findings.some((f) => f.status !== 'closed') ? html`<a class="btn primary" href="#/fixes?unit=${a.site_id}&domain=${a.domain}">${icon('construction')}View fixes</a>` : ''}` })}
       <div class="stack-lg">
         <section class="card stack">
           <div class="section-head" style="margin:0"><h2>Audit summary</h2></div>
@@ -1536,38 +1537,47 @@ const loadDraft = () => { try { return JSON.parse(localStorage.getItem(DRAFT_KEY
 const saveDraft = (x) => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(x)); } catch { /* private mode */ } };
 const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } };
 
-async function pageNewAudit({ token, query }) {
+async function pageNewAudit({ token, query, editId = null }) {
   if (isManager()) {
     mount({ title: 'New audit', body: html`${pageHeader({ title: 'Start an audit', crumb: { href: '#/audits', label: 'Audits' } })}<div class="card">${emptyState({ iconName: 'lock', title: 'Only the Compliance Head runs audits', text: 'See your fixes on the Dashboard.', action: html`<a class="btn primary" href="#/">${icon('construction')}Go to dashboard</a>` })}</div>` });
     return;
   }
-  const [sitesRes, templates] = await Promise.all([api('/api/sites'), getTemplates()]);
+  const [sitesRes, templates, saved] = await Promise.all([api('/api/sites'), getTemplates(), editId ? api(`/api/audits/${editId}`) : null]);
   if (stale(token)) return;
   const units = sitesRes.units;
+  // Editing a submitted audit: same form, filled from the saved audit, kept on this device under its own key until saved.
+  const EDIT_KEY = editId ? `bk-audit-edit:${editId}` : null;
+  const fromSaved = () => ({
+    edit: editId, template_id: saved.audit.template_id, site_id: saved.audit.site_id, domain: saved.audit.domain, audit_date: saved.audit.audit_date,
+    auditor: saved.audit.auditor || '', audit_type: saved.audit.audit_type || 'Surprise', summary: saved.audit.summary || '', step: 1,
+    answers: Object.fromEntries(saved.responses.map((r) => [r.item_id, { result: r.result, note: r.note || '', photos: [...(r.photos || [])] }])),
+  });
   const fresh = () => ({
     site_id: +query.get('unit') || null, domain: R.AUDIT_DOMAINS.includes(query.get('domain')) ? query.get('domain') : null,
     audit_date: auditToday(), auditor: app.me?.name || '', audit_type: 'Surprise', answers: {}, summary: '', step: 0, client_id: newId(),
   });
-  let draft = loadDraft();
+  let draft = editId ? (() => { try { return JSON.parse(localStorage.getItem(EDIT_KEY)) || null; } catch { return null; } })() : loadDraft();
+  if (editId && !draft) draft = fromSaved();
   let conflict = null;
-  if (draft && !units.some((s) => s.id === draft.site_id)) draft = null;
+  if (!editId && draft && !units.some((s) => s.id === draft.site_id)) draft = null;
   if (draft && Object.keys(draft.answers || {}).length && ((query.get('unit') && +query.get('unit') !== draft.site_id) || (query.get('domain') && query.get('domain') !== draft.domain))) { conflict = draft; draft = fresh(); }
   draft = draft || fresh();
   draft.client_id ||= newId(); // drafts saved before audits carried one
   await loadLocalThumbs([...Object.values(draft.answers || {}), ...Object.values(conflict?.answers || {})]);
   if (stale(token)) return;
-  const persist = () => saveDraft(draft);
+  const persist = () => (editId ? (() => { try { localStorage.setItem(EDIT_KEY, JSON.stringify(draft)); } catch { /* private mode */ } })() : saveDraft(draft));
+  const clearThis = () => (editId ? (() => { try { localStorage.removeItem(EDIT_KEY); } catch { /* ignore */ } })() : clearDraft());
   /** The audit starts when the auditor first moves into the checklist (or rates a line, for drafts saved before times were kept). */
-  const markStart = () => { if (!draft.started_at) draft.started_at = new Date().toISOString(); };
+  const markStart = () => { if (!editId && !draft.started_at) draft.started_at = new Date().toISOString(); };
   const timeHtml = () => (draft.started_at ? html`<span class="muted">·</span><span class="small muted" title="Recorded automatically">${icon('schedule', 'muted')} Started ${R.fmtClock(draft.started_at)} · ${R.fmtDuration(Math.max(0, Math.round((Date.now() - Date.parse(draft.started_at)) / 60000)))} so far</span>` : '');
-  const unit = () => units.find((s) => s.id === draft.site_id);
-  const tpl = () => templates.find((t) => t.domain === draft.domain && t.active);
-  const lines = () => { const t = tpl(), u = unit(); if (!t || !u) return []; return t.items.filter((i) => i.applies === 'Both' || (u.kind === 'kitchen' ? i.applies === 'CPK' : i.applies === 'Restaurant')); };
+  const unit = () => units.find((s) => s.id === draft.site_id) || (editId ? { id: saved.audit.site_id, name: saved.audit.site_name, city: saved.audit.site_city, kind: saved.audit.site_kind } : undefined);
+  const tpl = () => (editId ? templates.find((t) => t.id === draft.template_id) : templates.find((t) => t.domain === draft.domain && t.active));
+  const lines = () => { if (editId) return saved.items; const t = tpl(), u = unit(); if (!t || !u) return []; return t.items.filter((i) => i.applies === 'Both' || (u.kind === 'kitchen' ? i.applies === 'CPK' : i.applies === 'Restaurant')); };
   const labels = () => R.SCHEMES[tpl().scheme].ratings;
   const ready = () => !!(draft.site_id && draft.domain && tpl());
   const secs = () => [...new Set(lines().map((i) => i.section))];
   // Steps: 0 = basic details, 1..n = one checklist section each, n+1 = review & submit.
-  const stepNames = () => (ready() ? ['Basic details', ...secs(), 'Review & submit'] : ['Basic details']);
+  const stepNames = () => (ready() ? ['Basic details', ...secs(), editId ? 'Review & save' : 'Review & submit'] : ['Basic details']);
   const clampStep = () => { draft.step = Math.max(0, Math.min(stepNames().length - 1, +draft.step || 0)); };
   const isReview = () => ready() && draft.step === stepNames().length - 1;
   const stepOf = (item) => secs().indexOf(item.section) + 1;
@@ -1624,9 +1634,9 @@ async function pageNewAudit({ token, query }) {
     const t = ready() ? tpl() : null;
     return html`<section class="card form" aria-label="Audit details">
       <div class="section-head" style="margin:0"><h2>Basic details</h2></div>
-      <div class="field"><label for="aUnit">Unit</label><select class="input" id="aUnit" data-change="unit"><option value="">Choose a unit…</option>${units.map((s) => html`<option value="${s.id}" ${s.id === draft.site_id ? 'selected' : ''}>${unitName(s)}</option>`)}</select></div>
+      ${editId ? html`<div class="field"><span class="label">Unit and audit</span><b>${unitName(unit())} · ${R.DOMAINS[draft.domain].label}</b><span class="hint">These cannot change when editing. Ratings, remarks, photos, date and auditor can.</span></div>` : html`<div class="field"><label for="aUnit">Unit</label><select class="input" id="aUnit" data-change="unit"><option value="">Choose a unit…</option>${units.map((s) => html`<option value="${s.id}" ${s.id === draft.site_id ? 'selected' : ''}>${unitName(s)}</option>`)}</select></div>
       <div class="field"><span class="label" id="typeLbl">Audit</span><div class="choices" role="group" aria-labelledby="typeLbl">
-        ${R.AUDIT_DOMAINS.map((dom) => html`<button type="button" class="choice" data-click="domain" data-v="${dom}" aria-pressed="${draft.domain === dom}" style="${draft.domain === dom ? 'border-color:var(--primary);background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--primary)' : ''}">${icon(draft.domain === dom ? 'radio_button_checked' : 'radio_button_unchecked')}${icon(R.DOMAINS[dom].icon)}<span><b>${R.DOMAINS[dom].label}</b><span class="small">${R.DOMAINS[dom].long}</span></span></button>`)}</div></div>
+        ${R.AUDIT_DOMAINS.map((dom) => html`<button type="button" class="choice" data-click="domain" data-v="${dom}" aria-pressed="${draft.domain === dom}" style="${draft.domain === dom ? 'border-color:var(--primary);background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--primary)' : ''}">${icon(draft.domain === dom ? 'radio_button_checked' : 'radio_button_unchecked')}${icon(R.DOMAINS[dom].icon)}<span><b>${R.DOMAINS[dom].label}</b><span class="small">${R.DOMAINS[dom].long}</span></span></button>`)}</div></div>`}
       <div class="form-2">
         <div class="field"><label for="aDate">Date</label><input class="input" type="date" id="aDate" max="${auditToday()}" value="${draft.audit_date}" data-change="date"></div>
         <div class="field"><label for="aBy">Auditor</label><input class="input" id="aBy" value="${draft.auditor}" data-input="auditor" autocomplete="name"></div>
@@ -1656,7 +1666,8 @@ async function pageNewAudit({ token, query }) {
         ${progressBar(s.score, { band: s.band, target: true })}
         ${missing.length ? html`<div class="banner warn">${icon('pending_actions')}<span class="b-body">${R.plural(missing.length, 'line')} still to rate.</span><button class="btn sm" data-click="goStep" data-v="${stepOf(missing[0])}">Go to first</button></div>` : ''}
         ${noNote.length ? html`<div class="banner warn">${icon('edit_note')}<span class="b-body">Add a remark to ${R.plural(noNote.length, 'line')} rated ${L.partial} or ${L.fail}.</span><button class="btn sm" data-click="goStep" data-v="${stepOf(noNote[0])}">Go to first</button></div>` : ''}
-        ${!missing.length && !noNote.length ? html`<div class="banner good">${icon('check_circle')}<span class="b-body">Every line is rated. Ready to submit.</span></div>` : ''}
+        ${!missing.length && !noNote.length ? html`<div class="banner good">${icon('check_circle')}<span class="b-body">Every line is rated. ${editId ? 'Ready to save.' : 'Ready to submit.'}</span></div>` : ''}
+        ${editId ? html`<p class="small muted">Saved: <b>${pct(saved.audit.score)}</b>. Saving recalculates the score and updates this audit's fixes: new gaps get a fix, changed gaps are updated, gaps now ${L.pass} or ${L.na} are closed.</p>` : ''}
       </section>
       <section class="card flush">
         <div class="section-head"><h2>By section</h2></div>
@@ -1679,8 +1690,8 @@ async function pageNewAudit({ token, query }) {
         <div id="submitErr" class="error-text" hidden></div>
         ${draft.started_at ? html`<p class="small muted">${icon('schedule', 'muted')} Started at ${R.fmtClock(draft.started_at)}.</p>` : ''}
         <p class="small muted">${icon('save', 'muted')} Saved as you go. You can come back later.</p>
-        <p class="small muted">${icon('cloud_off', 'muted')} No network? Submit anyway; it sends when back online.</p>
-        <div><button class="btn danger sm" type="button" data-click="discard">${icon('delete')}Discard draft</button></div>
+        ${editId ? '' : html`<p class="small muted">${icon('cloud_off', 'muted')} No network? Submit anyway; it sends when back online.</p>`}
+        <div><button class="btn danger sm" type="button" data-click="discard">${icon('delete')}${editId ? 'Discard changes' : 'Discard draft'}</button></div>
       </section>
     </div>`;
   };
@@ -1691,9 +1702,9 @@ async function pageNewAudit({ token, query }) {
     const step = draft.step;
     const review = isReview();
     mount({
-      title: 'New audit',
+      title: editId ? 'Edit audit' : 'New audit',
       body: html`
-        ${pageHeader({ compact: step > 0, title: ready() ? `${R.DOMAINS[draft.domain].label} audit` : 'Start an audit', crumb: { href: '#/audits', label: 'Audits' }, sub: ready() ? html`<span>${unitName(unit())}</span><span>·</span><span>${fmt(draft.audit_date, true)}</span>` : 'Walk the unit with your phone' })}
+        ${pageHeader({ compact: step > 0, title: editId ? `Edit ${R.DOMAINS[draft.domain].label.toLowerCase()} audit` : ready() ? `${R.DOMAINS[draft.domain].label} audit` : 'Start an audit', crumb: editId ? { href: `#/audits/${editId}`, label: 'Back to audit' } : { href: '#/audits', label: 'Audits' }, sub: ready() ? html`<span>${unitName(unit())}</span><span>·</span><span>${fmt(draft.audit_date, true)}</span>` : 'Walk the unit with your phone' })}
         ${conflict ? html`<div class="banner info" style="margin-bottom:16px">${icon('history')}<span class="b-body">Unfinished ${R.DOMAINS[conflict.domain].label.toLowerCase()} audit for <b>${unitName(units.find((x) => x.id === conflict.site_id))}</b> (${R.plural(Object.keys(conflict.answers).length, 'rating')}).</span><button class="btn sm" data-click="resume">Continue it</button></div>` : ''}
         ${ready() ? html`<div class="stepper-head">
           <div class="sh-line"><span class="sh-step">Step ${step + 1} of ${total}</span><span class="sh-name">${names[step]}</span><span class="spacer"></span>
@@ -1705,7 +1716,7 @@ async function pageNewAudit({ token, query }) {
         ${bottomBar(html`
           <button class="btn" data-click="prev" ${step === 0 ? 'disabled' : ''}>${icon('arrow_back')}Previous</button>
           <button class="btn" data-click="save">${icon('save')}Save draft</button>
-          ${review ? html`<button class="btn primary" data-click="submit">${icon('send')}Submit audit</button>`
+          ${review ? html`<button class="btn primary" data-click="submit">${icon(editId ? 'save' : 'send')}${editId ? 'Save changes' : 'Submit audit'}</button>`
             : html`<button class="btn primary" data-click="next" ${ready() ? '' : 'disabled'}>Next${icon('arrow_forward')}</button>`}`,
         ready() ? `Step ${step + 1} of ${total} · ${names[step]}` : '')}`,
     });
@@ -1761,6 +1772,11 @@ async function pageNewAudit({ token, query }) {
     goStep: (el) => go(+el.dataset.v),
     save: () => { persist(); toast('Draft saved on this device', { success: true }); },
     discard: async () => {
+      if (editId) {
+        const ok = await confirmDialog({ title: 'Discard your changes?', text: 'The audit stays exactly as it was saved.', ok: 'Discard changes', danger: true });
+        if (!ok) return;
+        clearThis(); location.hash = `#/audits/${editId}`; return;
+      }
       const ok = await confirmDialog({ title: 'Discard this draft?', text: 'All ratings and photos for this audit will be deleted.', ok: 'Discard', danger: true });
       if (!ok) return;
       dropLocalPhotos(Object.values(draft.answers)); clearDraft(); draft = fresh(); conflict = null; render();
@@ -1786,6 +1802,13 @@ async function pageNewAudit({ token, query }) {
       try {
         // photos taken with no network go up first; the draft keeps each server key as it arrives
         await uploadLocalPhotos(body.answers, () => { body.answers.forEach((a) => { draft.answers[a.item_id].photos = [...a.photos]; }); persist(); });
+        if (editId) {
+          const r = await api(`/api/audits/${editId}`, { method: 'PUT', body: { audit_date: body.audit_date, auditor: body.auditor, audit_type: body.audit_type, summary: body.summary, answers: body.answers } });
+          clearThis(); searchData = null;
+          toast(`Audit saved: ${pct(r.score)}, ${R.bandLabel(r.band)} · fixes: ${r.added} added, ${r.changed} changed, ${r.closed} closed`, { success: true, ms: 7000 });
+          location.hash = `#/audits/${editId}`;
+          return;
+        }
         const r = await api('/api/audits', { method: 'POST', body });
         clearDraft();
         searchData = null;
@@ -1793,6 +1816,7 @@ async function pageNewAudit({ token, query }) {
         location.hash = `#/audits/${r.id}`;
       } catch (e2) {
         if (e2 instanceof SignInNeeded) return;
+        if (e2.offline && editId) { toast('No network. Your changes are kept on this device; save again when you are back online.', { error: true, ms: 9000 }); return; }
         if (e2.offline) {
           // no network: keep it on the phone and send it by itself later
           outboxPut({ client_id: draft.client_id, owner: outboxOwner(), queued_at: new Date().toISOString(), unit: unitName(unit()), body });
