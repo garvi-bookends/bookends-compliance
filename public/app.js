@@ -3220,6 +3220,7 @@ async function pageSettings({ token }) {
             <span style="flex:1;min-width:200px"><b>${me.name}</b> ${toneBadge(me.role === 'head' ? 'info' : 'neutral', ROLE_LABEL[me.role] || 'Team access')}${me.unit ? html` <span class="small muted">${icon('storefront')} ${unitName(me.unit)}</span>` : ''}<br>
               <span class="small muted">${me.username ? `Signed in as ${me.username}.` : 'Signed in with the shared team access code.'} Your name is recorded on every audit and change you make.</span></span>
             ${me.username ? html`<button class="btn" data-click="changePw">${icon('key')}Change password</button>` : ''}
+            ${me.role === 'head' && me.id ? html`<button class="btn" data-click="myLink">${icon('link')}My sign-in link</button>` : ''}
             <button class="btn" data-click="signout">${icon('logout')}Sign out</button></div>
         </section>
         ${teamSection()}
@@ -3248,6 +3249,7 @@ async function pageSettings({ token }) {
   on.click = {
     signout: () => signOut(),
     changePw: () => openPasswordDialog(),
+    myLink: () => openLinkDialog({ id: me.id, name: me.name, username: me.username }),
     firstAdmin: () => openPersonDialog(null, { firstAdmin: true, onDone: () => { toast('Compliance Head created. Sign in with it to add managers.', { success: true, ms: 9000 }); rerender(); } }),
     addPerson: () => openPersonDialog(null, { units: sites.units, onDone: () => rerender() }),
     editPerson: (el) => openPersonDialog(person(el), { units: sites.units, onDone: () => rerender() }),

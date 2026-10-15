@@ -818,7 +818,7 @@ async function me({ env, actor, session }) {
   const site = u?.site_id ? await env.DB.prepare('SELECT id, name, city, kind FROM sites WHERE id = ?').bind(u.site_id).first() : null;
   return json({
     name: actor, today: todayFor(env),
-    role: u ? u.role : 'team', username: u?.username || null, mustChange: !!u?.must_change,
+    id: u?.id ?? null, role: u ? u.role : 'team', username: u?.username || null, mustChange: !!u?.must_change,
     unit: u?.role === 'manager' ? site : null,
     accountsReady: heads !== null,
     canManageUsers: heads !== null && (u?.role === 'head' || (!u && heads === 0)),
