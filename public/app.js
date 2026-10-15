@@ -1716,7 +1716,7 @@ async function pageNewAudit({ token, query, editId = null }) {
         <textarea class="input" id="note-${i.id}" data-input="note" data-id="${i.id}" rows="2" placeholder="${U('remark', 'Remark (required): what exactly did you see?')}">${a.note || ''}</textarea>
         <div class="photo-row">
           ${(a.photos || []).map((p, n) => html`<span class="photo-wrap"><img class="thumb${processingPhotos.has(p) ? ' is-processing' : ''}" data-photo="${p}" src="${photoSrc(p)}" alt="Photo ${n + 1} for ${i.code}${isLocalPhoto(p) ? ' (on this phone, not uploaded yet)' : ''}">${isLocalPhoto(p) && !uploadedPhotos.has(p) && !uploadingPhotos.has(p) ? html`<span class="ph-local" title="Saved on this phone; uploads when the network is back">${icon('cloud_off')}</span>` : ''}<button type="button" class="rm" data-click="rmPhoto" data-id="${i.id}" data-n="${n}" aria-label="Remove photo">${icon('close')}</button></span>`)}
-          ${(a.photos || []).length < 4 ? html`<button type="button" class="btn" data-click="photo" data-cam="1" data-id="${i.id}">${icon('photo_camera')}${U('camera', 'Camera')}</button><button type="button" class="btn" data-click="photo" data-id="${i.id}">${icon('photo_library')}${U('gallery', 'Gallery')}</button>` : ''}
+          <button type="button" class="btn" data-click="photo" data-cam="1" data-id="${i.id}">${icon('photo_camera')}${U('camera', 'Camera')}</button><button type="button" class="btn" data-click="photo" data-id="${i.id}">${icon('photo_library')}${U('gallery', 'Gallery')}</button>
           <span class="small muted row" style="gap:6px">${prioBadge(prio)} ${U('prio', null)?.[prio] || R.PRIORITY[prio].response}</span>
         </div>
       </div>` : ''}
@@ -1873,7 +1873,7 @@ async function pageNewAudit({ token, query, editId = null }) {
       const key = await pickAuditPhoto({ camera: el.dataset.cam === '1' });
       if (!key) return;
       const a = draft.answers[i.id];
-      a.photos = [...(a.photos || []), key].slice(0, 4);
+      a.photos = [...(a.photos || []), key];
       persist(); refresh(i);
     },
     rmPhoto: (el) => {

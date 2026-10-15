@@ -435,7 +435,7 @@ async function createAudit({ env, request, actor }) {
     if (!R.RESULTS.includes(a.result)) continue;
     answers[a.item_id] = a.result;
     notes[a.item_id] = str(a.note, 1000);
-    photos[a.item_id] = (Array.isArray(a.photos) ? a.photos : []).filter((k) => typeof k === 'string' && k.startsWith('evidence/')).slice(0, 4);
+    photos[a.item_id] = (Array.isArray(a.photos) ? a.photos : []).filter((k) => typeof k === 'string' && k.startsWith('evidence/'));
   }
   const missing = lines.filter((i) => !answers[i.id]);
   if (missing.length) bad(`${R.plural(missing.length, 'line')} not rated (first: ${missing[0].code})`);
@@ -545,7 +545,7 @@ async function updateAudit({ env, request, actor, params: [id] }) {
     if (!R.RESULTS.includes(a.result) || !used.has(Number(a.item_id))) continue;
     answers[a.item_id] = a.result;
     notes[a.item_id] = str(a.note, 1000);
-    photos[a.item_id] = (Array.isArray(a.photos) ? a.photos : []).filter((k) => typeof k === 'string' && k.startsWith('evidence/')).slice(0, 4);
+    photos[a.item_id] = (Array.isArray(a.photos) ? a.photos : []).filter((k) => typeof k === 'string' && k.startsWith('evidence/'));
   }
   const missing = lines.filter((i) => !answers[i.id]);
   if (missing.length) bad(`${R.plural(missing.length, 'line')} not rated (first: ${missing[0].code})`);
