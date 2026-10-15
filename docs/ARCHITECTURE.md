@@ -26,13 +26,13 @@ flowchart LR
 
 There are two ways in, side by side:
 
-- **Personal accounts** (username + password), added by the Compliance Head in Settings → Team members (or **Add unit manager** on a unit page). There is no public sign-up.
+- **Personal accounts** (username + password), added by the Compliance Head in Settings → Team members (or **Add location manager** on a unit page). There is no public sign-up.
   `POST /api/auth/login {username, password}`. Usernames are 3–40 letters, numbers, `.`, `_` or `-`, not case-sensitive. Passwords are stored only as `pbkdf2$100000$<salt>$<hash>` (PBKDF2-SHA256, random 16-byte salt); unknown username and wrong password give the same answer after the same delay.
   The session cookie carries `{name, uid, exp}`. On every request the Worker re-reads the account, so **disabling someone signs them out at once**, and renames show up on everything they record from then on.
   The Compliance Head sets each person's password when creating them (typed twice) and can set a new one later; that password is theirs to use straight away. People can change it themselves in Settings. (`must_change = 1` would ask for a new one at next sign-in; nothing sets it today.)
   **Roles** (migration `0005_user_roles.sql`):
   - `head`, **Compliance Head**: everything, and adds and manages people. The last active Compliance Head cannot be demoted or disabled, and nobody can disable themselves.
-  - `manager`, **Unit Manager**: one unit (`users.site_id`), enforced in the Worker on every request, not only hidden in the screens. `loadState` and the list queries are filtered to that unit; a request for another unit's unit, audit, fix or licence answers 404. They can work on their unit's fixes (start work, owner, root cause, what was done, proof, mark fixed) and add or edit its licences. Running audits, adding or editing units, deleting licences, verifying / closing / sending back / reopening fixes, moving due dates and managing people answer 403 (`'head'` routes in the route table, plus the checks in `updateFinding`).
+  - `manager`, **Location Manager**: one unit (`users.site_id`), enforced in the Worker on every request, not only hidden in the screens. `loadState` and the list queries are filtered to that unit; a request for another unit's unit, audit, fix or licence answers 404. They can work on their unit's fixes (start work, owner, root cause, what was done, proof, mark fixed) and add or edit its licences. Running audits, adding or editing units, deleting licences, verifying / closing / sending back / reopening fixes, moving due dates and managing people answer 403 (`'head'` routes in the route table, plus the checks in `updateFinding`).
   **First Compliance Head:** while none exists, anyone signed in with the team code can create it from Settings; after that only a Compliance Head manages people.
 - **The shared team code: first-time setup only.** While no Compliance Head exists, the sign-in page shows the name + team code form so the first one can be created. As soon as a Compliance Head exists, the Worker refuses the team code (403), signs out any session opened with it, and the page shows only username + password.
 
@@ -70,7 +70,7 @@ erDiagram
 | `findings` | The fix plan (gaps + corrective action) | `priority` = critical/major/minor (shown as P1/P2/P3), `rating`, `marks` (won back when closed), `kind`, `status`, `due_date`, `owner`, `root_cause`, `action_taken`, `evidence_key`, `is_repeat` |
 | `licences` | Licence & certificate register | `severity` decides what an expiry does to the unit's status |
 | `activity` | Append-only log: who did what, when | |
-| `users` | Personal accounts (migrations `0004`–`0006`) | `username` (unique, case-insensitive), `role` head \| manager, `site_id` (a Unit Manager's unit), `password_hash` (PBKDF2 only), `must_change`, `active`, `last_login_at` |
+| `users` | Personal accounts (migrations `0004`–`0006`) | `username` (unique, case-insensitive), `role` head \| manager, `site_id` (a Location Manager's unit), `password_hash` (PBKDF2 only), `must_change`, `active`, `last_login_at` |
 
 Visit numbers aren't stored: they are each audit's position among the unit's audits of that type, ordered by date.
 
@@ -99,7 +99,7 @@ All responses are JSON. Everything except sign-in needs the session cookie.
 | `GET/POST /api/licences` · `PUT/DELETE /api/licences/:id` | Licence register |
 | `POST /api/uploads` | Raw image/PDF body (JPEG, PNG, WebP, PDF; 8 MB max) → `{key}`. Phones shrink photos to 1600 px before upload |
 | `GET /api/files/<key>` | A stored file (keys `evidence/import/<sha>.<ext>` or `evidence/YYYY-MM/<uuid>.<ext>`) |
-| `GET /api/activity?site=&limit=` | The audit log, newest first (default 200, max 1000), with fix titles and unit names. Compliance Head only (a Unit Manager gets 403) |
+| `GET /api/activity?site=&limit=` | The audit log, newest first (default 200, max 1000), with fix titles and unit names. Compliance Head only (a Location Manager gets 403) |
 
 ## Front end
 
@@ -110,7 +110,7 @@ A single-page app with hash routes. Each page fetches its own data and renders H
 | `#/units?type=&status=&q=` · `#/units/:id?tab=` | Unit cards with search and filters · one unit with tabs: Overview (scores, why this status, visit 1 → 2 → target, route to 80%), Audits, Fixes, Licences, Photos |
 | `#/audits?domain=&unit=&status=&from=&to=&q=` · `#/audits/:id` | Audit list · one audit: summary, findings grouped by priority (collapsible), then section scores, route and full checklist (collapsed) |
 | `#/audits/new?unit=&domain=` | The phone audit flow as steps: basic details, one step per checklist section, review & submit; sticky Previous / Save draft / Next bar. The draft (including the current step) is saved on the device (`localStorage`) |
-| `#/` (also `#/fixes?…`) · `#/fixes/:id` | **Dashboard = the fix plan** (no separate Fix Plan page): Open / Overdue / P1–P3 summary, filters (`status`, `priority`, `unit`, `due`, `kind`, `domain`, `q`, `view=problem`), fixes by priority or by problem. A Unit Manager sees their unit only. Older `#/fixes` links open it · one fix: key facts, description, evidence, review (Approve / Reject with a required reason, sent as the `note` of `PATCH status: open`, so it lands in the fix history), corrective action, history |
+| `#/` (also `#/fixes?…`) · `#/fixes/:id` | **Dashboard = the fix plan** (no separate Fix Plan page): Open / Overdue / P1–P3 summary, filters (`status`, `priority`, `unit`, `due`, `kind`, `domain`, `q`, `view=problem`), fixes by priority or by problem. A Location Manager sees their unit only. Older `#/fixes` links open it · one fix: key facts, description, evidence, review (Approve / Reject with a required reason, sent as the `note` of `PATCH status: open`, so it lands in the fix history), corrective action, history |
 | `#/licences?status=&unit=` · `#/licences/:id` | Licence register; core licences not yet recorded show as "Not added" with an Add button |
 | `#/reports?type=&unit=&period=…` | Report builder (food / maintenance / combined, unit, period). Built in the browser from the existing APIs; "Print / Save as PDF" uses the browser's print dialog |
 | `#/settings` · `#/framework` | Account, team members, **audit log** (who did what, when; searchable, filter by type), theme, this device's audit draft, units · the rules, drawn from `rules.js`, and the checklists |

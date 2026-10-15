@@ -71,8 +71,8 @@ The same account holds unrelated things (for example a D1 database `bookends-pre
 | 2 | Confirm **Beshak Dumas line 37**: the table says Compliant, the report total counts it as Major (used) | Vishal Patel | Data note on that audit |
 | 3 | Confirm the **dates of both Central Hot Kitchen visit-1 reports** (none written; 20 Aug assumed) | Vishal Patel | Data note on those audits |
 | 4 | Send the wording of **FSSAI checklist lines 31, 37 and 50**. They were N/A in every report, so they aren't in the app | Vishal Patel | Framework → checklists |
-| 5 | Fill the **licence register**: FSSAI, Fire NOC, water test, pest control, medical fitness, FoSTaC… with expiry dates. It is empty because no report had dates | Vishal Patel / unit managers | Licences page |
-| 6 | Add **unit manager names and phones**. New fixes are assigned to the unit manager automatically | Owner | Units → Edit |
+| 5 | Fill the **licence register**: FSSAI, Fire NOC, water test, pest control, medical fitness, FoSTaC… with expiry dates. It is empty because no report had dates | Vishal Patel / location managers | Licences page |
+| 6 | Add **location manager names and phones**. New fixes are assigned to the location manager automatically | Owner | Units → Edit |
 | 7 | **Maintenance dockets** for Beshak Dumas and the four central kitchens (none yet) | Vishal Patel | Units page shows "not yet" |
 | 8 | Decide on **per-person logins** (Cloudflare Access) instead of one shared code | Owner | [docs/OPERATIONS.md](docs/OPERATIONS.md#per-person-logins-cloudflare-access) |
 | 9 | Optional: a **custom domain** (e.g. `compliance.<company domain>`) | Owner | [docs/OPERATIONS.md](docs/OPERATIONS.md#custom-domain) |

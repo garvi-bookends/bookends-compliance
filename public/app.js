@@ -562,7 +562,7 @@ async function showSignin() {
   closeDialog(dlg); closeDialog(cdlg);
   const box = $('#signin');
   box.hidden = false;
-  // Everyone signs in with their own username and password: the Compliance Head, or a Unit Manager.
+  // Everyone signs in with their own username and password: the Compliance Head, or a Location Manager.
   const inputWithIcon = (ic, input, extra = '') => html`<div class="input-icon">${icon(ic)}${input}${extra}</div>`;
   box.innerHTML = part(html`<div class="signin">
     <div class="signin-bg" aria-hidden="true"><span class="glow g1"></span><span class="glow g2"></span><span class="glow g3"></span></div>
@@ -776,8 +776,8 @@ async function signOut({ ask = true } = {}) {
   $('#alertCount').hidden = true;
   showSignin();
 }
-const ROLE_LABEL = { head: 'Compliance Head', manager: 'Unit Manager', team: 'Team access' };
-/** Unit Managers see and work on their own unit only. The server enforces it; the screens just leave out what they cannot use. */
+const ROLE_LABEL = { head: 'Compliance Head', manager: 'Location Manager', team: 'Team access' };
+/** Location Managers see and work on their own unit only. The server enforces it; the screens just leave out what they cannot use. */
 const isManager = () => app.me?.role === 'manager';
 /** Settings → Wipe all data: deletes every audit record (see wipeData in src/api.js). Needs the person's own password and WIPE typed. */
 function openWipeDialog() {
@@ -902,7 +902,7 @@ $('#searchBtn').addEventListener('click', openSearch);
 $('#searchBtn2').addEventListener('click', openSearch);
 
 // =================================================================== alerts: P1/P2 fixes for everyone, licences for the Compliance Head
-// The server decides who gets what (a Unit Manager only ever gets their own unit's fixes, and no licence alerts).
+// The server decides who gets what (a Location Manager only ever gets their own unit's fixes, and no licence alerts).
 // "Mark all done" (at the bottom of the panel) hides the alerts for this person only; each comes back if it moves from due soon to overdue (or expired).
 let alertsCache = null; // { at, list, done }
 async function loadAlerts({ force = false } = {}) {
@@ -1056,7 +1056,7 @@ function unitForm(u = {}) {
       <div class="field"><label for="uCity">City</label><input class="input" id="uCity" name="city" value="${u.city || ''}"></div>
     </div>
     <div class="form-2">
-      <div class="field"><label for="uMgr">Unit manager</label><input class="input" id="uMgr" name="manager" value="${u.manager || ''}"><span class="hint">New fixes at this unit are assigned to them.</span></div>
+      <div class="field"><label for="uMgr">Location manager</label><input class="input" id="uMgr" name="manager" value="${u.manager || ''}"><span class="hint">New fixes at this unit are assigned to them.</span></div>
       <div class="field"><label for="uPh">Manager phone</label><input class="input" id="uPh" name="manager_phone" type="tel" value="${u.manager_phone || ''}"></div>
     </div>
   </div>`;
@@ -1265,7 +1265,7 @@ async function pageUnit({ token, params: [id], query }) {
       ${pageHeader({ title: s.name, crumb: { href: '#/units', label: 'Units' },
         sub: html`<span>${unitType(s)}</span><span>·</span><span>${unitLoc(s)}</span>${s.manager ? html`<span>·</span><span>${icon('person', 'muted')} ${s.manager}</span>` : ''}${statusBadge(st.overall)}`,
         actions: isManager() ? html`<a class="btn" href="#/reports?unit=${s.id}">${icon('summarize')}View reports</a>`
-          : html`<button class="btn primary" data-click="start">${icon('add')}Start audit</button><a class="btn" href="#/reports?unit=${s.id}">${icon('summarize')}View reports</a><button class="btn" data-click="edit">${icon('edit')}Edit unit</button>${app.me?.canManageUsers && !app.me.firstAdminSetup ? html`<button class="btn" data-click="addManager">${icon('person_add')}Add unit manager</button>` : ''}` })}
+          : html`<button class="btn primary" data-click="start">${icon('add')}Start audit</button><a class="btn" href="#/reports?unit=${s.id}">${icon('summarize')}View reports</a><button class="btn" data-click="edit">${icon('edit')}Edit unit</button>${app.me?.canManageUsers && !app.me.firstAdminSetup ? html`<button class="btn" data-click="addManager">${icon('person_add')}Add location manager</button>` : ''}` })}
       <div id="unitTabs">${tabs()}</div>
       <div id="tabBody">${tabContent()}</div>`,
   });
@@ -1279,7 +1279,7 @@ async function pageUnit({ token, params: [id], query }) {
     tab: (el) => { setTab(el.dataset.v); if (el.classList.contains('stat')) $('#unitTabs').scrollIntoView({ behavior: 'smooth' }); },
     edit: () => openUnitDialog(s),
     start: () => openStartAudit([], s.id),
-    addManager: async () => { const sites = (await api('/api/sites')).units; openPersonDialog(null, { units: sites, preset: { role: 'manager', site_id: s.id }, onDone: () => toast(`Unit manager added for ${s.name}`, { success: true }) }); },
+    addManager: async () => { const sites = (await api('/api/sites')).units; openPersonDialog(null, { units: sites, preset: { role: 'manager', site_id: s.id }, onDone: () => toast(`Location manager added for ${s.name}`, { success: true }) }); },
     addLicence: async (el) => { const sites = (await api('/api/sites')).units; openLicenceDialog(null, sites, s.id, el.dataset.type || null); },
   };
 }
@@ -2982,21 +2982,21 @@ const passwordProblem = (fd) => {
 /**
  * Add a person (Name, Username, Role (+ Unit), Password, Confirm password), or edit one.
  * The password the Compliance Head sets is the person's password. firstAdmin: creating the first Compliance Head
- * from a team-code session. preset: { role, site_id } for "Add unit manager" on a unit page.
+ * from a team-code session. preset: { role, site_id } for "Add location manager" on a unit page.
  */
 function openPersonDialog(u = null, { firstAdmin = false, onDone, units = [], preset = {} }) {
   const role0 = u?.role || preset.role || 'manager';
   const site0 = u?.site_id ?? preset.site_id ?? '';
   let usernameTouched = false;
   openDialog({
-    title: firstAdmin ? 'Create the Compliance Head' : u ? `Edit ${u.name}` : preset.role === 'manager' ? 'Add unit manager' : 'Add a person',
+    title: firstAdmin ? 'Create the Compliance Head' : u ? `Edit ${u.name}` : preset.role === 'manager' ? 'Add location manager' : 'Add a person',
     body: html`<div class="form">
       ${firstAdmin ? html`<div class="banner info">${icon('shield_person')}<span class="b-body">The Compliance Head has full access and adds everyone else.</span></div>` : ''}
       <div class="field"><label for="peName">Name</label><input class="input" id="peName" name="name" required maxlength="80" value="${u?.name || ''}" autocomplete="off" data-input="name"></div>
       ${u ? html`<div class="field"><span class="label">Username</span><span class="mono">${u.username}</span></div>`
         : html`<div class="field"><label for="peUser">Username</label><input class="input mono" id="peUser" name="username" required maxlength="40" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" data-input="username"><span class="hint">They sign in with this. Letters, numbers, dots, _ or -.</span></div>`}
       ${firstAdmin ? '' : html`<div class="field"><label for="peRole">Role</label><select class="input" id="peRole" name="role" data-change="role">
-          <option value="manager" ${role0 === 'manager' ? 'selected' : ''}>Unit Manager: their own unit only</option>
+          <option value="manager" ${role0 === 'manager' ? 'selected' : ''}>Location Manager: their own unit only</option>
           <option value="head" ${role0 === 'head' ? 'selected' : ''}>Compliance Head: full access</option></select></div>
         <div class="field" id="peUnitWrap" ${role0 === 'manager' ? '' : 'hidden'}><label for="peUnit">Unit</label><select class="input" id="peUnit" name="site_id">
           <option value="">Choose the unit…</option>${units.map((x) => html`<option value="${x.id}" ${String(x.id) === String(site0) ? 'selected' : ''}>${unitName(x)}</option>`)}</select></div>`}
@@ -3039,7 +3039,7 @@ function openPersonDialog(u = null, { firstAdmin = false, onDone, units = [], pr
     },
   });
 }
-/** A person's own sign-in link: opening it signs them straight in (a Unit Manager sees only their unit). */
+/** A person's own sign-in link: opening it signs them straight in (a Location Manager sees only their unit). */
 async function openLinkDialog(u) {
   let r;
   try { r = await api(`/api/users/${u.id}/link`, { method: 'POST', body: {} }); }
@@ -3198,12 +3198,12 @@ async function pageSettings({ token }) {
         <div class="banner info">${icon('shield_person')}<span class="b-body">First create the Compliance Head account.</span></div>
         <div><button class="btn primary" data-click="firstAdmin">${icon('person_add')}Create the Compliance Head</button></div></section>`;
     }
-    // a Unit Manager cannot add or change people, so the section is not shown at all
+    // a Location Manager cannot add or change people, so the section is not shown at all
     if (!manage) return '';
     // closed until clicked, like the audit log; the count shows how many people are inside
     return collapse({ id: 'teamMembers', open: !!settingsOpen.teamMembers, flush: true, iconName: 'group', title: `Team members (${people.users.length})`,
       sub: 'Add or edit people.',
-      body: html`<div class="team-intro"><span class="small muted">Compliance Head: everything. Unit Manager: own unit only.</span>
+      body: html`<div class="team-intro"><span class="small muted">Compliance Head: everything. Location Manager: own unit only.</span>
           <button class="btn primary sm" data-click="addPerson">${icon('person_add')}Add person</button></div>
         <div class="list">${people.users.map(personRow)}</div>` });
   };
@@ -3313,7 +3313,7 @@ async function pageFramework({ token }) {
         <section class="stack"><h2 style="font-size:18px">Who does what</h2>
           <div class="card prose small"><ul>
             <li><b>Compliance Head:</b> runs audits, checks proof, closes fixes, keeps licences.</li>
-            <li><b>Unit manager:</b> fixes problems at the unit and uploads proof on time.</li>
+            <li><b>Location manager:</b> fixes problems at the unit and uploads proof on time.</li>
             <li><b>Maintenance / vendors:</b> fix maintenance points.</li>
             <li><b>Founders:</b> monthly review, help with problems that repeat.</li>
           </ul></div></section>

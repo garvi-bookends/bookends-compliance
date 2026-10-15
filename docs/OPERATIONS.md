@@ -57,7 +57,7 @@ An auditor can carry on and finish an audit with no signal:
 ## Team members (personal accounts)
 
 - **First time:** sign in with the team code → Settings → **Create the Compliance Head**: name, username, password (twice), Create. Then sign out and sign in with that username. From then on only the Compliance Head adds people.
-- **Add a unit manager:** on the unit's page, **Add unit manager** (role and unit already filled in), or Settings → Team members → **Add person**: Name, Username (suggested from the name), Role, Unit, Password, Confirm password, **Create**. Tell them their username and password; they can change the password in Settings. To move someone to another unit, **Edit** them and pick the new unit; it applies at once.
+- **Add a location manager:** on the unit's page, **Add location manager** (role and unit already filled in), or Settings → Team members → **Add person**: Name, Username (suggested from the name), Role, Unit, Password, Confirm password, **Create**. Tell them their username and password; they can change the password in Settings. To move someone to another unit, **Edit** them and pick the new unit; it applies at once.
 - **Forgotten password:** the Compliance Head uses **New password** next to the person, types it twice and tells them.
 - **Someone leaves:** **Edit** → untick "Can sign in". They are signed out at once; their past audits and changes stay under their name.
 - **Locked out of every Compliance Head account:** the team code no longer works once a Compliance Head exists, so a developer promotes someone directly: run `UPDATE users SET role = 'head', site_id = NULL, active = 1 WHERE username = 'their.username';` in the `bookends_compliance` database (psql or pgAdmin).

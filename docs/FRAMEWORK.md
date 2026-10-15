@@ -97,7 +97,7 @@ Open ──► In progress ──► Fixed, awaiting verification ──► Clos
 
 ## 10. Escalation
 
-1. Priority 1 open for more than 48 hours: the Compliance Head calls the unit manager and informs the founders the same day.
+1. Priority 1 open for more than 48 hours: the Compliance Head calls the location manager and informs the founders the same day.
 2. The same problem open at three or more units: fixed once, centrally, not unit by unit.
 3. A unit below 50% (Non-Compliance): re-audit within 3 weeks of its fixes being reported closed.
 4. Any unit below 80% (Satisfactory): next audit within 30 days, with its route-to-80% list as the agenda.

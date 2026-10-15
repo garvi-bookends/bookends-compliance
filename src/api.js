@@ -138,7 +138,7 @@ function logout({ request }) {
 }
 
 // ================================================================= roles
-// Compliance Head (and the shared team code): everything. Unit Manager: their own unit only, enforced here on every request.
+// Compliance Head (and the shared team code): everything. Location Manager: their own unit only, enforced here on every request.
 /** The one unit a session is limited to, or null for full access. A manager without a unit sees nothing. */
 const scopeOf = (session) => (session?.user?.role === 'manager' ? (session.user.site_id ?? -1) : null);
 const canSee = (session, siteId) => { const s = scopeOf(session); return s == null || s === Number(siteId); };
@@ -154,7 +154,7 @@ async function loadState(env, scope = null) {
       LEFT JOIN template_items i ON i.id = f.item_id WHERE f.status != 'closed' ORDER BY f.due_date`),
     env.DB.prepare('SELECT * FROM licences ORDER BY expires_on IS NULL, expires_on'),
   ]);
-  // A unit manager's state holds their unit only, so everything built from it is limited to that unit.
+  // A location manager's state holds their unit only, so everything built from it is limited to that unit.
   const mine = (rows) => (scope == null ? rows : rows.filter((r) => (r.site_id ?? r.id) === scope));
   const sites = { results: mine(sitesR.results) }, audits = { results: mine(auditsR.results) };
   const findings = { results: mine(findingsR.results) }, licences = { results: mine(licencesR.results) };
@@ -642,7 +642,7 @@ async function updateFinding({ env, request, actor, session, params: [id] }) {
   };
   if (!R.FINDING_STATUS[next.status]) bad('Unknown status');
   if (scopeOf(session) != null) {
-    // Unit managers do the work and mark it fixed. Verifying, closing, sending back, reopening and moving deadlines is the Compliance Head's.
+    // Location managers do the work and mark it fixed. Verifying, closing, sending back, reopening and moving deadlines is the Compliance Head's.
     if (f.status === 'closed') throw new HttpError(403, 'This fix is closed. Ask the Compliance Head if it needs reopening.');
     if (next.status === 'closed') throw new HttpError(403, 'Only the Compliance Head can verify and close a fix');
     if (f.status === 'fixed' && next.status !== 'fixed') throw new HttpError(403, 'Only the Compliance Head can send a fix back');
@@ -800,11 +800,11 @@ async function userAdmin(env, session) {
   throw new HttpError(403, 'Only the Compliance Head can add or change team members');
 }
 const USER_ROLES = ['head', 'manager'];
-const ROLE_NAMES = { head: 'Compliance Head', manager: 'Unit Manager' };
+const ROLE_NAMES = { head: 'Compliance Head', manager: 'Location Manager' };
 const USER_FIELDS = 'u.id, u.username, u.name, u.role, u.site_id, s.name AS site_name, s.city AS site_city, s.kind AS site_kind, u.must_change, u.active, u.created_at, u.created_by, u.last_login_at';
 // Usernames: 3–40 letters, numbers, dots, underscores or hyphens; not case-sensitive.
 const USERNAME = /^[a-z0-9._-]{3,40}$/;
-/** A Unit Manager must look after an existing, active unit; a Compliance Head has none. */
+/** A Location Manager must look after an existing, active unit; a Compliance Head has none. */
 async function unitFor(env, role, siteId) {
   if (role !== 'manager') return null;
   const site = Number(siteId) ? await env.DB.prepare('SELECT id, name FROM sites WHERE id = ? AND active = 1').bind(Number(siteId)).first() : null;
@@ -856,7 +856,7 @@ async function updateUser({ env, request, actor, session, params: [id] }) {
   const role = body.role !== undefined ? body.role : u.role;
   const active = body.active !== undefined ? (body.active ? 1 : 0) : u.active;
   if (!name) bad('Enter the person’s name');
-  if (!USER_ROLES.includes(role)) bad('Role must be Compliance Head or Unit Manager');
+  if (!USER_ROLES.includes(role)) bad('Role must be Compliance Head or Location Manager');
   if (u.id === session.user.id && (!active || role !== 'head')) bad('You cannot remove your own Compliance Head access or disable yourself. Ask another Compliance Head.');
   if (u.role === 'head' && u.active && (role !== 'head' || !active) && (await activeHeads(env)) <= 1) bad('This is the only Compliance Head. Make someone else Compliance Head first.');
   const site = await unitFor(env, role, body.site_id !== undefined ? body.site_id : u.site_id);
@@ -903,7 +903,7 @@ async function accountForLink(env, token) {
 }
 const LINK_GONE = 'This link has expired or was already used. Ask the Compliance Head for a new one.';
 // ---- personal sign-in links: opening one signs that person straight in (no username or password).
-// A Unit Manager's link opens only their own unit, like their password does. The link is the account id plus an HMAC
+// A Location Manager's link opens only their own unit, like their password does. The link is the account id plus an HMAC
 // (keyed with ACCESS_CODE) of a random "version" kept per person in signin_links, so the same link can be shown again,
 // and "New link" (a new version) cancels the old one. Disabling the account stops it too. The table is created on first
 // use, so no manual migration is needed (also in migrations-pg/0007_signin_links.sql).
@@ -922,7 +922,7 @@ async function createSignInLink({ env, request, url, actor, session, params: [id
   const u = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
   if (!u) notFound('Person');
   if (!u.active) bad('This account is disabled. Enable it first.');
-  // A Unit Manager's link opens their restaurant only, so they must have one: otherwise the link would open an empty account.
+  // A Location Manager's link opens their restaurant only, so they must have one: otherwise the link would open an empty account.
   if (u.role === 'manager' && !u.site_id) bad(`${u.name} has no restaurant set. Click Edit, choose their unit, then get the link.`);
   const body = await readJson(request).catch(() => ({}));
   await ensureLinkTable(env);

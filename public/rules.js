@@ -164,7 +164,7 @@ export const ROLES = [
 ];
 
 export const ESCALATION = [
-  'Priority 1 open for more than 48 hours: the Compliance Head calls the unit manager and informs the founders the same day.',
+  'Priority 1 open for more than 48 hours: the Compliance Head calls the location manager and informs the founders the same day.',
   'The same problem open at three or more outlets: fixed once, centrally (one pest-control contract, one water-testing lab, one FoSTaC batch), not outlet by outlet.',
   'A unit below 50% (Non-Compliance): re-audit within 3 weeks of the fixes being reported closed.',
   'Any unit below 80% (Satisfactory): next audit within 30 days. The route-to-80% list is the agenda.',
