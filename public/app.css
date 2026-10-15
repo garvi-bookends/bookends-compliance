@@ -941,3 +941,9 @@ button.log-row:hover { background: var(--surface-2); }
 .link-card > .ms { color: var(--muted); font-size: 22px; flex: none; }
 .link-card .lc-body { flex: 1; min-width: 0; display: grid; gap: 2px; }
 .link-card .lc-body b { font-size: 1rem; }
+
+/* audit form: checklist language switch (English · ગુજરાતી · हिंदी) */
+.lang-switch { display: inline-flex; gap: 2px; padding: 2px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--border); flex: none; }
+.lang-switch button { border: 0; background: transparent; color: var(--text-2); font: inherit; font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 8px; cursor: pointer; min-height: 32px; }
+.lang-switch button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(18, 22, 43, .12); }
+@media (max-width: 599px) { .stepper-head .sh-line:first-child { flex-wrap: wrap; } .stepper-head .lang-switch { order: 5; width: 100%; } .stepper-head .lang-switch button { flex: 1; } }

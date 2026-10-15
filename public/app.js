@@ -1554,6 +1554,38 @@ const loadDraft = () => { try { return JSON.parse(localStorage.getItem(DRAFT_KEY
 const saveDraft = (x) => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(x)); } catch { /* private mode */ } };
 const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } };
 
+// =================================================================== audit form languages
+// The audit form can be read in English, Gujarati or Hindi. Only the words change: ratings are saved the same way in every
+// language, so scores, fixes, reports and exports are unaffected. Checklist lines come from /i18n/<lang>.json; when a line
+// has no translation it shows in English.
+const AUDIT_LANGS = [['en', 'English'], ['gu', 'ગુજરાતી'], ['hi', 'हिंदी']];
+const AUDIT_UI = {
+  gu: {
+    rated: 'ચકાસ્યા', liveScore: 'હાલનો સ્કોર', critical: 'ક્રિટિકલ', marks: 'માર્ક', pt: 'પોઇન્ટ', step: 'સ્ટેપ',
+    remark: 'નોંધ (જરૂરી): તમે બરાબર શું જોયું?', photo: 'ફોટો લો અથવા ઉમેરો', another: 'બીજો ફોટો',
+    nextUnrated: 'બાકી લાઈન', previous: 'પાછળ', next: 'આગળ', save: 'ડ્રાફ્ટ સાચવો', submit: 'ઓડિટ સબમિટ કરો', saveChanges: 'ફેરફાર સાચવો',
+    basic: 'મૂળ વિગતો', review: 'તપાસો અને સબમિટ કરો', reviewEdit: 'તપાસો અને સાચવો', language: 'ચેકલિસ્ટની ભાષા',
+    ratings: { fssai2: { pass: 'પાલન', partial: 'નાની ખામી', fail: 'મોટી ખામી', na: 'લાગુ નથી' }, fssai1: { pass: 'પાલન', partial: 'અધૂરું', fail: 'પાલન નથી', na: 'લાગુ નથી' }, docket: { pass: 'બરાબર', partial: 'ધ્યાન આપો', fail: 'ખામી', na: 'લાગુ નથી' } },
+    prio: { critical: 'ખોરાક, જીવ અથવા લાઇસન્સનું જોખમ. 48 કલાકમાં સુધારો.', major: '7 દિવસમાં સુધારો.', minor: '30 દિવસમાં સુધારો.' },
+  },
+  hi: {
+    rated: 'जाँचे', liveScore: 'अभी का स्कोर', critical: 'क्रिटिकल', marks: 'मार्क', pt: 'पॉइंट', step: 'स्टेप',
+    remark: 'नोट (ज़रूरी): आपने ठीक क्या देखा?', photo: 'फ़ोटो लें या जोड़ें', another: 'एक और फ़ोटो',
+    nextUnrated: 'बाकी लाइन', previous: 'पीछे', next: 'आगे', save: 'ड्राफ़्ट सेव करें', submit: 'ऑडिट सबमिट करें', saveChanges: 'बदलाव सेव करें',
+    basic: 'बुनियादी जानकारी', review: 'जाँचें और सबमिट करें', reviewEdit: 'जाँचें और सेव करें', language: 'चेकलिस्ट की भाषा',
+    ratings: { fssai2: { pass: 'पालन', partial: 'छोटी कमी', fail: 'बड़ी कमी', na: 'लागू नहीं' }, fssai1: { pass: 'पालन', partial: 'अधूरा', fail: 'पालन नहीं', na: 'लागू नहीं' }, docket: { pass: 'ठीक', partial: 'ध्यान दें', fail: 'कमी', na: 'लागू नहीं' } },
+    prio: { critical: 'खाना, जान या लाइसेंस का खतरा. 48 घंटे में ठीक करें.', major: '7 दिन में ठीक करें.', minor: '30 दिन में ठीक करें.' },
+  },
+};
+const auditDicts = {};
+/** The checklist words for a language (null for English, or if the file cannot be loaded). */
+async function auditDict(lang) {
+  if (lang === 'en') return null;
+  if (!(lang in auditDicts)) auditDicts[lang] = await fetch(`/i18n/${lang}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  return auditDicts[lang];
+}
+const langSwitch = (lang) => html`<span class="lang-switch" role="group" aria-label="Checklist language">${AUDIT_LANGS.map(([k, l]) => html`<button type="button" data-click="lang" data-v="${k}" aria-pressed="${k === lang}" lang="${k}">${l}</button>`)}</span>`;
+
 async function pageNewAudit({ token, query, editId = null }) {
   if (isManager()) {
     mount({ title: 'New audit', body: html`${pageHeader({ title: 'Start an audit', crumb: { href: '#/audits', label: 'Audits' } })}<div class="card">${emptyState({ iconName: 'lock', title: 'Only the Compliance Head runs audits', text: 'See your fixes on the Dashboard.', action: html`<a class="btn primary" href="#/">${icon('construction')}Go to dashboard</a>` })}</div>` });
@@ -1562,6 +1594,9 @@ async function pageNewAudit({ token, query, editId = null }) {
   const [sitesRes, templates, saved] = await Promise.all([api('/api/sites'), getTemplates(), editId ? api(`/api/audits/${editId}`) : null]);
   if (stale(token)) return;
   const units = sitesRes.units;
+  let lang = AUDIT_LANGS.some(([k]) => k === localStorageGet('bk-audit-lang')) ? localStorageGet('bk-audit-lang') : 'en';
+  let dict = await auditDict(lang);
+  if (stale(token)) return;
   // Editing a submitted audit: same form, filled from the saved audit, kept on this device under its own key until saved.
   const EDIT_KEY = editId ? `bk-audit-edit:${editId}` : null;
   const fromSaved = () => ({
@@ -1591,6 +1626,14 @@ async function pageNewAudit({ token, query, editId = null }) {
   const tpl = () => (editId ? templates.find((t) => t.id === draft.template_id) : templates.find((t) => t.domain === draft.domain && t.active));
   const lines = () => { if (editId) return saved.items; const t = tpl(), u = unit(); if (!t || !u) return []; return t.items.filter((i) => i.applies === 'Both' || (u.kind === 'kitchen' ? i.applies === 'CPK' : i.applies === 'Restaurant')); };
   const labels = () => R.SCHEMES[tpl().scheme].ratings;
+  // words in the chosen language (English when there is no translation)
+  const U = (k, en) => (lang !== 'en' && AUDIT_UI[lang]?.[k]) || en;
+  const shownLabels = () => (lang !== 'en' && AUDIT_UI[lang]?.ratings?.[tpl().scheme]) || labels();
+  const tItem = (i) => (lang !== 'en' && dict?.items?.[`${tpl().scheme}:${i.code}`]) || null;
+  const tSec = (s) => (lang !== 'en' && dict?.sections?.[s]) || s;
+  const tArea = (a) => (lang !== 'en' && dict?.areas?.[a]) || a;
+  const stepLabel = (n) => (n === 'Basic details' ? U('basic', n) : n === 'Review & submit' ? U('review', n) : n === 'Review & save' ? U('reviewEdit', n) : tSec(n));
+  const stepCount = (a, b) => (lang === 'en' ? `Step ${a} of ${b}` : `${U('step', 'Step')} ${a}/${b}`);
   const ready = () => !!(draft.site_id && draft.domain && tpl());
   const secs = () => [...new Set(lines().map((i) => i.section))];
   // Steps: 0 = basic details, 1..n = one checklist section each, n+1 = review & submit.
@@ -1601,24 +1644,25 @@ async function pageNewAudit({ token, query, editId = null }) {
 
   const itemHtml = (i) => {
     const a = draft.answers[i.id] || {};
-    const L = labels();
+    const L = shownLabels();
+    const tr = tItem(i);
     const prio = a.result === 'fail' || a.result === 'partial' ? R.priorityFor(i, a.result) : null;
     return html`<div class="item${a.result === 'fail' ? ' is-fail' : a.result === 'partial' ? ' is-partial' : ''}" id="item-${i.id}">
       <div class="item-main stack" style="gap:6px">
-        <div class="item-head"><span class="code">${i.code}</span>${star(i.critical)}${i.critical ? html`<span>critical</span>` : ''}${i.criticality && !i.critical ? html`<span>${i.criticality}</span>` : ''}${i.area && i.area !== i.section ? html`<span>${i.area}</span>` : ''}<span>· ${R.fmtNum(i.weight)} ${draft.domain === 'food' ? 'marks' : 'pt'}</span></div>
-        <div class="text">${i.text}</div>
-        ${i.guidance ? html`<div class="guidance">${icon('lightbulb')}<span>${i.guidance}</span></div>` : ''}
+        <div class="item-head"><span class="code">${i.code}</span>${star(i.critical)}${i.critical ? html`<span>${U('critical', 'critical')}</span>` : ''}${i.criticality && !i.critical ? html`<span>${i.criticality}</span>` : ''}${i.area && i.area !== i.section ? html`<span>${tArea(i.area)}</span>` : ''}<span>· ${R.fmtNum(i.weight)} ${draft.domain === 'food' ? U('marks', 'marks') : U('pt', 'pt')}</span></div>
+        <div class="text" lang="${tr ? lang : 'en'}">${tr?.text || i.text}</div>
+        ${i.guidance ? html`<div class="guidance">${icon('lightbulb')}<span lang="${tr?.guidance ? lang : 'en'}">${tr?.guidance || i.guidance}</span></div>` : ''}
       </div>
       <div class="answers" role="group" aria-label="Rating for ${i.code}">
         ${['pass', 'partial', 'fail', 'na'].map((v) => html`<button type="button" data-click="answer" data-id="${i.id}" data-v="${v}" aria-pressed="${a.result === v}">${L[v]}</button>`)}
       </div>
       ${prio ? html`<div class="fail-box">
         <label class="sr-only" for="note-${i.id}">Remark</label>
-        <textarea class="input" id="note-${i.id}" data-input="note" data-id="${i.id}" rows="2" placeholder="Remark (required): what exactly did you see?">${a.note || ''}</textarea>
+        <textarea class="input" id="note-${i.id}" data-input="note" data-id="${i.id}" rows="2" placeholder="${U('remark', 'Remark (required): what exactly did you see?')}">${a.note || ''}</textarea>
         <div class="photo-row">
           ${(a.photos || []).map((p, n) => html`<span class="photo-wrap"><img class="thumb" src="${photoSrc(p)}" alt="Photo ${n + 1} for ${i.code}${isLocalPhoto(p) ? ' (on this phone, not uploaded yet)' : ''}">${isLocalPhoto(p) && !uploadedPhotos.has(p) && !uploadingPhotos.has(p) ? html`<span class="ph-local" title="Saved on this phone; uploads when the network is back">${icon('cloud_off')}</span>` : ''}<button type="button" class="rm" data-click="rmPhoto" data-id="${i.id}" data-n="${n}" aria-label="Remove photo">${icon('close')}</button></span>`)}
-          ${(a.photos || []).length < 4 ? html`<button type="button" class="btn" data-click="photo" data-id="${i.id}">${icon('photo_camera')}${(a.photos || []).length ? 'Add another' : 'Take or add photo'}</button>` : ''}
-          <span class="small muted row" style="gap:6px">${prioBadge(prio)} ${R.PRIORITY[prio].response}</span>
+          ${(a.photos || []).length < 4 ? html`<button type="button" class="btn" data-click="photo" data-id="${i.id}">${icon('photo_camera')}${(a.photos || []).length ? U('another', 'Add another') : U('photo', 'Take or add photo')}</button>` : ''}
+          <span class="small muted row" style="gap:6px">${prioBadge(prio)} ${U('prio', null)?.[prio] || R.PRIORITY[prio].response}</span>
         </div>
       </div>` : ''}
     </div>`;
@@ -1631,8 +1675,8 @@ async function pageNewAudit({ token, query, editId = null }) {
   const liveHtml = () => {
     const { ls, s } = stats();
     const answered = ls.filter((i) => draft.answers[i.id]?.result).length;
-    return html`<b class="num">${answered}/${ls.length}</b><span class="muted">rated</span>
-      ${s.possible ? html`<span class="muted">·</span><span>Live score <b class="num">${pct(s.score)}</b></span>${statusBadge(s.band)}` : ''}
+    return html`<b class="num">${answered}/${ls.length}</b><span class="muted">${U('rated', 'rated')}</span>
+      ${s.possible ? html`<span class="muted">·</span><span>${U('liveScore', 'Live score')} <b class="num">${pct(s.score)}</b></span>${statusBadge(s.band)}` : ''}
       ${s.criticalFails ? html`<span class="small t-bad"><span class="star">★</span> ${R.plural(s.criticalFails, 'critical line')} ${labels().fail}</span>` : ''}
       ${timeHtml()}`;
   };
@@ -1650,7 +1694,8 @@ async function pageNewAudit({ token, query, editId = null }) {
   const detailsStep = () => {
     const t = ready() ? tpl() : null;
     return html`<section class="card form" aria-label="Audit details">
-      <div class="section-head" style="margin:0"><h2>Basic details</h2></div>
+      <div class="section-head" style="margin:0"><h2>${U('basic', 'Basic details')}</h2></div>
+      <div class="field"><span class="label">${U('language', 'Checklist language')}</span>${langSwitch(lang)}</div>
       ${editId ? html`<div class="field"><span class="label">Unit and audit</span><b>${unitName(unit())} · ${R.DOMAINS[draft.domain].label}</b><span class="hint">These cannot change when editing. Ratings, remarks, photos, date and auditor can.</span></div>` : html`<div class="field"><label for="aUnit">Unit</label><select class="input" id="aUnit" data-change="unit"><option value="">Choose a unit…</option>${units.map((s) => html`<option value="${s.id}" ${s.id === draft.site_id ? 'selected' : ''}>${unitName(s)}</option>`)}</select></div>
       <div class="field"><span class="label" id="typeLbl">Audit</span><div class="choices" role="group" aria-labelledby="typeLbl">
         ${R.AUDIT_DOMAINS.map((dom) => html`<button type="button" class="choice" data-click="domain" data-v="${dom}" aria-pressed="${draft.domain === dom}" style="${draft.domain === dom ? 'border-color:var(--primary);background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--primary)' : ''}">${icon(draft.domain === dom ? 'radio_button_checked' : 'radio_button_unchecked')}${icon(R.DOMAINS[dom].icon)}<span><b>${R.DOMAINS[dom].label}</b><span class="small">${R.DOMAINS[dom].long}</span></span></button>`)}</div></div>`}
@@ -1666,8 +1711,8 @@ async function pageNewAudit({ token, query, editId = null }) {
     const sec = secs()[draft.step - 1];
     const items = lines().filter((i) => i.section === sec);
     return html`<section class="card flush">
-      <div class="section-head" style="padding-bottom:12px;border-bottom:1px solid var(--border);margin:0"><h2>${sec}</h2><span class="row" id="secCount">${secCount(items)}</span>
-        <span class="spacer"></span><button class="btn ghost sm" data-click="nextUnrated">${icon('arrow_downward')}Next unrated</button></div>
+      <div class="section-head" style="padding-bottom:12px;border-bottom:1px solid var(--border);margin:0"><h2>${tSec(sec)}</h2><span class="row" id="secCount">${secCount(items)}</span>
+        <span class="spacer"></span><button class="btn ghost sm" data-click="nextUnrated">${icon('arrow_downward')}${U('nextUnrated', 'Next unrated')}</button></div>
       ${items.map(itemHtml)}
     </section>`;
   };
@@ -1695,7 +1740,7 @@ async function pageNewAudit({ token, query, editId = null }) {
             const rated = items.filter((i) => draft.answers[i.id]?.result).length;
             const gaps = items.filter((i) => ['fail', 'partial'].includes(draft.answers[i.id]?.result)).length;
             return html`<div class="dt-row clickable" role="row" data-click="goStep" data-v="${n + 1}">
-              <div class="dt-cell main" role="cell"><div class="dt-primary">${sec}</div></div>
+              <div class="dt-cell main" role="cell"><div class="dt-primary">${tSec(sec)}</div></div>
               <div class="dt-cell kv" role="cell"><span class="lbl">Rated:</span><span class="${rated < items.length ? 't-warn' : ''}">${rated}/${items.length}</span></div>
               <div class="dt-cell kv" role="cell"><span class="lbl">Gaps:</span>${gaps}</div>
               <div class="dt-cell aside" role="cell">${scoreDisplay(sc?.score ?? null)}</div>
@@ -1724,18 +1769,18 @@ async function pageNewAudit({ token, query, editId = null }) {
         ${pageHeader({ compact: step > 0, title: editId ? `Edit ${R.DOMAINS[draft.domain].label.toLowerCase()} audit` : ready() ? `${R.DOMAINS[draft.domain].label} audit` : 'Start an audit', crumb: editId ? { href: `#/audits/${editId}`, label: 'Back to audit' } : { href: '#/audits', label: 'Audits' }, sub: ready() ? html`<span>${unitName(unit())}</span><span>·</span><span>${fmt(draft.audit_date, true)}</span>` : 'Walk the unit with your phone' })}
         ${conflict ? html`<div class="banner info" style="margin-bottom:16px">${icon('history')}<span class="b-body">Unfinished ${R.DOMAINS[conflict.domain].label.toLowerCase()} audit for <b>${unitName(units.find((x) => x.id === conflict.site_id))}</b> (${R.plural(Object.keys(conflict.answers).length, 'rating')}).</span><button class="btn sm" data-click="resume">Continue it</button></div>` : ''}
         ${ready() ? html`<div class="stepper-head">
-          <div class="sh-line"><span class="sh-step">Step ${step + 1} of ${total}</span><span class="sh-name">${names[step]}</span><span class="spacer"></span>
-            <label class="sr-only" for="jump">Jump to step</label><select class="select" id="jump" data-change="jump" style="height:36px;font-size:13px;max-width:200px">${names.map((n, k) => html`<option value="${k}" ${k === step ? 'selected' : ''}>${k + 1}. ${n}</option>`)}</select></div>
+          <div class="sh-line"><span class="sh-step">${stepCount(step + 1, total)}</span><span class="sh-name">${stepLabel(names[step])}</span><span class="spacer"></span>${langSwitch(lang)}
+            <label class="sr-only" for="jump">Jump to step</label><select class="select" id="jump" data-change="jump" style="height:36px;font-size:13px;max-width:200px">${names.map((n, k) => html`<option value="${k}" ${k === step ? 'selected' : ''}>${k + 1}. ${stepLabel(n)}</option>`)}</select></div>
           <div class="step-dots" aria-hidden="true">${names.map((_, k) => html`<span class="${k < step ? 'done' : k === step ? 'current' : ''}"></span>`)}</div>
           <div class="sh-line" id="liveLine">${liveHtml()}</div>
         </div>` : ''}
         ${step === 0 ? detailsStep() : review ? reviewStep() : sectionStep()}
         ${bottomBar(html`
-          <button class="btn" data-click="prev" ${step === 0 ? 'disabled' : ''}>${icon('arrow_back')}Previous</button>
-          <button class="btn" data-click="save">${icon('save')}Save draft</button>
-          ${review ? html`<button class="btn primary" data-click="submit">${icon(editId ? 'save' : 'send')}${editId ? 'Save changes' : 'Submit audit'}</button>`
-            : html`<button class="btn primary" data-click="next" ${ready() ? '' : 'disabled'}>Next${icon('arrow_forward')}</button>`}`,
-        ready() ? `Step ${step + 1} of ${total} · ${names[step]}` : '')}`,
+          <button class="btn" data-click="prev" ${step === 0 ? 'disabled' : ''}>${icon('arrow_back')}${U('previous', 'Previous')}</button>
+          <button class="btn" data-click="save">${icon('save')}${U('save', 'Save draft')}</button>
+          ${review ? html`<button class="btn primary" data-click="submit">${icon(editId ? 'save' : 'send')}${editId ? U('saveChanges', 'Save changes') : U('submit', 'Submit audit')}</button>`
+            : html`<button class="btn primary" data-click="next" ${ready() ? '' : 'disabled'}>${U('next', 'Next')}${icon('arrow_forward')}</button>`}`,
+        ready() ? `${stepCount(step + 1, total)} · ${stepLabel(names[step])}` : '')}`,
     });
   };
   const go = (n) => { draft.step = n; persist(); render(); };
@@ -1745,6 +1790,14 @@ async function pageNewAudit({ token, query, editId = null }) {
     first?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   on.click = {
+    lang: async (el) => {
+      const next = el.dataset.v;
+      if (next === lang) return;
+      const d = await auditDict(next);
+      if (next !== 'en' && !d) { toast('Could not load that language. Check the network and try again.', { error: true }); return; }
+      lang = next; dict = d; localStorageSet('bk-audit-lang', lang);
+      keepScrollOnce = true; render();
+    },
     resume: () => { draft = conflict; conflict = null; persist(); render(); },
     domain: async (el) => {
       if (el.dataset.v === draft.domain) return;
