@@ -986,3 +986,18 @@ select.input { height: 46px; }
 input[type="date"].input, input[type="time"].input { -webkit-appearance: none; appearance: none; display: block; min-width: 0; max-width: 100%; text-align: left; }
 input[type="date"].input::-webkit-date-and-time-value { text-align: left; margin: 0; }
 input[type="date"].input::-webkit-calendar-picker-indicator { margin: 0; cursor: pointer; }
+
+/* Settings → Team members: Edit · New password · Get link never run outside the box. On phones and tablets they take
+   their own row under the person; on laptops they sit on the right and wrap under the name only if there is no room. */
+.list-row.person .lr-body { flex: 1 1 260px; min-width: 0; }
+.list-row.person .lr-trail { flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; max-width: 100%; }
+@media (max-width: 1023px) {
+  .list-row.person .lr-trail { width: 100%; padding-left: 50px; justify-content: stretch; }
+  .list-row.person .lr-trail .btn { flex: 1 1 0; min-width: 0; }
+}
+@media (max-width: 420px) {
+  .list-row.person .lr-body { flex-basis: 160px; }
+  .list-row.person .lr-trail { padding-left: 0; }
+  .list-row.person .lr-trail .btn { padding: 0 6px; font-size: 12.5px; }
+  .list-row.person .lr-trail .btn .ms { display: none; } /* the words alone fit three buttons on the smallest phones */
+}
