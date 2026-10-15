@@ -1607,6 +1607,10 @@ const AUDIT_UI = {
     remark: 'નોંધ (જરૂરી): તમે બરાબર શું જોયું?', photo: 'ફોટો લો અથવા ઉમેરો', another: 'બીજો ફોટો', camera: 'કેમેરા', gallery: 'ગેલેરી',
     nextUnrated: 'બાકી લાઈન', previous: 'પાછળ', next: 'આગળ', save: 'ડ્રાફ્ટ સાચવો', submit: 'ઓડિટ સબમિટ કરો', saveChanges: 'ફેરફાર સાચવો',
     basic: 'મૂળ વિગતો', review: 'તપાસો અને સબમિટ કરો', reviewEdit: 'તપાસો અને સાચવો', language: 'ચેકલિસ્ટની ભાષા',
+    unit: 'યુનિટ', chooseUnit: 'યુનિટ પસંદ કરો…', audit: 'ઓડિટ', date: 'તારીખ', auditor: 'ઓડિટર', pick: 'યુનિટ અને ઓડિટ પસંદ કરો.', started: 'શરૂ', soFar: 'થયા',
+    domains: { food: ['ફૂડ સેફ્ટી', 'FSSAI ફૂડ સેફ્ટી ઓડિટ'], maintenance: ['મેન્ટેનન્સ', 'મેન્ટેનન્સ ઇન્સ્પેક્શન ડોકેટ'] },
+    applies: (n, k, kitchen) => `${n} લાઈન, ${k} વિભાગ આ ${kitchen ? 'કિચન' : 'રેસ્ટોરન્ટ'} માટે.`,
+    marking: { fssai2: 'પાલન 2 માર્ક · નાની ખામી 1 · મોટી ખામી 0 · લાગુ નથી તે ગણાય નહીં · ★ ક્રિટિકલ લાઈન ડબલ ગણાય (4 · 2 · 0).', docket: 'બરાબર 1 પોઇન્ટ · ધ્યાન આપો 0.5 · ખામી 0.' },
     ratings: { fssai2: { pass: 'પાલન', partial: 'નાની ખામી', fail: 'મોટી ખામી', na: 'લાગુ નથી' }, fssai1: { pass: 'પાલન', partial: 'અધૂરું', fail: 'પાલન નથી', na: 'લાગુ નથી' }, docket: { pass: 'બરાબર', partial: 'ધ્યાન આપો', fail: 'ખામી', na: 'લાગુ નથી' } },
     prio: { critical: 'ખોરાક, જીવ અથવા લાઇસન્સનું જોખમ. 48 કલાકમાં સુધારો.', major: '7 દિવસમાં સુધારો.', minor: '30 દિવસમાં સુધારો.' },
   },
@@ -1615,6 +1619,10 @@ const AUDIT_UI = {
     remark: 'नोट (ज़रूरी): आपने ठीक क्या देखा?', photo: 'फ़ोटो लें या जोड़ें', another: 'एक और फ़ोटो', camera: 'कैमरा', gallery: 'गैलरी',
     nextUnrated: 'बाकी लाइन', previous: 'पीछे', next: 'आगे', save: 'ड्राफ़्ट सेव करें', submit: 'ऑडिट सबमिट करें', saveChanges: 'बदलाव सेव करें',
     basic: 'बुनियादी जानकारी', review: 'जाँचें और सबमिट करें', reviewEdit: 'जाँचें और सेव करें', language: 'चेकलिस्ट की भाषा',
+    unit: 'यूनिट', chooseUnit: 'यूनिट चुनें…', audit: 'ऑडिट', date: 'तारीख', auditor: 'ऑडिटर', pick: 'यूनिट और ऑडिट चुनें.', started: 'शुरू', soFar: 'हुए',
+    domains: { food: ['फ़ूड सेफ़्टी', 'FSSAI फ़ूड सेफ़्टी ऑडिट'], maintenance: ['मेंटेनेंस', 'मेंटेनेंस इंस्पेक्शन डॉकेट'] },
+    applies: (n, k, kitchen) => `${n} लाइन, ${k} सेक्शन इस ${kitchen ? 'किचन' : 'रेस्टोरेंट'} के लिए.`,
+    marking: { fssai2: 'पालन 2 मार्क · छोटी कमी 1 · बड़ी कमी 0 · लागू नहीं वाली गिनी नहीं जाती · ★ क्रिटिकल लाइन डबल गिनी जाती है (4 · 2 · 0).', docket: 'ठीक 1 पॉइंट · ध्यान दें 0.5 · कमी 0.' },
     ratings: { fssai2: { pass: 'पालन', partial: 'छोटी कमी', fail: 'बड़ी कमी', na: 'लागू नहीं' }, fssai1: { pass: 'पालन', partial: 'अधूरा', fail: 'पालन नहीं', na: 'लागू नहीं' }, docket: { pass: 'ठीक', partial: 'ध्यान दें', fail: 'कमी', na: 'लागू नहीं' } },
     prio: { critical: 'खाना, जान या लाइसेंस का खतरा. 48 घंटे में ठीक करें.', major: '7 दिन में ठीक करें.', minor: '30 दिन में ठीक करें.' },
   },
@@ -1663,7 +1671,7 @@ async function pageNewAudit({ token, query, editId = null }) {
   const clearThis = () => (editId ? (() => { try { localStorage.removeItem(EDIT_KEY); } catch { /* ignore */ } })() : clearDraft());
   /** The audit starts when the auditor first moves into the checklist (or rates a line, for drafts saved before times were kept). */
   const markStart = () => { if (!editId && !draft.started_at) draft.started_at = new Date().toISOString(); };
-  const timeHtml = () => (draft.started_at ? html`<span class="muted">·</span><span class="small muted" title="Recorded automatically">${icon('schedule', 'muted')} Started ${R.fmtClock(draft.started_at)} · ${R.fmtDuration(Math.max(0, Math.round((Date.now() - Date.parse(draft.started_at)) / 60000)))} so far</span>` : '');
+  const timeHtml = () => (draft.started_at ? html`<span class="muted">·</span><span class="small muted" title="Recorded automatically">${icon('schedule', 'muted')} ${U('started', 'Started')} ${R.fmtClock(draft.started_at)} · ${R.fmtDuration(Math.max(0, Math.round((Date.now() - Date.parse(draft.started_at)) / 60000)))} ${U('soFar', 'so far')}</span>` : '');
   const unit = () => units.find((s) => s.id === draft.site_id) || (editId ? { id: saved.audit.site_id, name: saved.audit.site_name, city: saved.audit.site_city, kind: saved.audit.site_kind } : undefined);
   const tpl = () => (editId ? templates.find((t) => t.id === draft.template_id) : templates.find((t) => t.domain === draft.domain && t.active));
   const lines = () => { if (editId) return saved.items; const t = tpl(), u = unit(); if (!t || !u) return []; return t.items.filter((i) => i.applies === 'Both' || (u.kind === 'kitchen' ? i.applies === 'CPK' : i.applies === 'Restaurant')); };
@@ -1737,16 +1745,16 @@ async function pageNewAudit({ token, query, editId = null }) {
     const t = ready() ? tpl() : null;
     return html`<section class="card form" aria-label="Audit details">
       <div class="section-head" style="margin:0"><h2>${U('basic', 'Basic details')}</h2></div>
-      <div class="field"><span class="label">${U('language', 'Checklist language')}</span>${langSwitch(lang)}</div>
-      ${editId ? html`<div class="field"><span class="label">Unit and audit</span><b>${unitName(unit())} · ${R.DOMAINS[draft.domain].label}</b><span class="hint">These cannot change when editing. Ratings, remarks, photos, date and auditor can.</span></div>` : html`<div class="field"><label for="aUnit">Unit</label><select class="input" id="aUnit" data-change="unit"><option value="">Choose a unit…</option>${units.map((s) => html`<option value="${s.id}" ${s.id === draft.site_id ? 'selected' : ''}>${unitName(s)}</option>`)}</select></div>
-      <div class="field"><span class="label" id="typeLbl">Audit</span><div class="choices" role="group" aria-labelledby="typeLbl">
-        ${R.AUDIT_DOMAINS.map((dom) => html`<button type="button" class="choice" data-click="domain" data-v="${dom}" aria-pressed="${draft.domain === dom}" style="${draft.domain === dom ? 'border-color:var(--primary);background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--primary)' : ''}">${icon(draft.domain === dom ? 'radio_button_checked' : 'radio_button_unchecked')}${icon(R.DOMAINS[dom].icon)}<span><b>${R.DOMAINS[dom].label}</b><span class="small">${R.DOMAINS[dom].long}</span></span></button>`)}</div></div>`}
+      ${ready() ? '' : html`<div class="field"><span class="label">${U('language', 'Checklist language')}</span>${langSwitch(lang)}</div>`}
+      ${editId ? html`<div class="field"><span class="label">Unit and audit</span><b>${unitName(unit())} · ${R.DOMAINS[draft.domain].label}</b><span class="hint">These cannot change when editing. Ratings, remarks, photos, date and auditor can.</span></div>` : html`<div class="field"><label for="aUnit">${U('unit', 'Unit')}</label><select class="input" id="aUnit" data-change="unit"><option value="">${U('chooseUnit', 'Choose a unit…')}</option>${units.map((s) => html`<option value="${s.id}" ${s.id === draft.site_id ? 'selected' : ''}>${unitName(s)}</option>`)}</select></div>
+      <div class="field"><span class="label" id="typeLbl">${U('audit', 'Audit')}</span><div class="choices" role="group" aria-labelledby="typeLbl">
+        ${R.AUDIT_DOMAINS.map((dom) => html`<button type="button" class="choice" data-click="domain" data-v="${dom}" aria-pressed="${draft.domain === dom}" style="${draft.domain === dom ? 'border-color:var(--primary);background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--primary)' : ''}">${icon(draft.domain === dom ? 'radio_button_checked' : 'radio_button_unchecked')}${icon(R.DOMAINS[dom].icon)}<span><b>${U('domains', null)?.[dom]?.[0] || R.DOMAINS[dom].label}</b><span class="small">${U('domains', null)?.[dom]?.[1] || R.DOMAINS[dom].long}</span></span></button>`)}</div></div>`}
       <div class="form-2">
-        <div class="field"><label for="aDate">Date</label><input class="input" type="date" id="aDate" max="${auditToday()}" value="${draft.audit_date}" data-change="date"></div>
-        <div class="field"><label for="aBy">Auditor</label><input class="input" id="aBy" value="${draft.auditor}" data-input="auditor" autocomplete="name"></div>
+        <div class="field"><label for="aDate">${U('date', 'Date')}</label><input class="input" type="date" id="aDate" max="${auditToday()}" value="${draft.audit_date}" data-change="date"></div>
+        <div class="field"><label for="aBy">${U('auditor', 'Auditor')}</label><input class="input" id="aBy" value="${draft.auditor}" data-input="auditor" autocomplete="name"></div>
       </div>
-      ${t ? html`<div class="banner info">${icon('checklist')}<span class="b-body">${t.name}: ${R.plural(lines().length, 'line')} in ${R.plural(secs().length, 'section')} apply to this ${unit().kind === 'kitchen' ? 'kitchen' : 'restaurant'}. ${R.SCHEMES[t.scheme].marking}</span></div>`
-        : html`<p class="small muted">Pick a unit and audit type.</p>`}
+      ${t ? html`<div class="banner info">${icon('checklist')}<span class="b-body">${lang === 'en' ? `${t.name}: ${R.plural(lines().length, 'line')} in ${R.plural(secs().length, 'section')} apply to this ${unit().kind === 'kitchen' ? 'kitchen' : 'restaurant'}. ${R.SCHEMES[t.scheme].marking}` : `${AUDIT_UI[lang].applies(lines().length, secs().length, unit().kind === 'kitchen')} ${AUDIT_UI[lang].marking[t.scheme] || R.SCHEMES[t.scheme].marking}`}</span></div>`
+        : html`<p class="small muted">${U('pick', 'Pick a unit and audit type.')}</p>`}
     </section>`;
   };
   const sectionStep = () => {
