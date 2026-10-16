@@ -411,6 +411,7 @@ function uploadInBackground(key, blob) {
   uploadingPhotos.set(key, job);
 }
 async function uploadLocalPhotos(answers, save) {
+  let dropped = 0; // photos the server would not take, left out of the audit
   for (const a of answers) {
     if (!(a.photos || []).some(isLocalPhoto)) continue;
     for (let n = 0; n < a.photos.length; n += 1) {
@@ -422,15 +423,26 @@ async function uploadLocalPhotos(answers, save) {
       if (done) { a.photos[n] = done; save(); idb.del(k).catch(() => {}); continue; }
       const blob = await idb.get(k).catch(() => null);
       if (!blob) { a.photos.splice(n, 1); n -= 1; save(); continue; } // lost from the phone (storage cleared): nothing to send
-      const r = await api('/api/uploads', { method: 'POST', file: blob });
+      let r;
+      try { r = await api('/api/uploads', { method: 'POST', file: blob }); } catch (e) {
+        // the server turned this photo down (wrong format, too big): leave it out rather than block the whole audit
+        if (!(e instanceof ApiError) || e.offline || !(e.status >= 400 && e.status < 500) || e.status === 401) throw e;
+        a.photos.splice(n, 1); n -= 1; save(); idb.del(k).catch(() => {}); dropped += 1;
+        continue;
+      }
       a.photos[n] = r.key; save();
       idb.del(k).catch(() => {});
     }
   }
+  return dropped;
 }
+// What the server stores. A photo this browser cannot open (often an iPhone HEIC on a computer) stays in its own format.
+const PHOTO_TYPES = /^image\/(jpeg|png|webp)$/;
+const PHOTO_FORMAT_MSG = 'This photo could not be opened here (iPhone HEIC photos often cannot). Choose a JPEG or PNG photo, or take it with the camera button.';
 /** Photo for an audit line: uploaded straight away when there is network, otherwise kept on the phone for later.
- *  camera: open the phone's back camera directly; otherwise the phone offers its gallery (and camera). */
-function pickAuditPhoto({ camera = false } = {}) {
+ *  camera: open the phone's back camera directly; otherwise the phone offers its gallery (and camera).
+ *  onFail(key): the photo turned out unusable, so it should come off the line again. */
+function pickAuditPhoto({ camera = false, onFail = () => {} } = {}) {
   const input = $('#filePicker');
   input.accept = 'image/*';
   if (camera) input.setAttribute('capture', 'environment'); else input.removeAttribute('capture');
@@ -444,6 +456,7 @@ function pickAuditPhoto({ camera = false } = {}) {
       const key = `local:${newId()}`;
       const job = shrinkPhoto(file).then(async (blob) => {
         if (removedPhotos.has(key)) return null;
+        if (blob.type && !PHOTO_TYPES.test(blob.type)) { toast(PHOTO_FORMAT_MSG, { error: true, ms: 9000 }); onFail(key); return null; }
         await idb.put(key, blob);
         const url = URL.createObjectURL(blob);
         localThumbs.set(key, url);
@@ -451,7 +464,7 @@ function pickAuditPhoto({ camera = false } = {}) {
         if (navigator.onLine) uploadInBackground(key, blob);
         else toast('No network. Photo saved; it uploads when the network is back.', { ms: 6000 });
         return blob;
-      }).catch(() => { toast('Could not keep that photo on this phone. Try again.', { error: true }); return null; })
+      }).catch(() => { toast('Could not keep that photo on this phone. Try again.', { error: true }); onFail(key); return null; })
         .finally(() => processingPhotos.delete(key));
       processingPhotos.set(key, job);
       resolve(key);
@@ -1870,7 +1883,9 @@ async function pageNewAudit({ token, query, editId = null }) {
     },
     photo: async (el) => {
       const i = lines().find((x) => x.id === +el.dataset.id);
-      const key = await pickAuditPhoto({ camera: el.dataset.cam === '1' });
+      // a photo that cannot be used comes off the line again, so it never holds up Submit
+      const onFail = (k) => { const a = draft.answers[i.id]; if (!a?.photos?.includes(k)) return; a.photos = a.photos.filter((p) => p !== k); persist(); refresh(i); };
+      const key = await pickAuditPhoto({ camera: el.dataset.cam === '1', onFail });
       if (!key) return;
       const a = draft.answers[i.id];
       a.photos = [...(a.photos || []), key];
@@ -1927,18 +1942,19 @@ async function pageNewAudit({ token, query, editId = null }) {
       };
       try {
         // photos taken with no network go up first; the draft keeps each server key as it arrives
-        await uploadLocalPhotos(body.answers, () => { body.answers.forEach((a) => { draft.answers[a.item_id].photos = [...a.photos]; }); persist(); });
+        const dropped = await uploadLocalPhotos(body.answers, () => { body.answers.forEach((a) => { draft.answers[a.item_id].photos = [...a.photos]; }); persist(); });
+        const left = dropped ? ` · ${R.plural(dropped, 'photo')} left out (not a JPEG, PNG or WebP)` : '';
         if (editId) {
           const r = await api(`/api/audits/${editId}`, { method: 'PUT', body: { audit_date: body.audit_date, auditor: body.auditor, audit_type: body.audit_type, summary: body.summary, answers: body.answers } });
           clearThis(); searchData = null;
-          toast(`Audit saved: ${pct(r.score)}, ${R.bandLabel(r.band)} · fixes: ${r.added} added, ${r.changed} changed, ${r.closed} closed`, { success: true, ms: 7000 });
+          toast(`Audit saved: ${pct(r.score)}, ${R.bandLabel(r.band)} · fixes: ${r.added} added, ${r.changed} changed, ${r.closed} closed${left}`, { success: true, ms: dropped ? 10000 : 7000 });
           location.hash = `#/audits/${editId}`;
           return;
         }
         const r = await api('/api/audits', { method: 'POST', body });
         clearDraft();
         searchData = null;
-        toast(`Audit submitted: ${pct(r.score)}, ${R.bandLabel(r.band)} · ${R.plural(r.created, 'fix', 'fixes')} raised${r.autoClosed ? `, ${r.autoClosed} closed by this visit` : ''}`, { success: true, ms: 7000 });
+        toast(`Audit submitted: ${pct(r.score)}, ${R.bandLabel(r.band)} · ${R.plural(r.created, 'fix', 'fixes')} raised${r.autoClosed ? `, ${r.autoClosed} closed by this visit` : ''}${left}`, { success: true, ms: dropped ? 10000 : 7000 });
         location.hash = `#/audits/${r.id}`;
       } catch (e2) {
         if (e2 instanceof SignInNeeded) return;

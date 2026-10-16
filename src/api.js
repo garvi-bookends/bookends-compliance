@@ -766,13 +766,23 @@ const MAX_UPLOAD = 4 * 1024 * 1024;
 const FILE_KEY = /^evidence\/(\d{4}-\d{2}\/[0-9a-f-]{36}|import\/[0-9a-f]{16})\.(jpg|jpeg|png|webp|pdf)$/;
 const TYPE_OF = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', pdf: 'application/pdf' };
 
+/** The file's real type from its first bytes. Browsers sometimes send no type, or a wrong one (image/jpg, octet-stream). */
+function sniffType(buf) {
+  const b = new Uint8Array(buf, 0, Math.min(12, buf.byteLength));
+  const ascii = (from, to) => String.fromCharCode(...b.slice(from, to));
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
+  if (b[0] === 0x89 && ascii(1, 4) === 'PNG') return 'image/png';
+  if (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP') return 'image/webp';
+  if (ascii(0, 4) === '%PDF') return 'application/pdf';
+  return null;
+}
 async function upload({ env, request, actor }) {
-  const type = (request.headers.get('content-type') || '').split(';')[0].trim();
-  const ext = UPLOAD_TYPES[type];
-  if (!ext) bad('Upload a JPEG, PNG, WebP or PDF');
   const body = await request.arrayBuffer();
   if (!body.byteLength) bad('Empty file');
   if (body.byteLength > MAX_UPLOAD) bad('File is larger than 4 MB');
+  const type = sniffType(body);
+  const ext = UPLOAD_TYPES[type];
+  if (!ext) bad('Upload a JPEG, PNG, WebP or PDF');
   const key = `evidence/${todayFor(env).slice(0, 7)}/${crypto.randomUUID()}.${ext}`;
   await env.FILES.put(key, body, type);
   return json({ key, url: `/api/files/${key}` }, 201);
