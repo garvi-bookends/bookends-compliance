@@ -333,12 +333,32 @@ function shrinkInWorker(file) {
 }
 /** A small JPEG (1280 px, ~200 KB) from a phone photo: in the background worker when it can, otherwise on the page. */
 async function shrinkPhoto(file) {
-  if (!file.type.startsWith('image/')) return file;
+  if (!file.type.startsWith('image/') && !isHeic(file)) return file;
   if (file.type === 'image/jpeg' && file.size < 400e3) return file;
   const small = await shrinkInWorker(file);
-  return small && small.size < file.size ? small : downscale(file);
+  const out = small && small.size < file.size ? small : await downscale(file);
+  if (PHOTO_TYPES.test(out.type) || !isHeic(file)) return out;
+  // the browser could not open it (an iPhone HEIC photo on a computer or Android): convert it here, then shrink that
+  const jpeg = await heicToJpeg(file).catch(() => null);
+  return jpeg ? shrinkPhoto(jpeg) : out;
 }
-function pickAndUpload({ accept = 'image/*' } = {}) {
+// iPhone photos (HEIC). Safari opens them itself; elsewhere public/vendor/heic2any.min.js (1.3 MB) converts them,
+// loaded only the first time such a photo is picked.
+const isHeic = (f) => /^image\/hei[cf]/.test(f.type) || /\.hei[cf]$/i.test(f.name || '');
+let heicLib = null;
+const loadHeic = () => (heicLib ||= new Promise((resolve, reject) => {
+  const s = document.createElement('script');
+  s.src = '/vendor/heic2any.min.js';
+  s.onload = () => (window.heic2any ? resolve(window.heic2any) : reject(new Error('HEIC converter missing')));
+  s.onerror = () => { heicLib = null; reject(new Error('Could not load the HEIC converter')); };
+  document.head.append(s);
+}));
+async function heicToJpeg(file) {
+  const out = await (await loadHeic())({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+  return Array.isArray(out) ? out[0] : out; // a HEIC with several images gives a list: keep the first
+}
+const PHOTO_ACCEPT = 'image/*,.heic,.heif'; // some computers leave HEIC out of image/*
+function pickAndUpload({ accept = PHOTO_ACCEPT } = {}) {
   const input = $('#filePicker');
   input.accept = accept;
   input.removeAttribute('capture');
@@ -436,15 +456,15 @@ async function uploadLocalPhotos(answers, save) {
   }
   return dropped;
 }
-// What the server stores. A photo this browser cannot open (often an iPhone HEIC on a computer) stays in its own format.
+// What the server stores. A photo still in another format after shrinkPhoto could be neither opened nor converted.
 const PHOTO_TYPES = /^image\/(jpeg|png|webp)$/;
-const PHOTO_FORMAT_MSG = 'This photo could not be opened here (iPhone HEIC photos often cannot). Choose a JPEG or PNG photo, or take it with the camera button.';
+const PHOTO_FORMAT_MSG = 'This photo could not be opened. Choose a JPEG, PNG or HEIC photo, or take it with the camera button.';
 /** Photo for an audit line: uploaded straight away when there is network, otherwise kept on the phone for later.
  *  camera: open the phone's back camera directly; otherwise the phone offers its gallery (and camera).
  *  onFail(key): the photo turned out unusable, so it should come off the line again. */
 function pickAuditPhoto({ camera = false, onFail = () => {} } = {}) {
   const input = $('#filePicker');
-  input.accept = 'image/*';
+  input.accept = PHOTO_ACCEPT;
   if (camera) input.setAttribute('capture', 'environment'); else input.removeAttribute('capture');
   input.value = '';
   return new Promise((resolve) => {
@@ -2282,7 +2302,7 @@ function openLicenceDialog(l, units, presetUnit = null, presetType = null) {
     on: {
       change: { type: (el) => { const t = R.LICENCE_TYPES.find((x) => x.type === el.value); $('#otherWrap', dlg).hidden = el.value !== '__other'; if (t) $('#lSev', dlg).value = t.severity; } },
       click: {
-        file: async () => { const k = await pickAndUpload({ accept: 'image/*,application/pdf' }).catch(() => null); if (k) { fileKey = k; $('#lFile', dlg).innerHTML = part(fileHtml()); } },
+        file: async () => { const k = await pickAndUpload({ accept: `${PHOTO_ACCEPT},application/pdf` }).catch(() => null); if (k) { fileKey = k; $('#lFile', dlg).innerHTML = part(fileHtml()); } },
         rmFile: () => { fileKey = null; $('#lFile', dlg).innerHTML = part(fileHtml()); },
         del: async () => {
           const ok = await confirmDialog({ title: 'Delete this licence?', text: 'It will be removed.', ok: 'Delete', danger: true });
