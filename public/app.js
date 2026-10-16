@@ -1518,7 +1518,7 @@ async function pageAudit({ token, params: [id] }) {
         ${collapse({ iconName: 'checklist', title: 'Full checklist', sub: `${d.items.length} lines · ${counts.fail + counts.partial} gaps`, flush: true, open: !findings.length && counts.fail + counts.partial > 0, body: html`
           <div class="row" style="padding:14px 24px">${segmented({ name: 'gaps', value: '1', label: 'Show', options: [['1', 'Gaps only'], ['0', `All ${d.items.length} lines`]] })}</div>
           <div class="list" id="lines">${linesHtml()}</div>` })}
-        ${downloadBar({ title: 'Download this audit', text: 'Full report as PDF.' })}
+        ${downloadBar({ title: 'Download this audit', text: 'Full report with every photo, as PDF or Excel.' })}
       </div>`,
   });
   /** Downloads this audit in full: summary, conclusion, section scores, findings, route to 80% and every checklist line. */
@@ -1533,6 +1533,13 @@ async function pageAudit({ token, params: [id] }) {
       ['Previous visit', prev ? `${pct(prev.score)} (${R.fmtDelta(a.score - prev.score)})` : 'None'],
       ...(a.source === 'import' ? [['Source', `${a.source_ref}${a.prepared_by ? `, prepared by ${a.prepared_by}` : ''}`]] : [])];
     const sortedFindings = [...findings].sort((x, y) => R.PRIORITY_ORDER.indexOf(x.priority) - R.PRIORITY_ORDER.indexOf(y.priority) || x.id - y.id);
+    // every photo goes in the file: each checklist line's photos, then each fix's proof
+    const shots = await exportPhotos([...lineRows.flatMap((x) => x.r.photos), ...sortedFindings.map((f) => f.evidence_key)]);
+    const imgs = (keys) => keys.map((key) => shots.get(key)).filter(Boolean);
+    const linePhotos = lineRows.map((x) => ({ ...x, images: imgs(x.r.photos) })).filter((x) => x.images.length);
+    const proofPhotos = sortedFindings.map((f) => ({ f, images: imgs(f.evidence_key ? [f.evidence_key] : []) })).filter((x) => x.images.length);
+    const shotCount = shots.size;
+    const missedShots = new Set([...lineRows.flatMap((x) => x.r.photos), ...sortedFindings.map((f) => f.evidence_key)].filter((k) => k && !/\.pdf$/i.test(k))).size - shotCount;
     if (format === 'pdf') {
       const k = await pdfKit({ title: unitLabel, subtitle, running: `${unitLabel} · ${subtitle}` });
       k.kpis([
@@ -1573,10 +1580,18 @@ async function pageAudit({ token, params: [id] }) {
         for (const x of lineRows.filter((l) => l.i.section === sec)) {
           const ph = x.r.photos.length;
           body.push([`${x.i.code}${x.i.critical ? ' *' : ''}`, x.i.text, k.badge(RESULT_TONE[x.r.result], L[x.r.result]), { content: ptsText(x), styles: { halign: 'right' } },
-            [x.r.note, ph ? `[${R.plural(ph, 'photo')} in the app]` : '', x.f ? `Fix #${x.f.id}` : ''].filter(Boolean).join('\n') || '-']);
+            [x.r.note, ph ? `[${R.plural(ph, 'photo')}, see Photos]` : '', x.f ? `Fix #${x.f.id}` : ''].filter(Boolean).join('\n') || '-']);
         }
       }
       k.table(['Code', 'Checklist line', 'Rating', 'Points', 'Remark'], body, { 0: { cellWidth: 13 }, 1: { cellWidth: 72 }, 2: { cellWidth: 24 }, 3: { cellWidth: 15 } });
+      if (shotCount) {
+        k.section('Photos', R.plural(shotCount, 'photo'));
+        k.photos([
+          ...linePhotos.map((x) => ({ title: `${x.i.code}${x.i.critical ? ' *' : ''}  ${x.i.text}`, sub: [L[x.r.result], x.r.note, x.f ? `Fix #${x.f.id}` : ''].filter(Boolean).join(' · '), images: x.images })),
+          ...proofPhotos.map((x) => ({ title: `Proof of fix #${x.f.id}: ${x.f.title}`, sub: [FIX_STATUS[x.f.status][1], x.f.action_taken].filter(Boolean).join(' · '), images: x.images })),
+        ]);
+      }
+      if (missedShots > 0) k.note(`${R.plural(missedShots, 'photo')} could not be loaded and ${missedShots === 1 ? 'is' : 'are'} not in this file. They can still be seen in the app.`);
       k.note(`${R.SCHEMES[scheme].marking} ${GRADE_KEY}`, { italic: false });
       return k.save(`${base}.pdf`);
     }
@@ -1614,6 +1629,12 @@ async function pageAudit({ token, params: [id] }) {
         rows: route.steps.map((s, n) => [n + 1, s.title || '', R.PRIORITY[s.priority].label, s.marks, n1(s.after)]),
         widths: [7, 58, 12, 12, 12] });
     }
+    x.photos('Photos', { title: `${unitLabel}: photos`, subtitle: `${subtitle} · ${R.plural(shotCount, 'photo')}`,
+      head: ['Code', 'Checklist line', 'Rating', 'Remark'], widths: [10, 46, 15, 36],
+      groups: [
+        ...linePhotos.map((l) => ({ cells: [`${l.i.code}${l.i.critical ? ' *' : ''}`, l.i.text, L[l.r.result], [l.r.note, l.f ? `Fix #${l.f.id}` : ''].filter(Boolean).join('\n')], images: l.images })),
+        ...proofPhotos.map((p) => ({ cells: [`Fix #${p.f.id}`, `Proof of fix: ${p.f.title}`, FIX_STATUS[p.f.status][1], p.f.action_taken || ''], images: p.images })),
+      ] });
     return x.save(`${base}.xlsx`);
   };
   on.click = {
@@ -2471,6 +2492,37 @@ const PDF = {
 const PRIO_TONE = { critical: 'bad', major: 'warn', minor: 'neutral' };
 const RESULT_TONE = { pass: 'good', partial: 'warn', fail: 'bad', na: 'neutral' };
 
+/** Photos for a downloaded report: each fetched, shrunk to a 900 px JPEG and kept as { data (data URL), w, h } by key.
+ *  PDFs and ones that cannot be loaded are left out; four download at a time. */
+async function exportPhotos(keys, max = 900) {
+  const out = new Map();
+  const todo = [...new Set(keys)].filter((k) => typeof k === 'string' && k && !/\.pdf$/i.test(k) && !isLocalPhoto(k));
+  let next = 0;
+  const work = async () => {
+    while (next < todo.length) {
+      const key = todo[next++];
+      try {
+        const res = await fetch(fileUrl(key));
+        if (!res.ok) continue;
+        const d = await decodePhoto(await res.blob());
+        try {
+          const w = d.img.naturalWidth || d.img.width, h = d.img.naturalHeight || d.img.height, k = Math.min(1, max / Math.max(w, h));
+          const c = document.createElement('canvas');
+          c.width = Math.round(w * k); c.height = Math.round(h * k);
+          const ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); // a PNG's see-through parts stay white, not black
+          ctx.drawImage(d.img, 0, 0, c.width, c.height);
+          out.set(key, { data: c.toDataURL('image/jpeg', 0.72), w: c.width, h: c.height });
+        } finally { d.done?.(); d.img.close?.(); }
+      } catch { /* left out of the report */ }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(4, todo.length) }, work));
+  return out;
+}
+/** The photos a fix carries: what the auditor saw, then the proof of the fix. */
+const fixPhotoKeys = (f) => [...safeList(f.photos), ...(f.evidence_key ? [f.evidence_key] : [])];
+
 /** A branded A4 PDF: header band, title, summary boxes, sections and tables, running header and page numbers. */
 async function pdfKit({ title, subtitle, running }) {
   await loadScript(LIBS.jspdf);
@@ -2563,6 +2615,34 @@ async function pdfKit({ title, subtitle, running }) {
       }
       k.table(null, rows, { 0: { cellWidth: 28 }, 2: { cellWidth: 28 } });
     },
+    /** Photos under a heading each: groups [{ title, sub, images: [{ data, w, h }] }], three to a row. */
+    photos(groups) {
+      const gap = 4, cols = 3, cw = (W - 2 * M - gap * (cols - 1)) / cols, maxH = 62;
+      for (const g of groups) {
+        if (!g.images.length) continue;
+        const fit = g.images.map((im) => { let w = cw, h = (cw * im.h) / im.w; if (h > maxH) { h = maxH; w = (maxH * im.w) / im.h; } return { ...im, dw: w, dh: h }; });
+        doc.setFontSize(9);
+        const tl = doc.splitTextToSize(T(g.title), W - 2 * M);
+        doc.setFontSize(8);
+        const sl = g.sub ? doc.splitTextToSize(T(g.sub), W - 2 * M) : [];
+        // the heading never sits alone at the foot of a page: it moves over with the first row of photos
+        newPageIf(tl.length * 4.2 + sl.length * 3.6 + Math.max(...fit.slice(0, cols).map((s) => s.dh)) + 26);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...INK); doc.text(tl, M, y); y += tl.length * 4.2;
+        if (sl.length) { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...MUTED); doc.text(sl, M, y); y += sl.length * 3.6; }
+        y += 1.5;
+        for (let i = 0; i < fit.length; i += cols) {
+          const row = fit.slice(i, i + cols), rh = Math.max(...row.map((s) => s.dh));
+          newPageIf(rh + 22);
+          row.forEach((s, n) => {
+            const x = M + n * (cw + gap) + (cw - s.dw) / 2;
+            doc.addImage(s.data, 'JPEG', x, y, s.dw, s.dh);
+            doc.setDrawColor(...LINE); doc.setLineWidth(0.2); doc.rect(x, y, s.dw, s.dh);
+          });
+          y += rh + gap;
+        }
+        y += 4;
+      }
+    },
     save(name) {
       const pages = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pages; i++) {
@@ -2650,6 +2730,18 @@ async function xlsxKit() {
     ws.getRow(2).height = 20;
     ws.getRow(3).height = 8;
   };
+  const headRow = (ws, head, widths) => {
+    const hr = ws.getRow(4);
+    head.forEach((h, c) => {
+      const cell = hr.getCell(c + 1);
+      cell.value = h;
+      cell.font = { bold: true, size: 10, color: { argb: XL.WHITE } };
+      cell.fill = fill(XL.NAVY);
+      cell.border = { top: thin, left: { style: 'thin', color: { argb: 'FF3350B5' } }, right: { style: 'thin', color: { argb: 'FF3350B5' } }, bottom: { style: 'medium', color: { argb: XL.NAVY } } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    });
+    fitHeight(hr, head.map((h, c) => ({ text: h, width: widths[c] })));
+  };
   const sheetOpts = (frozenRows) => ({
     views: [{ state: 'frozen', ySplit: frozenRows, showGridLines: false }],
     pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: 0.4, right: 0.4, top: 0.5, bottom: 0.5, header: 0.3, footer: 0.3 } },
@@ -2662,16 +2754,7 @@ async function xlsxKit() {
       const n = head.length;
       ws.columns = widths.map((width) => ({ width }));
       banner(ws, n, title, subtitle);
-      const hr = ws.getRow(4);
-      head.forEach((h, c) => {
-        const cell = hr.getCell(c + 1);
-        cell.value = h;
-        cell.font = { bold: true, size: 10, color: { argb: XL.WHITE } };
-        cell.fill = fill(XL.NAVY);
-        cell.border = { top: thin, left: { style: 'thin', color: { argb: 'FF3350B5' } }, right: { style: 'thin', color: { argb: 'FF3350B5' } }, bottom: { style: 'medium', color: { argb: XL.NAVY } } };
-        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-      });
-      fitHeight(hr, head.map((h, c) => ({ text: h, width: widths[c] })));
+      headRow(ws, head, widths);
       rows.forEach((vals, i) => {
         const row = ws.getRow(5 + i);
         const wrapped = [];
@@ -2701,6 +2784,39 @@ async function xlsxKit() {
       } else {
         ws.autoFilter = { from: { row: 4, column: 1 }, to: { row: 4 + rows.length, column: n } };
       }
+      ws.pageSetup.printTitlesRow = '4:4';
+    },
+    /** A sheet of photos: one row per group, its text in the first columns and its photos side by side after them.
+     *  groups: [{ cells: [text per head column], images: [{ data, w, h }] }] */
+    photos(name, { title, subtitle = '', head, widths, groups }) {
+      const rows = groups.filter((g) => g.images.length);
+      if (!rows.length) return;
+      const most = Math.max(...rows.map((g) => g.images.length));
+      const PW = 200, PH = 150; // largest photo in pixels; a column 30 characters wide is about 215 px
+      const allHead = [...head, ...Array.from({ length: most }, (_, n) => `Photo ${n + 1}`)];
+      const allWidths = [...widths, ...Array.from({ length: most }, () => 30)];
+      const ws = wb.addWorksheet(name.slice(0, 31), sheetOpts(4));
+      ws.columns = allWidths.map((width) => ({ width }));
+      banner(ws, allHead.length, title, subtitle);
+      headRow(ws, allHead, allWidths);
+      rows.forEach((g, i) => {
+        const row = ws.getRow(5 + i);
+        let tallest = 0;
+        allHead.forEach((h, c) => {
+          const cell = row.getCell(c + 1);
+          cell.font = { size: 10, color: { argb: XL.INK } };
+          cell.border = box;
+          cell.alignment = { vertical: 'top', wrapText: true };
+          if (c < head.length) { put(cell, g.cells[c], h); if (XL_TONE_COLS.test(h) && XL_TONES[g.cells[c]]) toneCell(cell, XL_TONES[g.cells[c]]); }
+        });
+        g.images.forEach((im, n) => {
+          const k = Math.min(PW / im.w, PH / im.h);
+          const id = wb.addImage({ base64: im.data.split(',')[1], extension: 'jpeg' });
+          ws.addImage(id, { tl: { col: head.length + n + 0.05, row: 4 + i + 0.05 }, ext: { width: Math.round(im.w * k), height: Math.round(im.h * k) }, editAs: 'oneCell' });
+          tallest = Math.max(tallest, im.h * k);
+        });
+        row.height = Math.max(24, tallest * 0.75 + 8); // row heights are in points, photos in pixels
+      });
       ws.pageSetup.printTitlesRow = '4:4';
     },
     /** A summary sheet: headed blocks of label / value pairs. A row's third item may set { tone }; numbers whose label has (%) show as percentages. */
@@ -2890,6 +3006,13 @@ async function pageReports({ token, query }) {
         state.unit ? { 0: { cellWidth: 10 }, 1: { cellWidth: 14 }, 2: { cellWidth: 85 } } : { 0: { cellWidth: 10 }, 1: { cellWidth: 14 }, 2: { cellWidth: 54 }, 3: { cellWidth: 36 }, 4: { cellWidth: 21 }, 5: { cellWidth: 27 } });
     } else k.empty('No open fixes.');
 
+    const shots = await exportPhotos(r.openNow.flatMap(fixPhotoKeys));
+    if (shots.size) {
+      k.section('Photos of open fixes', R.plural(shots.size, 'photo'));
+      k.photos(r.openNow.map((f) => ({ title: `#${f.id}  ${f.title}`, images: fixPhotoKeys(f).map((key) => shots.get(key)).filter(Boolean),
+        sub: [R.PRIORITY[f.priority].label, state.unit ? '' : unitName(f), `due ${fmt(f.due_date, true)}`, fixStatusText(f), f.evidence_key && shots.has(f.evidence_key) ? 'last photo: proof of the fix' : ''].filter(Boolean).join(' · ') })));
+    }
+
     if (state.type === 'combined') {
       k.section('Licences', `${R.plural(r.licences.length, 'recorded licence')}`);
       if (r.licences.length) k.table(['Licence', 'Unit', 'Number', 'Expires', 'Status'], r.licences.map((l) => [l.type, l.site_name, l.number || '-', l.expires_on ? fmt(l.expires_on, true) : 'No expiry', badge(l.st.tone, l.st.label)]));
@@ -2935,6 +3058,10 @@ async function pageReports({ token, query }) {
       rows: r.openNow.map((f) => [f.id, R.PRIORITY[f.priority].label, f.title, f.site_name, f.site_city, R.DOMAINS[f.domain].label, f.item_area || '', f.item_code || '', R.KINDS[f.kind]?.label || f.kind || '',
         f.audit_date || '', f.due_date, f.due_date < today ? R.daysBetween(f.due_date, today) : '', fixStatusText(f).replace(/ \(.*\)$/, ''), f.owner || '', f.marks, f.is_repeat ? 'Yes' : '']),
       widths: [7, 12, 54, 24, 12, 13, 20, 7, 12, 13, 13, 10, 20, 16, 10, 8] });
+    const shots = await exportPhotos(r.openNow.flatMap(fixPhotoKeys));
+    xk.photos('Fix photos', { title: 'Photos of open fixes', subtitle: `${sub} · ${R.plural(shots.size, 'photo')} · a fix's last photo is its proof when one is uploaded`,
+      head: ['Fix #', 'Priority', 'Fix', 'Unit', 'Status'], widths: [7, 12, 44, 22, 18],
+      groups: r.openNow.map((f) => ({ cells: [f.id, R.PRIORITY[f.priority].label, f.title, f.site_name, fixStatusText(f).replace(/ \(.*\)$/, '')], images: fixPhotoKeys(f).map((key) => shots.get(key)).filter(Boolean) })) });
     if (state.type === 'combined') {
       xk.table('Licences', { title: 'Licences', subtitle: sub,
         head: ['Licence', 'Unit', 'City', 'Number', 'Issued by', 'Issued on', 'Expires on', 'Status', 'Detail'],
