@@ -1518,7 +1518,7 @@ async function pageAudit({ token, params: [id] }) {
         ${collapse({ iconName: 'checklist', title: 'Full checklist', sub: `${d.items.length} lines · ${counts.fail + counts.partial} gaps`, flush: true, open: !findings.length && counts.fail + counts.partial > 0, body: html`
           <div class="row" style="padding:14px 24px">${segmented({ name: 'gaps', value: '1', label: 'Show', options: [['1', 'Gaps only'], ['0', `All ${d.items.length} lines`]] })}</div>
           <div class="list" id="lines">${linesHtml()}</div>` })}
-        ${downloadBar({ title: 'Download this audit', text: 'Full report with every photo, as PDF or Excel.' })}
+        ${downloadBar({ title: 'Download this audit', text: 'Full report with every photo, as PDF or Excel. PowerPoint: one slide per fix (P1, P2, P3) with its photos.', ppt: true })}
       </div>`,
   });
   /** Downloads this audit in full: summary, conclusion, section scores, findings, route to 80% and every checklist line. */
@@ -1533,6 +1533,11 @@ async function pageAudit({ token, params: [id] }) {
       ['Previous visit', prev ? `${pct(prev.score)} (${R.fmtDelta(a.score - prev.score)})` : 'None'],
       ...(a.source === 'import' ? [['Source', `${a.source_ref}${a.prepared_by ? `, prepared by ${a.prepared_by}` : ''}`]] : [])];
     const sortedFindings = [...findings].sort((x, y) => R.PRIORITY_ORDER.indexOf(x.priority) - R.PRIORITY_ORDER.indexOf(y.priority) || x.id - y.id);
+    if (format === 'ppt') {
+      const codeOf = new Map(d.items.map((i) => [i.id, i.code]));
+      return fixesPpt({ title: `${unitLabel}: fixes raised`, subtitle, fileName: `${base}-fixes.pptx`,
+        fixes: findings.map((f) => ({ ...f, item_code: codeOf.get(f.item_id), audit_date: a.audit_date })) });
+    }
     // every photo goes in the file: each checklist line's photos, then each fix's proof
     const shots = await exportPhotos([...lineRows.flatMap((x) => x.r.photos), ...sortedFindings.map((f) => f.evidence_key)]);
     const imgs = (keys) => keys.map((key) => shots.get(key)).filter(Boolean);
@@ -2441,11 +2446,11 @@ async function pageLicences({ token, params: [openId], query }) {
   }
 }
 
-/** DownloadBar: PDF and Excel buttons at the end of a page, one tap each. */
-const downloadBar = ({ title, text }) => html`<section class="card dl-bar no-print" aria-label="${title}">
+/** DownloadBar: PDF and Excel buttons at the end of a page, one tap each (and PowerPoint where ppt is set). */
+const downloadBar = ({ title, text, ppt = false }) => html`<section class="card dl-bar no-print" aria-label="${title}">
   <span class="lead-icon tone-info">${icon('download')}</span>
   <span class="dl-text"><b>${title}</b><span class="small muted">${text}</span></span>
-  <span class="dl-actions"><button class="btn" data-click="dlNow" data-v="pdf">${icon('picture_as_pdf')}Download PDF</button><button class="btn" data-click="dlNow" data-v="excel">${icon('table_view')}Download Excel</button></span>
+  <span class="dl-actions"><button class="btn" data-click="dlNow" data-v="pdf">${icon('picture_as_pdf')}Download PDF</button><button class="btn" data-click="dlNow" data-v="excel">${icon('table_view')}Download Excel</button>${ppt ? html`<button class="btn" data-click="dlNow" data-v="ppt">${icon('slideshow')}Download PowerPoint</button>` : ''}</span>
 </section>`;
 /** Runs a download from a DownloadBar button, showing progress on the button itself. */
 async function runDownload(btn, make) {
@@ -2463,6 +2468,7 @@ const LIBS = {
   jspdf: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   autotable: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js',
   exceljs: 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js',
+  pptx: 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js', // not on cdnjs
 };
 const scriptLoads = new Map();
 /** Loads a report library once, only when someone generates a report. */
@@ -2867,6 +2873,79 @@ async function xlsxKit() {
     },
   };
 }
+// PowerPoint colours: the same meaning as in the PDF (P1 red, P2 amber, P3 grey).
+const PPT = { NAVY: '00249C', INK: '12162B', MUTED: '646B80', LINE: 'DDE1E8', HEAD: 'F1F3F6',
+  FG: { critical: 'B42318', major: '9A5B00', minor: '4B5266' }, BG: { critical: 'FDECEA', major: 'FDF2DC', minor: 'EEF0F4' } };
+/** A PowerPoint of fixes: a cover with the P1 / P2 / P3 counts, then one slide per fix (Priority 1 first, then by due
+ *  date) with its details on the left and its photos on the right, four to a slide; more go on the next slide. */
+async function fixesPpt({ title, subtitle, fixes, fileName }) {
+  await loadScript(LIBS.pptx);
+  const list = [...fixes].sort((a, b) => R.PRIORITY_ORDER.indexOf(a.priority) - R.PRIORITY_ORDER.indexOf(b.priority) || a.due_date.localeCompare(b.due_date) || a.id - b.id);
+  const shots = await exportPhotos(list.flatMap(fixPhotoKeys), 1280);
+  const p = new window.PptxGenJS();
+  p.layout = 'LAYOUT_WIDE'; // 13.33 x 7.5 inches
+  p.author = 'Bookends Compliance'; p.company = 'Bookends Hospitality'; p.title = title;
+  const { NAVY, INK, MUTED, LINE, HEAD, FG, BG } = PPT;
+  const by = app.me?.name || '';
+  const band = (s, right) => {
+    s.addShape(p.ShapeType.rect, { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: NAVY }, line: { color: NAVY } });
+    s.addText('BOOKENDS HOSPITALITY', { x: 0.4, y: 0, w: 6, h: 0.6, fontSize: 13, bold: true, color: 'FFFFFF', valign: 'middle', margin: 0 });
+    s.addText(right, { x: 6.4, y: 0, w: 6.53, h: 0.6, fontSize: 10, color: 'FFFFFF', align: 'right', valign: 'middle', margin: 0 });
+  };
+
+  const cover = p.addSlide();
+  band(cover, `Generated ${fmt(app.today, true)}${by ? ` by ${by}` : ''}`);
+  cover.addText(title, { x: 0.6, y: 1.4, w: 12.1, h: 1, fontSize: 32, bold: true, color: INK, margin: 0, fit: 'shrink' });
+  cover.addText(subtitle, { x: 0.6, y: 2.45, w: 12.1, h: 0.5, fontSize: 16, color: MUTED, margin: 0 });
+  R.PRIORITY_ORDER.forEach((pr, n) => {
+    const x = 0.6 + n * 4.1;
+    cover.addShape(p.ShapeType.roundRect, { x, y: 3.4, w: 3.8, h: 2, fill: { color: BG[pr] }, line: { color: BG[pr] }, rectRadius: 0.1 });
+    cover.addText(String(list.filter((f) => f.priority === pr).length), { x: x + 0.3, y: 3.55, w: 3.2, h: 1.1, fontSize: 48, bold: true, color: FG[pr], margin: 0 });
+    cover.addText(`${R.PRIORITY[pr].label} (${R.PRIORITY[pr].short})`, { x: x + 0.3, y: 4.7, w: 3.2, h: 0.5, fontSize: 16, bold: true, color: FG[pr], margin: 0 });
+  });
+  cover.addText(list.length ? 'One slide per fix, Priority 1 first, with its photos.' : 'No fixes were raised.', { x: 0.6, y: 5.9, w: 12.1, h: 0.5, fontSize: 13, color: MUTED, margin: 0 });
+
+  // the photo area on the right of each fix slide, and where 1, 2, 3 or 4 photos sit in it
+  const AX = 5.7, AY = 0.95, AW = 7.23, AH = 6.2, GAP = 0.2, CAP = 0.32;
+  const cells = (k) => {
+    const cols = k === 1 ? 1 : 2, rows = k <= 2 ? 1 : 2;
+    const cw = (AW - GAP * (cols - 1)) / cols, ch = (AH - GAP * (rows - 1)) / rows;
+    return Array.from({ length: k }, (_, n) => ({ x: AX + (n % cols) * (cw + GAP), y: AY + Math.floor(n / cols) * (ch + GAP), w: cw, h: ch }));
+  };
+  for (const f of list) {
+    const photos = fixPhotoKeys(f).map((key) => ({ im: shots.get(key), proof: key === f.evidence_key })).filter((x) => x.im);
+    const pages = [];
+    for (let i = 0; i < photos.length; i += 4) pages.push(photos.slice(i, i + 4));
+    if (!pages.length) pages.push([]);
+    pages.forEach((page, n) => {
+      const s = p.addSlide();
+      band(s, `${R.PRIORITY[f.priority].label} · Fix #${f.id}${pages.length > 1 ? ` · photos ${n + 1} of ${pages.length}` : ''}`);
+      s.addText(R.PRIORITY[f.priority].short, { shape: p.ShapeType.roundRect, x: 0.4, y: 0.95, w: 0.8, h: 0.42, rectRadius: 0.06, fill: { color: BG[f.priority] }, color: FG[f.priority], fontSize: 14, bold: true, align: 'center', valign: 'middle', margin: 0 });
+      s.addText(`Fix #${f.id}`, { x: 1.35, y: 0.95, w: 3.9, h: 0.42, fontSize: 12, color: MUTED, valign: 'middle', margin: 0 });
+      s.addText(f.title, { x: 0.4, y: 1.5, w: 5, h: 1.45, fontSize: 20, bold: true, color: INK, valign: 'top', margin: 0, fit: 'shrink' });
+      const facts = [['Unit', unitName(f)], ['Audit', `${R.DOMAINS[f.domain].label}${f.audit_date ? `, ${fmt(f.audit_date, true)}` : ''}`], ['Checklist line', f.item_code || '-'],
+        ['Due', fmt(f.due_date, true)], ['Status', isOverdue(f) ? 'Overdue' : FIX_STATUS[f.status][1]], ['Assigned to', f.owner || '-'],
+        ...(f.detail ? [['Remark', f.detail]] : []), ...(f.action_taken ? [['Action taken', f.action_taken]] : [])];
+      s.addText(facts.flatMap(([k, v]) => [
+        { text: k.toUpperCase(), options: { fontSize: 9, bold: true, color: MUTED, breakLine: true } },
+        { text: String(v), options: { fontSize: 13, color: k === 'Status' && v === 'Overdue' ? FG.critical : INK, bold: k === 'Status' && v === 'Overdue', breakLine: true, paraSpaceAfter: 6 } },
+      ]), { x: 0.4, y: 3.05, w: 5, h: 4.15, valign: 'top', margin: 0, fit: 'shrink' });
+      if (!page.length) {
+        s.addShape(p.ShapeType.rect, { x: AX, y: AY, w: AW, h: AH, fill: { color: HEAD }, line: { color: LINE } });
+        s.addText('No photo for this fix', { x: AX, y: AY, w: AW, h: AH, fontSize: 16, color: MUTED, align: 'center', valign: 'middle' });
+        return;
+      }
+      cells(page.length).forEach((c, i) => {
+        const { im, proof } = page[i];
+        const room = c.h - CAP, k = Math.min(c.w / im.w, room / im.h), w = im.w * k, h = im.h * k;
+        s.addImage({ data: im.data, x: c.x + (c.w - w) / 2, y: c.y + (room - h) / 2, w, h });
+        s.addText(proof ? 'Proof of the fix' : `Photo ${n * 4 + i + 1}`, { x: c.x, y: c.y + room, w: c.w, h: CAP, fontSize: 10, color: proof ? FG.minor : MUTED, bold: proof, align: 'center', valign: 'middle', margin: 0 });
+      });
+    });
+  }
+  await p.writeFile({ fileName });
+  return fileName;
+}
 const n1 = (x) => (x == null ? '' : R.round1(x));
 /** Time spent on audits that have a recorded time: { timed, total, avg } in minutes. */
 const timeTotals = (audits) => {
@@ -2888,7 +2967,12 @@ async function pageReports({ token, query }) {
   const latestAudit = au.audits.map((a) => a.audit_date).sort().at(-1) || today;
   const TYPES = [['food', 'Food safety'], ['maintenance', 'Maintenance'], ['combined', 'Combined']];
   const PERIODS = [['daily', 'Daily'], ['weekly', 'Weekly'], ['monthly', 'Monthly'], ['custom', 'Custom'], ['all', 'All time']];
-  const FORMATS = [['pdf', 'PDF'], ['excel', 'Excel']];
+  const FORMATS = [['pdf', 'PDF'], ['excel', 'Excel'], ['ppt', 'PowerPoint']];
+  const FORMAT_INFO = {
+    pdf: { icon: 'picture_as_pdf', name: 'PDF', hint: 'Ready to share or print.' },
+    excel: { icon: 'table_view', name: 'Excel', file: 'Excel file', hint: 'Spreadsheet with filters.' },
+    ppt: { icon: 'slideshow', name: 'PowerPoint', hint: 'Only the fixes raised in the period: one slide each (P1, P2, P3) with its photos.' },
+  };
   const pick = (k, list, dflt) => (list.some(([v]) => v === query.get(k)) ? query.get(k) : dflt);
   const state = {
     type: pick('type', TYPES, 'combined'), unit: query.get('unit') || '', period: pick('period', PERIODS, 'monthly'), format: pick('format', FORMATS, 'pdf'),
@@ -3072,8 +3156,11 @@ async function pageReports({ token, query }) {
     return xk.save(`${r.fileBase}.xlsx`);
   };
 
+  // ---------------------------------------------------------------- PowerPoint (the fixes raised in the period, one slide each)
+  const makePpt = (r) => fixesPpt({ title: `${r.typeLabel} report: fixes raised`, subtitle: `${r.unitLabel} · ${r.periodLabel}`, fixes: r.raised, fileName: `${r.fileBase}-fixes.pptx` });
+
   // ---------------------------------------------------------------- form
-  const genLabel = () => html`${icon(state.format === 'pdf' ? 'picture_as_pdf' : 'table_view')}Generate ${state.format === 'pdf' ? 'PDF' : 'Excel'}`;
+  const genLabel = () => html`${icon(FORMAT_INFO[state.format].icon)}Generate ${FORMAT_INFO[state.format].name}`;
   const formHtml = () => html`<section class="card form no-print" aria-label="Generate report">
     <div class="section-head" style="margin:0"><h2>Generate report</h2></div>
     <div class="field"><span class="label">Report type</span>${segmented({ name: 'type', value: state.type, label: 'Report type', options: TYPES, fill: true })}</div>
@@ -3083,7 +3170,7 @@ async function pageReports({ token, query }) {
     </div>
     <div id="periodInputs">${periodInputs()}</div>
     <div class="field"><span class="label">Format</span>${segmented({ name: 'format', value: state.format, label: 'Format', options: FORMATS, fill: true })}
-      <span class="hint" id="fmtHint">${state.format === 'pdf' ? 'Ready to share or print.' : 'Spreadsheet with filters.'}</span></div>
+      <span class="hint" id="fmtHint">${FORMAT_INFO[state.format].hint}</span></div>
     <div><button class="btn primary lg" data-click="generate" id="genBtn">${genLabel()}</button></div>
   </section>`;
   const sync = (run) => {
@@ -3105,7 +3192,7 @@ async function pageReports({ token, query }) {
     format: (el) => {
       state.format = el.dataset.v; press('format', el);
       $('#genBtn').innerHTML = part(genLabel());
-      $('#fmtHint').textContent = state.format === 'pdf' ? 'Ready to share or print.' : 'Spreadsheet with filters.';
+      $('#fmtHint').textContent = FORMAT_INFO[state.format].hint;
     },
     generate: async (btn) => {
       const r = build();
@@ -3113,9 +3200,9 @@ async function pageReports({ token, query }) {
       btn.disabled = true;
       btn.innerHTML = part(html`${icon('hourglass_top')}Generating…`);
       try {
-        const name = state.format === 'pdf' ? await makePdf(r) : await makeExcel(r);
+        const name = await { pdf: makePdf, excel: makeExcel, ppt: makePpt }[state.format](r);
         $('#report').innerHTML = part(preview(r, html`Downloaded <b>${name}</b>. Preview below.`));
-        toast(`${state.format === 'pdf' ? 'PDF' : 'Excel file'} downloaded`, { success: true });
+        toast(`${FORMAT_INFO[state.format].file || FORMAT_INFO[state.format].name} downloaded`, { success: true });
       } catch (e) {
         $('#report').innerHTML = part(preview(r));
         toast(friendly(e), { error: true });
